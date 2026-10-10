@@ -1,13 +1,21 @@
 ExoHarness 发布包
 
-English version: RELEASE.txt
+English version: README.txt
 版权所有 © 2026 Jason Yang <flyangqn@gmail.com>
-核心代码许可证：GNU AGPL 第 3 版（仅此版本，AGPL-3.0-only），见 ../LICENSE。
+核心代码许可证：GNU AGPL 第 3 版（仅此版本，AGPL-3.0-only），见 LICENSE。
+商业授权说明见 COMMERCIAL-LICENSE.md。
 
 目录：bin/exoharness、web/、scripts/、build-manifest.json。
 构建清单保存文件 SHA-256；包不包含源码、数据库、用户资料或密钥。
 
-原生方式：
+Linux x86_64 GNU 二进制运行要求：
+  Linux x86_64，glibc 2.39 或更新版本，例如 Ubuntu 24.04。
+  Python 3.11 或更新版本、Docker Engine，以及当前账号的 Docker 使用权限。
+  可访问的 PostgreSQL；下列命令通过 Docker 准备本地数据库。
+  模型、凭据、Skill、MCP 服务及 OCI 执行镜像需另行配置，不包含在下载包内。
+
+原生方式（在解压后的目录执行）：
+  docker pull postgres:18.6-alpine3.23
   bash scripts/start-native.sh prepare-db
   bash scripts/start-native.sh start
   bash scripts/start-native.sh status
@@ -16,6 +24,9 @@ English version: RELEASE.txt
 
 prepare-db 使用已缓存 PostgreSQL 镜像；首次部署先获取 postgres:18.6-alpine3.23。
 已有 PostgreSQL 可通过环境变量直接配置二进制，步骤见源码 README。
+启动后打开管理端 http://127.0.0.1:9797/ 和用户端 http://127.0.0.1:9798/。
+执行模型任务前需配置模型连接和助理；用户注册需要配置 SMTP。
+管理员访问凭据在本地初始化。
 查看本地访问凭据：bash scripts/start-native.sh access（勿公开输出）。
 修改管理员密码：bash scripts/start-native.sh set-admin-password。
 查看实际私有数据位置：bash scripts/start-native.sh data-path。

@@ -10,6 +10,36 @@ ExoHarness 为智能体提供通用运行基础：模型接入、上下文管理
 
 框架可用于研究分析、软件工程、业务操作、内容创作等不同领域。多用户 Web 应用为这些智能体提供统一的聊天入口、管理控制台和文件服务；每个助理的实际能力由接入服务及授权范围决定。
 
+## 界面演示
+
+[打开用户端](https://agent.flyang.art/) · [打开演示管理端](https://harness.flyang.art/) · [下载发布包](https://github.com/jason571/Exoharness/releases)
+
+**聊天、结果预览与文件下载**
+
+![ExoHarness 用户端：任务回复、流程预览和报告下载](docs/assets/demo-chat.png)
+
+**管理端：任务状态、执行资源与用量**
+
+![ExoHarness 管理端：运行总览与任务追踪入口](docs/assets/demo-management.png)
+
+截图使用实际前端和示例数据，不代表真实模型或 MCP 执行。运行 `node scripts/capture-demo.mjs` 可复现截图，需要 Node 22+ 和 Google Chrome。在线执行任务需要配置模型并授权相应能力。
+
+## 下载并运行 Linux 发布包
+
+首个公开预览版适用于 **Linux x86_64、glibc 2.39 或更新版本**，例如 Ubuntu 24.04。安装 Python 3.11+ 和 Docker Engine，在 [Releases](https://github.com/jason571/Exoharness/releases) 下载 `.tar.gz` 与 `SHA256SUMS`：
+
+```bash
+sha256sum --check SHA256SUMS --ignore-missing
+tar -xzf exoharness-v0.1.0-linux-x86_64-gnu.tar.gz
+cd exoharness-v0.1.0-linux-x86_64-gnu
+docker pull postgres:18.6-alpine3.23
+bash scripts/start-native.sh prepare-db
+bash scripts/start-native.sh start
+bash scripts/start-native.sh access
+```
+
+管理端为 `http://127.0.0.1:9797/`，用户端为 `http://127.0.0.1:9798/`。`access` 显示本地私有凭据。执行任务前配置模型和助理；用户注册需配置 SMTP。模型凭据、能力包、外部 MCP 服务及 OCI 执行镜像需另行准备。详细步骤见包内 `README.zh-CN.txt` 和 [构建部署说明](docs/DEPLOYMENT.zh-CN.md)。
+
 ## 如何扩展能力？
 
 核心框架与业务能力分工明确：
@@ -86,7 +116,7 @@ GitHub 默认首页为英文，可通过顶部入口切换到本中文说明。�
 浏览器 ── 文件端 9790：下载、媒体播放、网页预览
 ```
 
-三个 HTTP 监听默认绑定 `127.0.0.1`，端口可配置为 8787、8788、8790。源码按模块组织于 `modules/`；模块测试位于各模块的 `tests/`，脚本和浏览器测试位于 `scripts/tests/`。
+三个 HTTP 监听默认绑定 `127.0.0.1`，端口可通过环境变量配置。源码按模块组织于 `modules/`；模块测试位于各模块的 `tests/`，脚本和浏览器测试位于 `scripts/tests/`。
 
 ## 技术栈与实现
 

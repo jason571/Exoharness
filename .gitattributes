@@ -1,0 +1,7 @@
+# esbuild outputs from web-console/package.json. Count the TypeScript sources.
+web/models.js linguist-generated=true
+web/agents.js linguist-generated=true
+web/knowledge.js linguist-generated=true
+web/chat.js linguist-generated=true
+web/portal-settings.js linguist-generated=true
+web/i18n.js linguist-generated=true

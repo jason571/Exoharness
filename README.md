@@ -10,6 +10,36 @@ ExoHarness provides the common runtime for AI agents: model connections, context
 
 The framework supports applications across different domains, from research and software engineering to business operations and content creation. Its multi-user web application gives these agents a shared chat interface, administration console, and file delivery service. The connected capabilities define each assistant's actual scope.
 
+## See it in action
+
+[Try the user portal](https://agent.flyang.art/) · [Administration demo](https://harness.flyang.art/) · [Download a release](https://github.com/jason571/Exoharness/releases)
+
+**Chat, previews, and downloadable files**
+
+![ExoHarness user portal showing a response, workflow preview, and downloadable report](docs/assets/demo-chat.png)
+
+**Administration: task status, execution resources, and usage**
+
+![ExoHarness administration overview showing task status and execution resources](docs/assets/demo-management.png)
+
+These screenshots render the actual interface with sample data; they do not represent model or MCP executions. Reproduce them with `node scripts/capture-demo.mjs` (Node 22+ and Google Chrome). Live tasks require configured models and authorized capabilities.
+
+## Run the Linux release
+
+The first public preview targets **Linux x86_64 with glibc 2.39+**, such as Ubuntu 24.04. Install Python 3.11+ and Docker Engine, then download the `.tar.gz` and `SHA256SUMS` from [Releases](https://github.com/jason571/Exoharness/releases).
+
+```bash
+sha256sum --check SHA256SUMS --ignore-missing
+tar -xzf exoharness-v0.1.0-linux-x86_64-gnu.tar.gz
+cd exoharness-v0.1.0-linux-x86_64-gnu
+docker pull postgres:18.6-alpine3.23
+bash scripts/start-native.sh prepare-db
+bash scripts/start-native.sh start
+bash scripts/start-native.sh access
+```
+
+Open administration at `http://127.0.0.1:9797/` and the user portal at `http://127.0.0.1:9798/`. The `access` command displays private local credentials. Configure a model and assistant before submitting tasks; SMTP is required for user signup. Model credentials, capability packages, external MCP services, and the OCI execution image are supplied separately. See the bundled `README.txt` / `README.zh-CN.txt` and [Deployment](docs/DEPLOYMENT.md).
+
 ## Build your own agents and workflows
 
 The core framework and domain capabilities have separate responsibilities:

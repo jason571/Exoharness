@@ -17,6 +17,10 @@ class NativeBuildTests(unittest.TestCase):
             root=Path(directory);output=root/'release';binary=root/'target/exoharness'
             for path,content in ((root/'web/chat.js','current asset'),(output/'web/chat.js','stale asset'),(root/'docs/RELEASE.txt','release'),(binary,'binary')):
                 path.parent.mkdir(parents=True,exist_ok=True);path.write_text(content)
+            for name in MODULE.PACKAGE_DOCUMENTS:
+                path=root/name
+                path.parent.mkdir(parents=True,exist_ok=True)
+                if not path.exists():path.write_text('public package document')
             calls=[]
             def command(argv,**kwargs):
                 calls.append(argv)
@@ -31,6 +35,9 @@ class NativeBuildTests(unittest.TestCase):
             self.assertFalse(manifest['deployment_ready'])
             asset=next(item for item in manifest['files'] if item['file']=='web/chat.js')
             self.assertEqual(asset['sha256'],MODULE.checksum(root/'web/chat.js'))
+            for source,name in MODULE.PACKAGE_DOCUMENTS.items():
+                self.assertEqual((output/name).read_bytes(),(root/source).read_bytes())
+                self.assertIn(name,[item['file'] for item in manifest['files']])
             self.assertFalse(any(argv[0] in ('npm','docker') for argv in calls))
 
     def test_release_inventory_excludes_data_secrets_and_cache(self):

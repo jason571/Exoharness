@@ -15,6 +15,12 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+PACKAGE_DOCUMENTS = {
+    "docs/RELEASE.txt": "README.txt",
+    "docs/RELEASE.zh-CN.txt": "README.zh-CN.txt",
+    "LICENSE": "LICENSE",
+    "COMMERCIAL-LICENSE.md": "COMMERCIAL-LICENSE.md",
+}
 
 def command(argv: list[str], *, capture: bool = False) -> str:
     result = subprocess.run(argv, cwd=ROOT, text=True, check=True,
@@ -61,7 +67,7 @@ def release_inventory(output_dir: Path) -> list[dict]:
     paths = [file for folder in ("bin", "web", "scripts")
              for file in (output_dir / folder).rglob("*")
              if file.is_file() and "__pycache__" not in file.parts]
-    paths.append(output_dir / "README.txt")
+    paths.extend(output_dir / name for name in PACKAGE_DOCUMENTS.values())
     return [{"file": str(path.relative_to(output_dir)), "sha256": checksum(path)}
             for path in sorted(paths) if path.is_file()]
 
@@ -108,7 +114,8 @@ def main() -> int:
         source = ROOT / "scripts" / name
         if source.is_file():
             publish_file(source, script_dir / name)
-    publish_file(ROOT / "docs" / "RELEASE.txt", output_dir / "README.txt")
+    for source, name in PACKAGE_DOCUMENTS.items():
+        publish_file(ROOT / source, output_dir / name)
     verbose = command(["rustc", "-vV"], capture=True)
     host = next(line.split(": ", 1)[1] for line in verbose.splitlines() if line.startswith("host: "))
     target = args.target or host

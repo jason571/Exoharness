@@ -1,14 +1,23 @@
 ExoHarness Release Package
 
-Language: English | Chinese: RELEASE.zh-CN.txt
+Language: English | Chinese: README.zh-CN.txt
 Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
-Core license: GNU AGPL version 3.0 only (AGPL-3.0-only); see ../LICENSE.
+Core license: GNU AGPL version 3.0 only (AGPL-3.0-only); see LICENSE.
+Commercial licensing: see COMMERCIAL-LICENSE.md.
 
 Contents: bin/exoharness, web/, scripts/, and build-manifest.json.
 The manifest records SHA-256 digests. The package excludes source code,
 databases, user data, and credentials.
 
-Native operation:
+Requirements for the Linux x86_64 GNU binary:
+  Linux x86_64 with glibc 2.39 or newer (for example Ubuntu 24.04).
+  Python 3.11 or newer, Docker Engine, and permission to use Docker.
+  An available PostgreSQL server; the commands below provision one in Docker.
+  Models, credentials, Skills, MCP services, and the OCI execution image are
+  configured separately. They are not included in this download.
+
+Native operation (from the extracted package directory):
+  docker pull postgres:18.6-alpine3.23
   bash scripts/start-native.sh prepare-db
   bash scripts/start-native.sh start
   bash scripts/start-native.sh status
@@ -18,6 +27,11 @@ Native operation:
 prepare-db uses a cached PostgreSQL image. For a first deployment, obtain
 postgres:18.6-alpine3.23 before running the command. An existing PostgreSQL
 server can be configured through environment variables instead.
+
+Open http://127.0.0.1:9797/ for administration and
+http://127.0.0.1:9798/ for the user portal after startup. Configure a model
+connection and an assistant before running model-backed tasks. User signup
+requires SMTP configuration; administrator access is bootstrapped locally.
 
 Display local access credentials with:
   bash scripts/start-native.sh access
