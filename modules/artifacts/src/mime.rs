@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 use crate::{ArtifactError, Result};
 pub(crate) fn content_type(filename: &str) -> Result<&'static str> {
     if filename.is_empty()

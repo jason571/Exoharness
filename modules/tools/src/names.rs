@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 use sha2::{Digest, Sha256};
 /// Identity is the pair (provider, raw name), never reparsed from display text.
 pub fn public_name(provider: &str, raw: &str) -> String {

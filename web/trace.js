@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 const $ = (selector) => document.querySelector(selector);
 const state = { sessions: [], runs: [], runPageOffset: 0, trace: null, selectedSessionId: null, selectedRunId: null, selectedInvocationId: null, selectedModelCallId: null, selectedRunDetail: false, selectedFocus: null, returnFocus: null, search: "", loading: false, sessionLoadVersion: 0, traceLoadVersion: 0 };
 const TRACE_EVENT_PAGE_SIZE = 256;

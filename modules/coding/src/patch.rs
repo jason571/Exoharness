@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Pure, strict patch preparation. No filesystem writes or execution.
 //! Codex-style markers; workspace adapter commits the entire candidate with CAS.
 use crate::paths::WorkspacePath;

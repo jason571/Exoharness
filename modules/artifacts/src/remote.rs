@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Copy declared same-origin MCP outputs into permanent signed delivery.
 //! No redirects, forwarded MCP credentials, arbitrary URL proxy or generation.
 use crate::{ArtifactError, Artifacts, PublishedArtifact, Result, files, mime};

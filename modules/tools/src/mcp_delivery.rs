@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! MCP execution and file delivery have separate outcomes. Fetching a result
 //! never calls its generating tool again, nor forwards MCP authentication.
 use crate::{Catalog, ToolRuntime};

@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Deterministic, reversible stage view from host-verified journal receipts.
 use exoharness_core::context::{ContextItem, JournalEntry};
 use serde_json::Value;

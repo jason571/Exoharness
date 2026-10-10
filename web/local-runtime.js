@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 "use strict";
 let token = "", identity = null, sessions = [], selected = null, lastRequest = null;
 const node = (id) => document.getElementById(id);

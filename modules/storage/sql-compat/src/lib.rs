@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Mature PostgreSQL SQL parameter adapter, reused without the legacy API.
 mod connection;
 mod params;

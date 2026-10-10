@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Configuration HTTP adapters. The router only composes handlers.
 mod assistant_authorization;
 mod assistant_requests;

@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Trusted document parsing through the existing isolated runtime, never host Python.
 use super::{KnowledgeState, Params, id, new_id, scope};
 use crate::{

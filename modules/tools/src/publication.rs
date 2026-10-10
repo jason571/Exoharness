@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 use crate::{Result, ToolError, ToolRuntime, sandbox::safe_output};
 use serde_json::{Value, json};
 use std::path::Path;

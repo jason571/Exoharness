@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Filesystem adapter for pure Coding policy. All reads are scoped and locked;
 //! patch candidates commit through the existing revisioned TaskStore.
 use super::{TaskEdit, TaskSnapshot, TaskStore, revision_path};

@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Private immutable-image/revision proof cache; never an execution grant.
 use crate::{EnvironmentEvidence, Result, RuntimeError};
 use sha2::{Digest, Sha256};

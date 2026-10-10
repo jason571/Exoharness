@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Session naming is a local projection of the first user message, not another
 //! model request. Explicit user names always take precedence.
 use crate::{Result, codec};

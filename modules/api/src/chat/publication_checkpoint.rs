@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Native, committed execution evidence separates computation from delivery.
 //! External MCP metadata cannot opt into this recovery boundary.
 use serde_json::{Value, json};

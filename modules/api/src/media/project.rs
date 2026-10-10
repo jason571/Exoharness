@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Signed static site delivery; no cookie authority, network proxy or execution.
 use super::MediaState;
 use crate::errors::ApiError;

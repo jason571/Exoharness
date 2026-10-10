@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Private, content-addressed avatars; no base64 is stored in configuration.
 use super::{Assistants, persistence};
 use crate::{ConfigurationError, Result, files, validation::asset};

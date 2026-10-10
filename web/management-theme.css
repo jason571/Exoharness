@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Jason Yang <flyangqn@gmail.com> */
+/* SPDX-License-Identifier: AGPL-3.0-only */
+/* Commercial licensing: contact flyangqn@gmail.com. */
+
 /* Management palette overrides; portal and generated content keep their own themes. */
 html.management-console[data-management-theme="light"] {
   --bg: #f4f7f6;

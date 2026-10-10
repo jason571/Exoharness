@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Convert the one Core journal projection into provider-neutral messages.
 use crate::checkpoint_reads;
 use exoharness_contracts::model::{ChatRequest, Message, Tool, ToolCall, ToolChoice};

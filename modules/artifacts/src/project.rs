@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Immutable static-project publication. Manifest membership, not a raw path,
 //! authorizes each asset. Nothing executes and no user directory is exposed.
 use crate::{ArtifactError, Artifacts, Result, files};

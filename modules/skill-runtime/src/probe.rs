@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Trusted probe source. User package content is only argv JSON, never code.
 use crate::{Result, RuntimeError, metadata::Requirements};
 use exoharness_sandbox::{Limits, RunSpec, Runtime, Sandbox};

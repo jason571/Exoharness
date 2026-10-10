@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Credential updates create a new immutable binding revision, not mutate a
 //! credential used by a frozen Run. Old keys are retained for snapshot leases.
 use crate::{Mcp, McpError, Result};

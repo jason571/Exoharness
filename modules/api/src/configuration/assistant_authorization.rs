@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! A saved selection is not an execution grant. Recheck all layers at dispatch.
 use super::ConfigurationState;
 use exoharness_configuration::{Assistants, ConfigurationError};

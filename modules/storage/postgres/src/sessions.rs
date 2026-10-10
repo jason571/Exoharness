@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 use crate::codec::{digest, encoded, identifier, now_ms, number, value};
 use crate::journal::{append, lock_session};
 use crate::runs::read_run;

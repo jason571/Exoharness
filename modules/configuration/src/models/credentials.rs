@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Private credential checks, never a public configuration projection.
 use crate::{ConfigurationError, Result, files, validation::text};
 use serde_json::Value;

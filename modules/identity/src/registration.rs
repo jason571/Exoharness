@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 use crate::helpers::{
     hash_password, now_seconds, random_registration_code, random_session_token, random_user_id,
     random_verification_id, validate_display_name, validate_email, validate_password,

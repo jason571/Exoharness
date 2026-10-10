@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Wait before the first model request; no provider traffic while queued.
 use super::ChatState;
 use exoharness_contracts::execution::RunState;

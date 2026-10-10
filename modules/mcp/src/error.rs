@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 #[derive(Debug, thiserror::Error)]
 pub enum McpError {
     #[error("MCP 配置导入参数无效：{0}")]

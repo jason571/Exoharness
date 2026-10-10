@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Project explicit MCP file descriptors into UI cards, never scan prose for links.
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};

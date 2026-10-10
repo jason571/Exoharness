@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Scoped tool providers: instructions, protocol tools and isolated execution.
 //! Registry snapshots are private evidence; model schemas are loaded on demand.
 mod admission;

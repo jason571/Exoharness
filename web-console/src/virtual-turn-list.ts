@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 /** Variable-height history window. Live rows remain mounted; no model data is changed. */
 export class VirtualTurnList<T> {
   private items: T[] = [];

@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Thin tool adapters; scope, file CAS and execution ownership live in Sandbox.
 use crate::{Catalog, DispatchResult, Result, ToolError, ToolRuntime};
 use exoharness_sandbox::{TaskEdit, TaskSnapshot};

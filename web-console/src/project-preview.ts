@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 // Keep previews on the download's media origin and signed static route.
 // Frames MUST remain sandboxed without allow-same-origin.
 export function projectPreview(download: URL, candidate?: string | null): URL | null {

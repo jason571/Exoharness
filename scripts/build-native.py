@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-only
+# Commercial licensing: contact flyangqn@gmail.com.
+
 """Native Cargo/Node build. Docker is neither detected nor invoked."""
 from __future__ import annotations
 import argparse

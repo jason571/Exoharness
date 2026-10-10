@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 use crate::types::{
     AuthError, AuthRole, MAX_DISPLAY_NAME_CHARS, MAX_EMAIL_BYTES, MAX_PASSWORD_BYTES,
     MAX_REGISTRATION_EMAIL_BODY_BYTES, MAX_REGISTRATION_EMAIL_SUBJECT_CHARS, MAX_USERNAME_CHARS,

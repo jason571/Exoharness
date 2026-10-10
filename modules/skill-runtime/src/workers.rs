@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Blocking jobs retain admission until they actually finish, even on cancel.
 use crate::{Result, RuntimeError};
 use std::sync::Arc;

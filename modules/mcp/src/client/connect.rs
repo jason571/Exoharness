@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 use super::{Connection, ConnectionOptions};
 use crate::{McpError, Result, admission, headers, progress::Handler};
 use exoharness_contracts::capability::{McpTransport, PermissionRecord, StoredCapability};

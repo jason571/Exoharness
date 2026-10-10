@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Local OS-authorized recovery. Secrets arrive via stdin, not arguments or logs.
 use exoharness_identity::{AuthRole, AuthStore, Database};
 use std::io::Read;

@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Exact model input/output evidence is private journal data, not chat prose.
 use crate::{
     PostgresStore, Result, RunState, StoreError,

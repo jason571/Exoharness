@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Bound historical read bodies only when the host declared durable storage.
 use exoharness_core::context::{ContextItem, JournalEntry};
 use serde_json::json;

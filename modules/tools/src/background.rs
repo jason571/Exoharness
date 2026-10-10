@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Host observes only the background task explicitly declared by this MCP.
 //! Polls never enter the model loop or reset its repeated-call protection.
 use crate::{Catalog, Result, ToolError, ToolRuntime, validate};

@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Mature frontmatter reader reused from the original standalone Skill loader.
 use crate::{Result, errors::validation};
 use std::collections::BTreeMap;

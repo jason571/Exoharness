@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! One atomic current document retains immutable per-assistant snapshots.
 use crate::{ConfigurationError, Result, files};
 use serde_json::{Value, json};

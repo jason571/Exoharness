@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Atomic bounded imports. One bad capability cannot leave half a batch installed.
 use super::{RegistryAccess, actor_valid, audit, invalidated, now, save_version};
 use crate::{PostgresStore, Result, StoreError};

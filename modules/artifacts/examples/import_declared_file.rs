@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Operator-only reconciliation of an already declared artifact. No tools or
 //! models are called and no chat/journal state is modified by this utility.
 use exoharness_artifacts::{Artifacts, RemoteFile};

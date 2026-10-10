@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 use crate::graph::ExtensionSpec;
 use crate::resources::{OwnedResource, Resources};
 use std::{any::Any, collections::BTreeMap, sync::Arc};

@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Runtime fact projection, not a grant to execute untrusted source.
 use crate::{ApiState, Surface, auth};
 use axum::{Json, Router, middleware, routing::get};

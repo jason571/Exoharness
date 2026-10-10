@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 /** Interface copy only. User messages, documents and tool payloads are not translated. */
 const entries = `
 运行总览|Overview

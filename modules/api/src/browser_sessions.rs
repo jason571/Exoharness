@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Loopback browser adapter for the unchanged legacy console. Not production auth.
 use crate::{Surface, auth::Principal};
 use std::{

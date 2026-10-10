@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Scoped, revisioned task files. Containers only receive execution copies.
 //! Metadata and retained revisions are never mounted into an execution.
 mod coding;

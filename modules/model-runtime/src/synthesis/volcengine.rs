@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! V3 SSE synthesis; collect real audio only after a successful end event.
 use super::SynthesizedAudio;
 use crate::streaming::sse::Decoder;

@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 const MAX_SOURCE_BYTES = 2 * 1024 * 1024;
 const MAX_CONTENT_BYTES = 1024 * 1024;
 const TEXT_EXTENSIONS = new Set(["txt", "md", "markdown", "csv", "json", "jsonl", "html", "htm"]);

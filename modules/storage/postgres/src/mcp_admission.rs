@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Cross-session admission uses the durable invocation ledger, not an
 //! in-memory semaphore. A submitted or uncertain call occupies capacity
 //! until an authoritative receipt resolves it, including after a restart.

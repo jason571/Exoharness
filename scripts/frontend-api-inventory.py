@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-only
+# Commercial licensing: contact flyangqn@gmail.com.
+
 """Static route coverage inventory, NOT runtime/method/payload acceptance.
 
 Only inspects literal/template /v1 paths in authored frontend and literal

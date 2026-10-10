@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Two-level authorized discovery. Metadata selection precedes schema loading.
 use crate::{Catalog, Result, ToolError};
 use exoharness_contracts::capability::CapabilitySpec;

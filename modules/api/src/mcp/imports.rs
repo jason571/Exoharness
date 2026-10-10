@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 use crate::{auth::Principal, errors::ApiError};
 use axum::{Extension, Json, body::Bytes, extract::State};
 use exoharness_contracts::capability::CapabilityScope;

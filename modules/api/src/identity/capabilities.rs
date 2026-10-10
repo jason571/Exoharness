@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Personal registry projection. Does not expose global/admin records or grant installation.
 use super::{IdentityError, IdentityState, work};
 use crate::{auth::Principal, errors::storage};

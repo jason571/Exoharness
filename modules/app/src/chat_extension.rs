@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Chat workers are one Core-owned service, shared by both HTTP surfaces.
 use async_trait::async_trait;
 use exoharness_api::{ChatTasks, ExecutionService};

@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 use serde::{Deserialize, Serialize};
 use std::{path::PathBuf, time::Duration};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

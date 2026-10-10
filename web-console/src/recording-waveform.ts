@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 // Local microphone metering only. No audio output, extra capture, or upload.
 export function mountRecordingWaveform(panel: HTMLElement | null) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");

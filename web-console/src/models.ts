@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 type ModelType = "llm" | "tts" | "asr";
 type ModelApi = "openai_compatible" | "anthropic" | "volcengine_tts_sse" | "aliyun_qwen_tts_http" | "aliyun_qwen_audio_tts_websocket" | "openai_transcription";
 

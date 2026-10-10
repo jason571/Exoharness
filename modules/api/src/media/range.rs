@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! One bounded RFC byte range. Multipart ranges are deliberately rejected.
 pub(super) fn parse(value: Option<&str>, size: u64) -> Result<Option<(u64, u64)>, ()> {
     let Some(value) = value else {

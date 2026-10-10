@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Artifact metadata uses the existing execution tables, never image Base64.
 use crate::{PostgresStore, Result, StoreError, codec::now_ms, journal::lock_session};
 use serde::{Deserialize, Serialize};

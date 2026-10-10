@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Linux OCI execution backend. It never interprets host shell source, pulls
 //! images or falls back to an unconfined process. Authorization is upstream.
 mod engine;

@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 use crate::{CATALOG_ID, Result, SANDBOX_ID, ToolError, admission, native, public_name};
 use exoharness_contracts::{
     capability::{CapabilitySpec, StoredCapability},

@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Deployment configuration, not an Agent, model adapter or global state bag.
 //! Import/read never calls a provider, compacts an assistant, or grants tools.
 mod files;

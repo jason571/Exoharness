@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Transactional persistence boundary. Synchronous driver calls must run on a
 //! dedicated blocking worker, never directly inside an async HTTP/model loop.
 mod artifacts;

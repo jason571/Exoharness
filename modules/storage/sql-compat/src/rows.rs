@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 use crate::params::translate_placeholders;
 use crate::{Connection, Error, Params, Result, Transaction};
 use postgres::{Client, types::FromSqlOwned};

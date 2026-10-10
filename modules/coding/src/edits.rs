@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 /// Snapshot of one authored UTF-8 file. Read and write belong to sandbox/storage.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Document {

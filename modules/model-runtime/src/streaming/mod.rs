@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! True upstream streaming. Only answer text crosses the side-channel; tool
 //! proposals are reconstructed and then validated by the ordinary adapter.
 mod anthropic;

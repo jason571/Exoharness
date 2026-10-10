@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 use super::{WireRequest, base, finish, header};
 use crate::{
     ChatRequest, Completion, ErrorKind, Finish, Message, ToolCall, ToolChoice, Usage,

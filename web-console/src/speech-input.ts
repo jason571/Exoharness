@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 // Dictation stays outside the Agent conversation until the user presses Send.
 import { mountRecordingWaveform } from "./recording-waveform";
 export function speechInputHint(): string {

@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! Generic concurrency configuration; registration does not grant execution.
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};

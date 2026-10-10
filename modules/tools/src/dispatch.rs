@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 use crate::{Catalog, DispatchResult, Result, SANDBOX_ID, ToolError, ToolRuntime, validate};
 use exoharness_contracts::model::ToolCall;
 use exoharness_mcp::{Connection, ConnectionOptions, McpError, Progress};

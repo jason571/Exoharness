@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 //! One registry projection; the transport adapter may not fabricate records
 //! from assistant selections or claim execution readiness from registration.
 use exoharness_contracts::capability::RegisteredCapabilityView;
