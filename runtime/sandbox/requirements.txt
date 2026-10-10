@@ -1,0 +1,9 @@
+python-pptx==1.0.2
+python-docx==1.2.0
+openpyxl==3.1.5
+pypdf==6.0.0
+reportlab==4.4.3
+markitdown[pptx]==0.1.4
+defusedxml==0.7.1
+matplotlib==3.10.6
+pandas==2.3.2

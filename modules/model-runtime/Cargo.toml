@@ -1,0 +1,24 @@
+[package]
+name = "exoharness-model-runtime"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+exoharness-contracts.workspace = true
+exoharness-core.workspace = true
+exoharness-configuration.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+reqwest = { version = "0.13", default-features = false, features = ["rustls", "stream", "multipart", "json"] }
+base64 = "0.22"
+uuid = { version = "1", features = ["v4"] }
+tokio-util = "0.7"
+
+[dev-dependencies]
+axum.workspace = true
+tempfile = "3"
+tokio-stream.workspace = true

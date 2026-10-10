@@ -1,0 +1,3868 @@
+{
+  "schema_version": 1,
+  "source_sha256": "6aa28bb27cc54d61aebf5e7663ff863b064c71e77cdbc74ea220d83e58de7872",
+  "meaning": "Legacy registered endpoints; pending is not missing, implemented or passed. See feature acceptance matrix for actual evidence.",
+  "endpoints": [
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/health",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1119,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/agent-assets",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1007,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/agent-assets/{asset_id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1011,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/agent-profile",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 988,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/agent-profiles",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 989,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/agent-profiles",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 989,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "DELETE",
+      "path": "/v1/agent-profiles/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 993,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/agent-profiles/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 993,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/agent-profiles/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 993,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/agent-profiles/{id}/default",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1003,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/agent-profiles/{id}/enabled",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 999,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/artifact-configuration",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1039,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/artifact-configuration",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1039,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/assistant-capabilities",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 895,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/attachment-assets/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1129,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/attachment-assets/{id}/metadata",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1130,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/audit",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 987,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/auth/login",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1123,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/auth/logout",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 917,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/auth/passwords/{role}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 918,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/auth/registration-email",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 922,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/auth/registration-email",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 922,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/auth/session",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 916,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/auth/status",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1122,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/capabilities",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 934,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/capabilities",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 934,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/capabilities/overview",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 938,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "DELETE",
+      "path": "/v1/capabilities/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 939,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/capabilities/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 939,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/capabilities/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 939,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/capabilities/{id}/enabled",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 945,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/capabilities/{id}/health",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 963,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/capabilities/{id}/health",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 963,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/capabilities/{id}/permissions",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 954,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/capabilities/{id}/permissions/{permission}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 959,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/capabilities/{id}/preparation",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 955,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/capabilities/{id}/preparation",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 955,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/capabilities/{id}/runtime",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 981,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/capabilities/{id}/runtime",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 981,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/capabilities/{id}/secrets",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 946,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "DELETE",
+      "path": "/v1/capabilities/{id}/secrets/{name}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 950,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/capabilities/{id}/secrets/{name}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 950,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/capabilities/{id}/shares",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 968,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/capabilities/{id}/shares/{user_id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 972,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/capabilities/{id}/skill-instructions",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 976,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/capabilities/{id}/test",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 986,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/capabilities/{id}/tools",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 980,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/capabilities/{id}/validate",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 985,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/capabilities/{id}/versions",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 967,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/chat",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1103,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/chat/stream",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1107,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/coding/projects",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1052,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/coding/projects/{name}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1053,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/coding/tools/{name}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1054,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/imports/manifest",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1056,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/imports/mcp-http",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1057,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/imports/package",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1074,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/imports/skill",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1062,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/imports/skill/package",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1070,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/imports/skill/preview",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1066,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/imports/tool",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1058,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/knowledge/libraries",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 896,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/knowledge/libraries",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 896,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "DELETE",
+      "path": "/v1/knowledge/libraries/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 897,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/knowledge/libraries/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 897,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/knowledge/libraries/{id}/categories",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 899,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/knowledge/libraries/{id}/categories",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 899,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "DELETE",
+      "path": "/v1/knowledge/libraries/{id}/categories/{category_id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 900,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/knowledge/libraries/{id}/categories/{category_id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 900,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/knowledge/libraries/{id}/documents",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 901,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/knowledge/libraries/{id}/documents",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 901,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "DELETE",
+      "path": "/v1/knowledge/libraries/{id}/documents/{document_id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 902,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/knowledge/libraries/{id}/documents/{document_id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 902,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/knowledge/libraries/{id}/documents/{document_id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 902,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/knowledge/libraries/{id}/grants",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 898,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/management/overview",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 884,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/management/users",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 885,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/management/users/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 886,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/management/users/{id}/assistant",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 887,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/management/users/{id}/capability-policy",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 891,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/model-catalog",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1078,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/model-configuration",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1079,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/model-providers",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1080,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "DELETE",
+      "path": "/v1/model-providers/{name}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1085,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/model-providers/{name}/enabled",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1081,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/models",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1089,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "DELETE",
+      "path": "/v1/models/{name}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1102,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/models/{name}/default",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1091,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/models/{name}/enabled",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1090,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/models/{name}/test",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1092,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/run-artifacts/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1036,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/run-artifacts/{id}/metadata",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1037,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/run-artifacts/{id}/preview",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1038,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/runs/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1025,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/runs/{id}/cancel",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1043,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/runs/{id}/events",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1026,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/runs/{id}/invocations",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1027,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/runs/{id}/response-actions",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1028,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/runs/{id}/response-actions",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1028,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/runs/{id}/resume",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1044,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/scheduler-configuration",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 928,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PUT",
+      "path": "/v1/scheduler-configuration",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 928,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/sessions",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1012,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/sessions",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1012,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "DELETE",
+      "path": "/v1/sessions/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1016,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/sessions/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1016,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "PATCH",
+      "path": "/v1/sessions/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1016,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/sessions/{id}/delete",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1020,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/sessions/{id}/response-actions",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1032,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/sessions/{id}/turns",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1021,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/skills/import",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1055,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "POST",
+      "path": "/v1/speech-input",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1093,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/speech-input/configuration",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1098,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/trace/runs",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1045,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/trace/runs/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1047,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/trace/runs/{id}/requests/{logical_id}/{attempt}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1048,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/v1/trace/sessions",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1046,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 864,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/agents",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 868,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/agents.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 909,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/app.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 906,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/audit.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 912,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/auth.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 914,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/chat.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 911,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/imports.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 907,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/knowledge.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 910,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/login.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1121,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/management.css",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 875,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/models.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 908,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/overview.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 872,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/security.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 915,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/styles.css",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1120,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/trace.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 913,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/assets/users.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 874,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/audit",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 903,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/chat",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 870,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/exoharness-login",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1118,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/imports",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 866,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/knowledge",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 869,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/login",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1117,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/models",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 867,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/overview",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 871,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/security",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 905,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/services",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 865,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/trace",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 904,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "management",
+      "method": "GET",
+      "path": "/users",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 873,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/health",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1266,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/account",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1154,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "PUT",
+      "path": "/v1/account/password",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1156,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "PUT",
+      "path": "/v1/account/profile",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1155,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/agent-assets/{asset_id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1229,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/agent-profile",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1228,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/application-info",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1223,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/attachment-assets/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1289,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/attachment-assets/{id}/metadata",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1290,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/auth/login",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1275,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/auth/logout",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1153,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/auth/register",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1283,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/auth/registration-code",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1279,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/auth/session",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1152,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/auth/status",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1274,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/available-assistants",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1224,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/chat/configuration",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1213,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/knowledge/categories",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1160,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/knowledge/categories",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1160,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "DELETE",
+      "path": "/v1/knowledge/categories/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1161,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "PUT",
+      "path": "/v1/knowledge/categories/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1161,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/knowledge/documents",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1157,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/knowledge/documents",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1157,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "DELETE",
+      "path": "/v1/knowledge/documents/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1158,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/knowledge/documents/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1158,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "PUT",
+      "path": "/v1/knowledge/documents/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1158,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/knowledge/search",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1159,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/memories",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1162,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/memories",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1162,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "DELETE",
+      "path": "/v1/memories/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1163,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "PUT",
+      "path": "/v1/memories/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1163,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/run-artifacts/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1245,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/run-artifacts/{id}/metadata",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1246,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/run-artifacts/{id}/preview",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1247,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/runs/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1243,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/runs/{id}/cancel",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1256,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/runs/{id}/events",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1244,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/runs/{id}/response-actions",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1248,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/runs/{id}/response-actions",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1248,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/runs/{id}/resume",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1257,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/sessions",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1230,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/sessions",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1230,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "DELETE",
+      "path": "/v1/sessions/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1234,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/sessions/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1234,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "PATCH",
+      "path": "/v1/sessions/{id}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1234,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/sessions/{id}/delete",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1238,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/sessions/{id}/response-actions",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1252,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/sessions/{id}/turns",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1239,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/speech-input",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1214,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/speech-input/configuration",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1219,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/user-capabilities",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1164,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/v1/user-capabilities/install-jobs",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1169,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/user-capabilities/install-jobs/{id}/cancel",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1173,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/user-capabilities/install/github",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1165,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/user-capabilities/mcp/http",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1181,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/user-capabilities/mcp/json",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1185,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/user-capabilities/mcp/package",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1189,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "DELETE",
+      "path": "/v1/user-capabilities/mcp/{id}/authorization",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1193,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "PUT",
+      "path": "/v1/user-capabilities/mcp/{id}/authorization",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1193,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "DELETE",
+      "path": "/v1/user-capabilities/mcp/{id}/environment/{name}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1199,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "PUT",
+      "path": "/v1/user-capabilities/mcp/{id}/environment/{name}",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1199,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/user-capabilities/skill/package",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1205,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/user-capabilities/tool/package",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1209,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "POST",
+      "path": "/v1/user-capabilities/{id}/recheck",
+      "kind": "api",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1177,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract",
+        "persist_restart",
+        "invalid_input",
+        "conflict_or_idempotency"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1143,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/assets/chat.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1146,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/assets/portal-auth.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1147,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/assets/portal-login.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1268,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/assets/portal-register.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1270,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/assets/portal-settings.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1148,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/assets/portal-theme.js",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1269,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/assets/styles.css",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1267,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/chat",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1144,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/login",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1264,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/register",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1265,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    },
+    {
+      "surface": "portal",
+      "method": "GET",
+      "path": "/settings",
+      "kind": "page_or_asset",
+      "source": "crates/exoharness-api/src/lib.rs",
+      "line": 1145,
+      "acceptance": "pending",
+      "evidence": [],
+      "required_checks": [
+        "success_or_empty",
+        "authentication",
+        "authorization",
+        "native_json_contract"
+      ]
+    }
+  ]
+}

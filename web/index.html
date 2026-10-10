@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>技能中心 · ExoHarness</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23132522'/%3E%3Ctext x='6' y='21' fill='%2377e5b5' font-size='12'%3EEH%3C/text%3E%3C/svg%3E">
+  <script src="/assets/management-theme.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/management-theme.css">
+  <script src="/assets/auth.js" defer></script>
+  <script src="/assets/app.js" defer></script>
+<script src="/assets/i18n.js" defer></script></head>
+<body class="services-page">
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="/services" aria-label="ExoHarness 技能中心">
+      <span class="brand-mark" aria-hidden="true">EH</span>
+      <span><strong>ExoHarness</strong><small>Capability Console</small></span>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a class="active" href="/services">技能中心</a>
+      <a href="/imports">技能导入</a>
+      <a href="/models">模型配置</a>
+      <a href="/agents" data-admin-only>智能助理</a>
+      <a href="/knowledge" data-admin-only>资料管理</a>
+      <a href="/trace" data-admin-only>Trace</a>
+    </nav>
+    <div class="service-state"><span id="service-dot" class="status-dot"></span><span id="service-label">正在连接服务</span></div>
+  </header>
+
+  <main class="page services-page-shell">
+    <section class="services-overview">
+      <div class="services-heading">
+        <p class="eyebrow">能力管理</p>
+        <h1>技能中心</h1>
+        <p>集中管理 Skill、MCP 与本地工具，查看可用性、权限和启用状态。</p>
+      </div>
+      <div class="services-overview-actions">
+        <a class="button ghost" href="/trace" data-admin-only>运行追踪</a>
+        <a class="button ghost" href="/audit">操作记录</a>
+        <a class="button primary add-capability-button" href="/imports"><span aria-hidden="true">＋</span>添加能力</a>
+      </div>
+    </section>
+
+    <section class="service-summary" aria-label="能力概况">
+      <article><span class="summary-marker all" aria-hidden="true"></span><div><strong id="metric-total">—</strong><small>全部能力</small></div></article>
+      <article><span class="summary-marker enabled" aria-hidden="true"></span><div><strong id="metric-enabled">—</strong><small>已启用</small></div></article>
+      <article><span class="summary-marker available" aria-hidden="true"></span><div><strong id="metric-available">—</strong><small>当前可用</small></div></article>
+    </section>
+
+    <section class="workspace-grid">
+      <article class="panel inventory-panel">
+        <div class="panel-header">
+          <div><h2>能力列表</h2><p id="capability-count" class="panel-copy">正在读取</p></div>
+          <button id="refresh-button" class="button ghost compact-button" type="button"><span aria-hidden="true">↻</span> 刷新</button>
+        </div>
+        <label class="capability-search"><span aria-hidden="true">⌕</span><input id="capability-search" type="search" placeholder="搜索能力名称" autocomplete="off"></label>
+        <div class="filter-row" role="group" aria-label="能力类型筛选">
+          <button class="filter active" data-filter="all" type="button">全部</button>
+          <button class="filter" data-filter="skill" type="button">Skill</button>
+          <button class="filter" data-filter="mcp_server" type="button">MCP</button>
+          <button class="filter" data-filter="tool_node" type="button">本地工具</button>
+        </div>
+        <div class="capability-list-header" aria-hidden="true"><span>能力</span><span>启用</span><span>可用性</span></div>
+        <div id="capability-list" class="capability-list" aria-live="polite"></div>
+      </article>
+
+      <article class="panel detail-panel">
+        <div id="empty-detail" class="empty-state">
+          <span class="empty-icon">↗</span>
+          <h2>选择一项能力</h2>
+          <p>从左侧选择后，可以检查可用性、处理权限并决定是否启用。</p>
+        </div>
+        <div id="capability-detail" class="hidden">
+          <div class="panel-header detail-heading">
+            <div><p id="detail-kind" class="detail-kind-label"></p><h2 id="detail-name"></h2></div>
+            <span id="detail-enabled" class="pill"></span>
+          </div>
+          <p id="detail-description" class="detail-description"></p>
+          <dl class="metadata">
+            <div><dt>版本</dt><dd id="detail-version"></dd></div>
+            <div><dt>配置版本</dt><dd id="detail-revision"></dd></div>
+            <div><dt>使用范围</dt><dd id="detail-scope"></dd></div>
+            <div><dt>可用性</dt><dd id="detail-health"></dd></div>
+          </dl>
+          <a class="capability-edit-link" href="/imports">需要修改配置？重新导入同名能力会创建新 revision <span aria-hidden="true">→</span></a>
+          <div class="action-row">
+            <button id="prepare-capability" class="button primary" type="button" data-admin-only>自动准备并启用</button>
+            <button id="validate-capability" class="button primary" type="button">验证可用性</button>
+            <button id="toggle-enabled" class="button secondary" type="button"></button>
+            <button id="allow-permissions" class="button secondary" type="button">仅授权</button>
+          </div>
+
+          <section id="python-runtime-section" class="subsection runtime-section hidden">
+            <div class="subsection-title">
+              <div><h3>隔离运行环境</h3><p id="python-runtime-message">正在检查沙盒依赖。</p></div>
+              <span id="python-runtime-status">正在检查</span>
+            </div>
+            <div class="runtime-path"><span>沙盒镜像</span><code id="python-runtime-path">尚未核验</code></div>
+            <button id="prepare-python-runtime" class="button secondary" type="button">检查沙盒依赖</button>
+            <p class="permission-help">检查不会执行上传脚本；通过检查不等于获得脚本执行授权。缺少依赖会明确列出，不回退宿主机执行。</p>
+          </section>
+
+          <section id="skill-instructions-section" class="subsection skill-instructions-section hidden">
+            <div class="subsection-title">
+              <div><h3>技能完整说明</h3><p>当前不可变 revision 的 SKILL.md，只读展示。</p></div>
+              <button id="copy-skill-instructions" class="button ghost compact-button" type="button">复制说明</button>
+            </div>
+            <pre id="skill-instructions" aria-live="polite">正在读取技能说明…</pre>
+          </section>
+
+          <section id="secret-section" class="subsection hidden">
+            <div class="subsection-title"><h3>认证信息</h3><span id="secret-summary"></span></div>
+            <p class="permission-help">认证内容只保存在本机，不会显示在页面、配置详情或 API 响应中。可在这里直接更新、轮换或删除。</p>
+            <div id="secret-list" class="secret-list"></div>
+          </section>
+
+          <section class="subsection">
+            <div class="subsection-title"><h3>权限</h3><span id="permission-summary"></span></div>
+            <p id="permission-help" class="permission-help">正在读取权限状态。</p>
+            <div id="permission-list" class="permission-list"></div>
+          </section>
+
+          <section class="subsection">
+            <div class="subsection-title"><h3>验证记录</h3><span id="validation-summary">尚未验证</span></div>
+            <div id="validation-checks" class="validation-checks"><p class="muted-copy">点击“验证可用性”，检查这项能力当前是否可以正常使用。</p></div>
+          </section>
+
+          <section id="test-section" class="subsection test-box">
+            <div class="subsection-title"><h3>试用工具</h3><span>使用当前模型</span></div>
+            <form id="test-form">
+              <label>想让它做什么？<textarea id="test-prompt" rows="4" placeholder="例如：查询东京未来三天的天气" required></textarea></label>
+              <button class="button primary" type="submit">开始测试</button>
+            </form>
+            <pre id="test-result" class="result-view" aria-live="polite">输入一个具体任务，系统会使用当前模型尝试调用这项能力。</pre>
+          </section>
+
+          <details class="manifest-details">
+            <summary>查看技术详情</summary>
+            <div class="technical-id"><span>能力 ID</span><code id="detail-id"></code></div>
+            <button id="discover-tools" class="button ghost compact-button" type="button">重新读取工具列表</button>
+            <pre id="detail-manifest"></pre>
+          </details>
+
+          <section class="subsection capability-danger-zone">
+            <div><h3>删除能力</h3><p id="delete-capability-help">从服务列表移除这项登记，并删除它保存在本机的认证信息。操作记录仍会保留。</p></div>
+            <button id="delete-capability" class="button ghost danger-button" type="button">删除登记</button>
+          </section>
+        </div>
+      </article>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

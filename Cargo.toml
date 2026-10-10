@@ -1,0 +1,45 @@
+[workspace]
+members = ["modules/artifacts", "modules/contracts", "modules/core", "modules/storage/postgres", "modules/storage/sql-compat", "modules/identity", "modules/coding", "modules/configuration", "modules/model-runtime", "modules/registry", "modules/skills", "modules/skill-runtime", "modules/secrets", "modules/mcp", "modules/sandbox", "modules/api", "modules/app"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+license = "MIT"
+
+[workspace.dependencies]
+exoharness-coding = { path = "modules/coding" }
+exoharness-tools = { path = "modules/tools" }
+exoharness-agent = { path = "modules/agent" }
+exoharness-artifacts = { path = "modules/artifacts" }
+exoharness-skill-runtime = { path = "modules/skill-runtime" }
+exoharness-model-runtime = { path = "modules/model-runtime" }
+exoharness-sandbox = { path = "modules/sandbox" }
+exoharness-secrets = { path = "modules/secrets" }
+exoharness-mcp = { path = "modules/mcp" }
+exoharness-skills = { path = "modules/skills" }
+exoharness-database = { path = "modules/storage/sql-compat" }
+exoharness-identity = { path = "modules/identity" }
+exoharness-contracts = { path = "modules/contracts" }
+exoharness-core = { path = "modules/core" }
+exoharness-storage-postgres = { path = "modules/storage/postgres" }
+exoharness-api = { path = "modules/api" }
+exoharness-configuration = { path = "modules/configuration" }
+exoharness-registry = { path = "modules/registry" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+async-trait = "0.1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "net", "signal", "time"] }
+postgres = { version = "0.19.14", features = ["with-serde_json-1"] }
+r2d2 = "0.8.10"
+r2d2_postgres = "0.18.2"
+sha2 = "0.10.9"
+axum = "0.8.9"
+tokio-stream = "0.1.19"
+getrandom = "0.4.3"
+tower = { version = "0.5.3", features = ["util"] }
+http-body-util = "0.1.5"
+http = "1.5.0"
+semver = "1"

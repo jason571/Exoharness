@@ -1,0 +1,23 @@
+[package]
+name = "exoharness-artifacts"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+[dependencies]
+exoharness-coding.workspace = true
+zip = { version = "3", default-features = false, features = ["deflate"] }
+exoharness-core.workspace = true
+exoharness-storage-postgres.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+getrandom.workspace = true
+ring = "0.17.14"
+url = "2"
+tempfile = "3"
+tokio.workspace = true
+reqwest = { version = "0.13", default-features = false, features = ["rustls", "stream"] }
+[dev-dependencies]
+exoharness-contracts.workspace = true

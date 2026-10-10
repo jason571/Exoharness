@@ -1,0 +1,26 @@
+{
+  "name": "exoharness-web-console",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "npm run typecheck && npm run build:models && npm run build:agents && npm run build:knowledge && npm run build:chat && npm run build:settings && npm run build:i18n",
+    "build:i18n": "esbuild src/i18n.ts --bundle --format=iife --target=es2022 --outfile=../web/i18n.js",
+    "typecheck": "tsc --noEmit",
+    "build:models": "esbuild src/models.ts --bundle --format=iife --target=es2022 --outfile=../web/models.js",
+    "build:agents": "esbuild src/agents.ts --bundle --format=iife --target=es2022 --outfile=../web/agents.js",
+    "build:knowledge": "esbuild src/admin-knowledge.ts --bundle --format=iife --target=es2022 --outfile=../web/knowledge.js",
+    "build:chat": "esbuild src/chat.ts --bundle --format=iife --target=es2022 --loader:.png=dataurl --outfile=../web/chat.js",
+    "build:settings": "esbuild src/portal-settings.ts --bundle --format=iife --target=es2022 --loader:.png=dataurl --outfile=../web/portal-settings.js",
+    "test:capability-install": "node --experimental-strip-types tests/capability-install.test.mjs"
+  },
+  "dependencies": {
+    "dompurify": "^3.4.14",
+    "highlight.js": "^11.12.0",
+    "marked": "^18.0.11"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  }
+}

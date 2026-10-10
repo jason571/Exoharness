@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>运行追踪 · ExoHarness</title>
+  <script src="/assets/management-theme.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/management-theme.css">
+  <script src="/assets/auth.js" defer></script>
+  <script src="/assets/trace.js" defer></script>
+<script src="/assets/i18n.js" defer></script></head>
+<body class="trace-page">
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="/services" aria-label="ExoHarness 技能中心">
+      <span class="brand-mark" aria-hidden="true">EH</span>
+      <span><strong>ExoHarness</strong><small>Capability Console</small></span>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a href="/services">技能中心</a>
+      <a href="/imports">技能导入</a>
+      <a href="/models">模型配置</a>
+      <a href="/agents" data-admin-only>智能助理</a>
+      <a href="/knowledge" data-admin-only>资料管理</a>
+      <a class="active" href="/trace" data-admin-only>Trace</a>
+    </nav>
+    <div class="service-state"><span id="service-dot" class="status-dot"></span><span id="service-label">正在读取运行轨迹</span></div>
+  </header>
+
+  <main class="page trace-page-shell">
+    <section class="trace-heading">
+      <div>
+        <p class="eyebrow">EXECUTION OBSERVABILITY</p>
+        <h1>会话追踪</h1>
+        <p>同一会话的消息集中展示，按轮查看模型消耗、能力调用与执行结果。</p>
+      </div>
+      <div class="trace-heading-actions">
+        <button id="trace-refresh" class="button ghost" type="button"><span aria-hidden="true">↻</span> 刷新</button>
+      </div>
+    </section>
+
+    <section class="trace-workspace">
+      <aside class="panel trace-run-panel">
+        <div class="trace-panel-heading">
+          <div><h2>会话记录</h2><p>最近 200 个会话 · 补充消息自动归组</p></div>
+          <span id="trace-run-count" class="trace-count">—</span>
+        </div>
+        <label class="trace-search"><span aria-hidden="true">⌕</span><input id="trace-search" type="search" placeholder="搜索会话、最近消息、状态"></label>
+        <div id="trace-run-list" class="trace-run-list" aria-live="polite"></div>
+      </aside>
+
+      <section class="trace-main">
+        <section id="trace-empty" class="panel trace-empty">
+          <span class="trace-empty-icon">↳</span>
+          <h2>选择一个会话</h2>
+          <p>查看完整调用路径、各阶段耗时以及脱敏后的输入与返回数据。</p>
+        </section>
+
+        <div id="trace-content" class="trace-content" hidden>
+          <section class="panel trace-conversation-panel">
+            <div class="trace-panel-heading">
+              <div><h2 id="trace-conversation-title">—</h2><p id="trace-conversation-turns">—</p></div>
+              <div class="trace-conversation-total"><span>会话累计 Token</span><strong id="trace-conversation-tokens">—</strong></div>
+            </div>
+            <div class="trace-conversation-meta"><code id="trace-conversation-id">—</code><span id="trace-conversation-calls">—</span></div>
+            <div id="trace-turn-list" class="trace-turn-list" aria-label="会话内各轮消息"></div>
+            <button id="trace-load-older" class="button ghost" type="button" hidden>加载更早的消息</button>
+          </section>
+          <section class="panel trace-overview-panel">
+            <div class="trace-overview-heading">
+              <div>
+                <div class="trace-title-row"><h2 id="trace-session-title">—</h2><span id="trace-status" class="trace-status">—</span></div>
+                <code id="trace-run-id">—</code>
+              </div>
+              <time id="trace-created-at">—</time>
+            </div>
+            <p id="trace-prompt" class="trace-prompt">—</p>
+            <div class="trace-metrics" aria-label="运行摘要">
+              <div><span>本轮耗时</span><strong id="trace-duration">—</strong></div>
+              <div><span>模型请求</span><strong id="trace-model-calls">—</strong></div>
+              <div><span>本轮 Token</span><strong id="trace-total-tokens">—</strong></div>
+              <div><span>费用</span><strong id="trace-cost">—</strong></div>
+              <div><span>输入 Token</span><strong id="trace-input-tokens">—</strong></div>
+              <div><span>输出 Token</span><strong id="trace-output-tokens">—</strong></div>
+              <div><span>缓存 Token</span><strong id="trace-cache-tokens">—</strong></div>
+              <div><span>能力调用</span><strong id="trace-invocations">—</strong></div>
+            </div>
+          </section>
+
+          <section class="panel trace-usage-panel">
+            <div class="trace-panel-heading">
+              <div><h2>模型消耗</h2><p>逐次请求显示实际 Token，并对照发送前的上下文估算</p></div>
+              <span id="trace-usage-meta" class="trace-flow-legend">等待模型调用</span>
+            </div>
+            <div id="trace-model-usage" class="trace-model-usage"></div>
+          </section>
+
+          <section class="panel trace-flow-panel">
+            <div class="trace-panel-heading">
+              <div><h2>调用路径</h2><p>点击能力或结果节点检查数据</p></div>
+              <span id="trace-flow-meta" class="trace-flow-legend">Agent → Capability → Result</span>
+            </div>
+            <div id="trace-flow" class="trace-flow"></div>
+          </section>
+
+          <section class="panel trace-timeline-panel">
+            <div class="trace-panel-heading trace-timeline-heading">
+              <div><h2>事件时间线</h2><p id="trace-timeline-meta">连续文字合并展示，原始事件完整保留</p></div>
+              <div class="trace-timeline-modes" role="group" aria-label="事件展示与翻页">
+                <button type="button" data-timeline-mode="readable" aria-pressed="true">整理视图</button>
+                <button type="button" data-timeline-mode="raw" aria-pressed="false">原始事件</button>
+                <button id="trace-event-prev" type="button" hidden>上一页</button>
+                <button id="trace-event-next" type="button" hidden>下一页</button>
+                <button id="trace-event-latest" type="button" hidden>最新事件</button>
+              </div>
+            </div>
+            <p id="trace-timeline-warning" class="trace-timeline-warning" hidden>当前显示部分事件，可翻页或跳到最新事件；运行状态与调用结果不受分页影响。</p>
+            <div id="trace-timeline" class="trace-timeline"></div>
+          </section>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="trace-detail-backdrop" class="trace-detail-backdrop" hidden></div>
+  <aside id="trace-detail-drawer" class="trace-detail-drawer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="trace-detail-title" inert>
+    <header class="trace-drawer-header">
+      <div class="trace-drawer-heading">
+        <span id="trace-detail-kind" class="trace-detail-kind">CALL</span>
+        <div><h2 id="trace-detail-title">调用详情</h2><p id="trace-detail-capability">敏感字段已由服务端脱敏</p></div>
+      </div>
+      <button id="trace-detail-close" class="trace-detail-close" type="button" aria-label="关闭调用详情">×</button>
+    </header>
+    <div class="trace-drawer-toolbar">
+      <span id="trace-detail-position">—</span>
+      <div>
+        <button id="trace-detail-prev" type="button">← 上一个</button>
+        <button id="trace-detail-next" type="button">下一个 →</button>
+      </div>
+    </div>
+    <div class="trace-detail-tabs" role="tablist" aria-label="调用数据">
+      <button id="trace-arguments-tab" type="button" role="tab" data-trace-tab="arguments" aria-controls="trace-arguments-panel">调用参数</button>
+      <button id="trace-result-tab" type="button" role="tab" data-trace-tab="result" aria-controls="trace-result-panel">返回结果</button>
+    </div>
+    <div id="trace-detail" class="trace-drawer-body">
+      <dl class="trace-facts" id="trace-facts"></dl>
+      <section id="trace-arguments-panel" class="trace-json-section" role="tabpanel" aria-labelledby="trace-arguments-tab">
+        <div><h3 id="trace-arguments-heading">调用参数</h3><button type="button" data-copy-target="trace-arguments">复制 JSON</button></div>
+        <section id="trace-request-evidence" hidden aria-label="模型请求证据">
+          <p id="trace-request-summary"></p>
+          <label for="trace-request-part">查看输入内容</label>
+          <select id="trace-request-part" aria-label="选择请求组成部分"></select>
+        </section>
+        <pre id="trace-arguments">{}</pre>
+      </section>
+      <section id="trace-result-panel" class="trace-json-section" role="tabpanel" aria-labelledby="trace-result-tab" hidden>
+        <div><h3 id="trace-result-heading">返回结果</h3><button type="button" data-copy-target="trace-result">复制 JSON</button></div>
+        <pre id="trace-result">尚未返回</pre>
+      </section>
+    </div>
+  </aside>
+</body>
+</html>

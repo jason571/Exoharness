@@ -1,0 +1,52 @@
+/* Management palette overrides; portal and generated content keep their own themes. */
+html.management-console[data-management-theme="light"] {
+  --bg: #f4f7f6;
+  --surface: #ffffff;
+  --surface-strong: #f7faf8;
+  --surface-soft: #ecf3ef;
+  --line: #dce5df;
+  --line-strong: #bacfc2;
+  --text: #1c3329;
+  --muted: #5d7468;
+  --green: #18744f;
+  --green-strong: #11815a;
+  --amber: #946d13;
+  --red: #b53b37;
+  --blue: #286bb3;
+  --shadow: 0 8px 28px rgba(29, 59, 44, .06);
+}
+html.management-console[data-management-theme="light"] body { background: radial-gradient(circle at 75% 0%, #eaf3ee, var(--bg) 34rem); }
+html.management-console[data-management-theme="light"] .ambient { opacity: .06; }
+html.management-console[data-management-theme="light"] :is(.topbar.management-header, .management-header > .main-nav) { color: var(--text); background: #fff; border-color: var(--line); }
+html.management-console[data-management-theme="light"] :is(.main-nav a, .mobile-nav-toggle, .mobile-nav-close, .management-nav-collapse, .management-theme-toggle) { color: var(--muted); }
+html.management-console[data-management-theme="light"] .main-nav a.active { color: var(--green); border-color: #c4ddce; background: #eaf4ee; box-shadow: inset 3px 0 var(--green); }
+html.management-console[data-management-theme="light"] :is(.main-nav a:hover, .management-nav-collapse:hover, .management-theme-toggle:hover) { color: var(--green); background: #edf5f0; }
+html.management-console[data-management-theme="light"] :is(.brand-mark, .main-nav-icon) { color: var(--green); }
+html.management-console[data-management-theme="light"] .brand-mark { background: #edf6f0; box-shadow: none; border-color: #c4ddce; }
+html.management-console[data-management-theme="light"] .status-dot.online { background: #269360; box-shadow: 0 0 0 4px rgba(38,147,96,.1); }
+html.management-console[data-management-theme="light"] :is(.ui-language-switch, .mobile-nav-toggle, .mobile-nav-close, .management-nav-collapse, .management-theme-toggle) { background: #fff; border-color: var(--line); }
+html.management-console[data-management-theme="light"] :is(.phase-card, .service-summary, .metric-tile, .metrics article, .user-record, .agent-save-bar, .user-installed-item) { background: #fff; border-color: var(--line); }
+html.management-console[data-management-theme="light"] :is(.panel, .agent-capability-picker, .import-kind-tabs, .mcp-method-tabs, .mcp-json-editor, .mcp-json-guide, .trace-drawer, .trace-drawer-header, .trace-drawer-body, .trace-result-section, .model-advanced, .test-box, .mobile-nav-identity, .setup-guide article) { color: var(--text); background: #fff; border-color: var(--line); }
+html.management-console[data-management-theme="light"] :is(input, textarea, select, .capability-search input, .audit-search input, .trace-search input, .knowledge-admin-grid .stack-form input, .knowledge-admin-grid .stack-form textarea, .knowledge-quick-category input, .knowledge-quick-category select, #mcp-json-input) { color: var(--text); background: #fff; border-color: var(--line-strong); }
+html.management-console[data-management-theme="light"] :is(input, textarea)::placeholder { color: #7c8f84; }
+html.management-console[data-management-theme="light"] :is(input, textarea, select):focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(24,116,79,.1); }
+html.management-console[data-management-theme="light"] .scheduler-limit-card { color: var(--text); background: var(--surface-strong); border-color: var(--line-strong); }
+html.management-console[data-management-theme="light"] .scheduler-limit-card :is(#scheduler-user-limit, #scheduler-global-limit) { color: var(--text); background: #fff; border-color: var(--muted); }
+html.management-console[data-management-theme="light"] .scheduler-limit-card :is(#scheduler-user-limit, #scheduler-global-limit):focus { border-color: var(--green); }
+html.management-console[data-management-theme="light"] :is(.button.primary, .save-configuration) { color: #fff; background: var(--green); }
+html.management-console[data-management-theme="light"] .button.danger { color: var(--red); background: #fff0ee; border-color: #edc5c0; }
+html.management-console[data-management-theme="light"] :is(.kind-icon, .import-kind-icon, .agent-scope-tabs, .metadata div, .user-assignment, .trace-context-card, .technical-id) { color: var(--text); background: var(--surface-strong); }
+html.management-console[data-management-theme="light"] :is(.capability-card:hover, .capability-card.selected, .trace-run-item:hover, .trace-run-item.active, .trace-turn-item.active, .user-list-item.active, .user-list-item:hover, .import-kind-tab.active, .mcp-method-tab.active, .model-item.selected, .agent-profile-item.selected) { color: var(--green); background: #edf6f0; border-color: #c4ddce; }
+html.management-console[data-management-theme="light"] :is(.result-view, .manifest-details pre, .skill-instructions-section pre, .trace-code, .trace-output, .trace-result-section pre, .trace-drawer pre, .model-test-result, .user-conversation, .agent-avatar-upload, .agent-skill-option, .model-card, .agent-profile-item) { color: var(--text); background: var(--surface-strong); border-color: var(--line); }
+html.management-console[data-management-theme="light"] :is(.management-heading p, .management-table th, .metric-tile span, .readiness-item p, .panel-copy, .mcp-json-status span, .mcp-json-notes, .runtime-path code, .technical-id code, .trace-run-prompt, .audit-record-copy p, .agent-skill-description, .user-created, .user-identity p, .import-kind-tab small) { color: var(--muted); }
+html.management-console[data-management-theme="light"] :is(.management-table td, .management-table th, .management-tabs, .readiness-item, .user-assignment, .agent-save-bar, .user-list-item, .agent-capability-picker, .trace-drawer-header) { border-color: var(--line); }
+html.management-console[data-management-theme="light"] :is(.management-page a:not(.brand):not(.main-nav a), .user-trace-link, .user-share-picker summary) { color: var(--green); }
+html.management-console[data-management-theme="light"] :is(.model-page-heading h1, .agent-page-heading h1, h1 span, .import-kind-tab strong, .mcp-method-tab strong, .metric-tile strong, .user-assistant-availability, .user-list-name, .agent-skill-heading strong, .mobile-nav-identity strong) { color: var(--text); }
+html.management-console[data-management-theme="light"] .json-guide-copy code { color: var(--green); }
+html.management-console[data-management-theme="light"] .audit-capability { color: var(--text) !important; }
+html.management-console[data-management-theme="light"] .management-error { color: var(--red); background: #fff0ee; }
+html.management-console[data-management-theme="light"] :is(.users-notice, .readonly-banner, .import-boundary-note) { color: var(--muted); background: #edf6f0; border-color: var(--line-strong); }
+html.management-console[data-management-theme="light"] :is(.overview-task-status[data-status="succeeded"], .user-conversation-status[data-status="succeeded"]) { color: #216a42; background: #e5f3e9; }
+html.management-console[data-management-theme="light"] :is(.overview-task-status[data-status="failed"], .user-conversation-status[data-status="failed"]) { color: #aa3734; background: #fff0ee; }
+html.management-console[data-management-theme="light"] :is(.overview-task-status[data-status="recoverable"], .overview-task-status[data-status="waiting_authorization"], .user-conversation-status[data-status="recoverable"]) { color: #865d14; background: #fff6df; }
+html.management-console[data-management-theme="light"] :is(.overview-task-status[data-status="running"], .overview-task-status[data-status="queued"], .user-conversation-status[data-status="running"], .user-conversation-status[data-status="queued"]) { color: #276696; background: #e9f3fc; }

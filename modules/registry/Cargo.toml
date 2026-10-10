@@ -1,0 +1,11 @@
+[package]
+name = "exoharness-registry"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+exoharness-core.workspace = true
+exoharness-storage-postgres.workspace = true
+exoharness-contracts.workspace = true

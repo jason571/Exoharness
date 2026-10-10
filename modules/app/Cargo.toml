@@ -1,0 +1,31 @@
+[package]
+name = "exoharness-app"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "exoharness"
+path = "src/main.rs"
+
+[dependencies]
+exoharness-tools.workspace = true
+exoharness-artifacts.workspace = true
+exoharness-skill-runtime.workspace = true
+exoharness-model-runtime.workspace = true
+exoharness-sandbox.workspace = true
+exoharness-mcp.workspace = true
+exoharness-secrets.workspace = true
+exoharness-skills.workspace = true
+exoharness-identity.workspace = true
+exoharness-contracts.workspace = true
+exoharness-core.workspace = true
+exoharness-storage-postgres.workspace = true
+exoharness-api.workspace = true
+exoharness-configuration.workspace = true
+exoharness-registry.workspace = true
+serde_json.workspace = true
+async-trait.workspace = true
+tokio.workspace = true
+axum.workspace = true

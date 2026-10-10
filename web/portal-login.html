@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b0b0c">
+  <title>登录 · ExoHarness</title>
+  <script src="/assets/portal-theme.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/portal-login.js" defer></script>
+<script src="/assets/i18n.js" defer></script></head>
+<body class="portal-access-page">
+  <main class="portal-access-shell">
+    <div class="access-intro">
+      <p class="access-intro-kicker"><span></span> EXOHARNESS · CREATIVE SPACE</p>
+      <h2>让每一个想法，<br><em>都有回响。</em></h2>
+      <p>从一段灵感出发，创作视频、音乐、图像与文档。你的下一件作品，从这里开始。</p>
+      <div class="access-intro-tags" aria-hidden="true"><span>想象</span><span>创作</span><span>交付</span></div>
+    </div>
+    <section class="portal-access-card">
+      <span class="portal-access-mark" aria-hidden="true">EXO</span>
+      <p class="eyebrow">EXOHARNESS</p>
+      <h1>欢迎回来</h1>
+      <p>登录后继续你的专属对话。</p>
+      <form id="portal-login-form" class="stack-form portal-access-form">
+        <label>邮箱或用户名<input id="portal-login-identifier" type="text" autocomplete="username" maxlength="254" required autofocus></label>
+        <label>密码<span class="password-input-wrap"><input id="portal-login-password" type="password" autocomplete="current-password" minlength="8" maxlength="256" required><button class="password-visibility" type="button" data-password-target="portal-login-password" aria-label="显示密码" aria-pressed="false"><svg class="password-eye-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle><path class="password-eye-slash" d="M4 4l16 16"></path></svg></button></span></label>
+        <button id="portal-login-submit" class="button primary" type="submit">登录</button>
+      </form>
+      <p id="portal-login-error" class="login-error hidden" role="alert"></p>
+      <p class="portal-access-switch">还没有账号？<a id="portal-register-link" href="/register">使用邮箱注册</a></p>
+    </section>
+  </main>
+</body>
+</html>

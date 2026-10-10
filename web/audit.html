@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>操作记录 · ExoHarness</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23132522'/%3E%3Ctext x='6' y='21' fill='%2377e5b5' font-size='12'%3EEH%3C/text%3E%3C/svg%3E">
+  <script src="/assets/management-theme.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/management-theme.css">
+  <script src="/assets/auth.js" defer></script>
+  <script src="/assets/audit.js" defer></script>
+<script src="/assets/i18n.js" defer></script></head>
+<body class="audit-page">
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="/services" aria-label="ExoHarness 技能中心">
+      <span class="brand-mark" aria-hidden="true">EH</span>
+      <span><strong>ExoHarness</strong><small>Capability Console</small></span>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a class="active" href="/services">技能中心</a>
+      <a href="/imports">技能导入</a>
+      <a href="/models">模型配置</a>
+      <a href="/agents" data-admin-only>智能助理</a>
+      <a href="/knowledge" data-admin-only>资料管理</a>
+      <a href="/trace" data-admin-only>Trace</a>
+    </nav>
+    <div class="service-state"><span id="service-dot" class="status-dot"></span><span id="service-label">正在连接服务</span></div>
+  </header>
+
+  <main class="page audit-page-shell">
+    <section class="audit-page-heading">
+      <div>
+        <p class="eyebrow">能力管理</p>
+        <h1>操作记录</h1>
+        <p>查看能力的添加、权限、验证、调用与启停记录。</p>
+      </div>
+      <a class="button ghost audit-back-link" href="/services"><span aria-hidden="true">←</span> 返回技能中心</a>
+    </section>
+
+    <section class="panel audit-controls">
+      <div class="audit-controls-topline">
+        <div><h2>全部记录</h2><p id="audit-result-count">正在读取</p></div>
+        <button id="audit-refresh" class="button ghost compact-button" type="button"><span aria-hidden="true">↻</span> 刷新</button>
+      </div>
+      <label class="audit-search"><span aria-hidden="true">⌕</span><input id="audit-search" type="search" placeholder="搜索能力或操作" autocomplete="off"></label>
+      <nav class="audit-filter-row" aria-label="记录类型">
+        <button class="filter active" type="button" data-audit-filter="all">全部</button>
+        <button class="filter" type="button" data-audit-filter="change">能力变更</button>
+        <button class="filter" type="button" data-audit-filter="validation">验证</button>
+        <button class="filter" type="button" data-audit-filter="permission">权限</button>
+        <button class="filter" type="button" data-audit-filter="invocation">调用</button>
+      </nav>
+    </section>
+
+    <section class="panel audit-record-panel" aria-live="polite">
+      <div id="audit-record-list" class="audit-record-list"><p class="list-message">正在读取操作记录</p></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

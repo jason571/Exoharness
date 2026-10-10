@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>用户管理 · ExoHarness</title>
+  <script src="/assets/management-theme.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/management-theme.css">
+  <link rel="stylesheet" href="/assets/management.css">
+  <script src="/assets/auth.js" defer></script>
+  <script src="/assets/users.js" defer></script>
+<script src="/assets/i18n.js" defer></script></head>
+<body class="users-page">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="/overview" aria-label="ExoHarness 运行总览">
+      <span class="brand-mark" aria-hidden="true">EH</span>
+      <span><strong>ExoHarness</strong><small>管理控制台</small></span>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a href="/services">技能中心</a>
+      <a href="/imports">技能导入</a>
+      <a href="/models">模型配置</a>
+      <a href="/agents" data-admin-only>智能助理</a>
+      <a href="/knowledge" data-admin-only>资料管理</a>
+      <a class="active" href="/users" data-admin-only>用户管理</a>
+      <a href="/trace" data-admin-only>Trace</a>
+      <a href="/security" data-admin-only>系统设置</a>
+    </nav>
+  </header>
+
+  <main class="page management-page users-management-page">
+    <section class="management-heading users-heading">
+      <div><p class="eyebrow">ACCESS / USERS</p><h1>用户管理</h1><p>查看对话记录，设置默认助理、能力权限和用户安装的能力。</p></div>
+      <form id="users-filter" class="management-controls"><label>搜索用户<input id="users-search" type="search" maxlength="128" placeholder="昵称、用户名或邮箱" autocomplete="off"></label><button id="users-refresh" class="button secondary" type="submit">刷新</button></form>
+    </section>
+    <div class="users-notice" role="note"><strong>变更范围</strong><span>修改助理只影响新会话；关闭能力使用权限会阻止该用户新的对应调用。用户安装的能力默认私有，仅不含凭据、不可执行的通用 Skill 可由管理员按用户分享；分享不越过助理授权。完整执行记录可进入 Trace。</span></div>
+    <p id="users-status" class="muted" role="status">正在读取用户…</p><p id="users-error" class="management-error" role="alert" hidden></p>
+    <section class="users-summary" aria-label="用户统计"><article class="metric-tile"><span>注册用户</span><strong id="users-count">—</strong></article><article class="metric-tile"><span>有执行记录</span><strong id="users-active-count">—</strong></article><article class="metric-tile"><span>对话总数</span><strong id="users-conversation-count">—</strong></article></section>
+    <section class="users-layout">
+      <aside class="panel users-list-panel">
+        <div class="users-list-heading"><div><h2>注册用户</h2><p>选择用户查看对话与助理配置</p></div><span id="users-list-count" class="count-badge">—</span></div>
+        <div id="users-list" class="users-list" aria-live="polite"></div>
+      </aside>
+      <section id="user-detail" class="panel user-detail-panel" aria-live="polite">
+        <div class="users-detail-empty"><span aria-hidden="true">◎</span><h2>选择一个用户</h2><p>用户详情、默认助理和执行对话会显示在这里。</p></div>
+      </section>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

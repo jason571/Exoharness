@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>技能导入 · ExoHarness</title>
+  <script src="/assets/management-theme.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/management-theme.css">
+  <script src="/assets/auth.js" defer></script>
+  <script src="/assets/imports.js" defer></script>
+<script src="/assets/i18n.js" defer></script></head>
+<body class="import-page">
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="/services" aria-label="ExoHarness 技能中心">
+      <span class="brand-mark" aria-hidden="true">EH</span>
+      <span><strong>ExoHarness</strong><small>Capability Console</small></span>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a href="/services">技能中心</a>
+      <a class="active" href="/imports">技能导入</a>
+      <a href="/models">模型配置</a>
+      <a href="/agents" data-admin-only>智能助理</a>
+      <a href="/knowledge" data-admin-only>资料管理</a>
+      <a href="/trace" data-admin-only>Trace</a>
+    </nav>
+    <div class="service-state"><span id="service-dot" class="status-dot"></span><span id="service-label">正在连接服务</span></div>
+  </header>
+
+  <main class="page import-page-shell">
+    <section class="import-hero">
+      <div>
+        <p class="eyebrow">CAPABILITY IMPORT</p>
+        <h1>技能导入</h1>
+        <p class="hero-copy">在这里接入 Skill、MCP 和本地工具；导入后的准备与检查结果会显示在下方。</p>
+      </div>
+      <div class="import-safety-note">
+        <span class="status-dot online"></span>
+        <div><strong>先检查，再启用</strong><small>准备过程不会执行生成、发送消息等业务操作</small></div>
+      </div>
+    </section>
+
+    <label class="import-boundary-note"><input id="auto-prepare" type="checkbox" checked>
+      自动准备并启用：允许标准连接和启动权限，安装声明的受支持依赖并检查；不覆盖已拒绝权限，不执行 Skill 安装脚本。取消勾选则仅登记。
+    </label>
+
+    <nav class="import-kind-tabs" role="tablist" aria-label="能力类型">
+      <button class="import-kind-tab active" type="button" role="tab" aria-selected="true" aria-controls="import-panel-mcp" data-import-kind="mcp">
+        <span class="import-kind-icon">MC</span><span><strong>连接 MCP</strong><small>接入外部服务与工具</small></span>
+      </button>
+      <button class="import-kind-tab" type="button" role="tab" aria-selected="false" aria-controls="import-panel-skill" data-import-kind="skill">
+        <span class="import-kind-icon">SK</span><span><strong>添加 Skill</strong><small>加入工作方法与配套资料</small></span>
+      </button>
+      <button class="import-kind-tab" type="button" role="tab" aria-selected="false" aria-controls="import-panel-tool" data-import-kind="tool">
+        <span class="import-kind-icon">TL</span><span><strong>添加本地工具</strong><small>接入脚本或代码包</small></span>
+      </button>
+    </nav>
+
+    <section class="import-kind-panels">
+      <article id="import-panel-mcp" class="panel import-kind-panel" role="tabpanel" data-import-panel="mcp">
+        <div class="import-panel-heading">
+          <div><p class="section-kicker">MCP SERVICE</p><h2>连接 MCP 服务</h2><p>已有配置可以直接粘贴；也可以手动填写服务地址，或选择本地 MCP 项目。</p></div>
+          <span class="safe-state">默认关闭</span>
+        </div>
+
+        <nav class="mcp-method-tabs" role="tablist" aria-label="MCP 添加方式">
+          <button class="mcp-method-tab active" type="button" role="tab" aria-selected="true" aria-controls="mcp-method-json" data-mcp-method="json"><strong>粘贴 JSON</strong><span>推荐</span></button>
+          <button class="mcp-method-tab" type="button" role="tab" aria-selected="false" aria-controls="mcp-method-http" data-mcp-method="http"><strong>填写服务地址</strong></button>
+          <button class="mcp-method-tab" type="button" role="tab" aria-selected="false" aria-controls="mcp-method-stdio" data-mcp-method="stdio"><strong>选择本地项目</strong></button>
+        </nav>
+
+        <section id="mcp-method-json" class="mcp-method-panel" role="tabpanel" data-mcp-method-panel="json">
+          <form id="mcp-upload-form" class="mcp-json-form">
+            <div class="mcp-json-editor">
+              <div class="field-heading"><label for="mcp-json-input">MCP 配置 JSON</label><span>支持一次添加多个服务</span></div>
+              <textarea id="mcp-json-input" rows="15" spellcheck="false" aria-describedby="mcp-json-status"></textarea>
+              <div class="json-editor-actions">
+                <button id="mcp-paste-button" class="button ghost compact-button" type="button">从剪贴板粘贴</button>
+                <label class="button ghost compact-button json-file-button">载入 JSON 文件<input id="mcp-file" type="file" accept="application/json,.json"></label>
+                <button id="mcp-example-button" class="button ghost compact-button" type="button">填入示例</button>
+                <button id="mcp-format-button" class="button ghost compact-button" type="button">格式化</button>
+                <span id="mcp-file-label" class="json-file-name">尚未选择文件</span>
+              </div>
+            </div>
+            <aside class="mcp-json-guide">
+              <div id="mcp-json-status" class="json-validation-status waiting" role="status"><span aria-hidden="true"></span><div><strong>等待粘贴配置</strong><small>粘贴后会立即检查 JSON 格式和服务数量</small></div></div>
+              <div class="json-guide-copy">
+                <strong>常见配置都可以直接使用</strong>
+                <ul>
+                  <li><code>type + url</code>：连接 HTTP MCP</li>
+                  <li><code>headers</code>：认证值会自动保存到本机密钥保险箱</li>
+                  <li><code>command + args</code>：添加本地 MCP</li>
+                  <li><code>mcpServers</code> 中可包含多个服务</li>
+                </ul>
+              </div>
+              <p class="import-boundary-note">可以直接粘贴现有配置。Authorization、Token 等敏感值会在登记前从配置中剥离，单独保存且不再回显。</p>
+              <button id="mcp-json-submit" class="button primary import-primary-action" type="submit" disabled>添加 MCP 服务</button>
+            </aside>
+          </form>
+        </section>
+
+        <section id="mcp-method-http" class="mcp-method-panel hidden" role="tabpanel" data-mcp-method-panel="http">
+          <div class="method-intro"><strong>填写正在运行的 MCP 地址</strong><span>适合已经提供 Streamable HTTP 地址的服务。</span></div>
+          <form id="mcp-http-form" class="stack-form focused-import-form">
+            <div class="form-row">
+              <label>服务名称<input id="mcp-http-name" required placeholder="company-search"></label>
+              <label>版本<input id="mcp-http-version" value="0.1.0" required></label>
+            </div>
+            <label>这个服务能做什么？<input id="mcp-http-description" required placeholder="例如：查询公司内部知识库"></label>
+            <div class="form-row">
+              <label>工具名称前缀<input id="mcp-http-namespace" required placeholder="company"></label>
+              <label>MCP 服务地址<input id="mcp-http-url" type="url" required placeholder="https://mcp.example.com/mcp"></label>
+            </div>
+            <label>Bearer Token（可选）<input id="mcp-http-secret" type="password" autocomplete="new-password" placeholder="输入后安全保存，不会再次显示"><small>Token 会单独保存到本机密钥保险箱，不进入 MCP 配置或列表 API</small></label>
+            <button class="button primary import-primary-action" type="submit">添加 HTTP MCP</button>
+          </form>
+        </section>
+
+        <section id="mcp-method-stdio" class="mcp-method-panel hidden" role="tabpanel" data-mcp-method-panel="stdio">
+          <div class="method-intro"><strong>选择本地 MCP 项目</strong><span>可以选择启动文件，也可以添加完整目录或 ZIP 包。</span></div>
+          <form id="mcp-package-form" class="stack-form focused-import-form">
+            <div class="local-source-grid">
+              <label class="file-picker">选择启动文件<input id="mcp-package-entry-file" type="file" accept=".py,.js,.mjs,.sh"><span id="mcp-package-entry-file-label">未选择文件</span></label>
+              <label class="file-picker">选择项目 ZIP<input id="mcp-package-zip" type="file" accept="application/zip,.zip"><span id="mcp-package-zip-label">未选择 ZIP</span></label>
+              <label class="file-picker">选择项目文件夹<input id="mcp-package-folder" type="file" webkitdirectory multiple><span id="mcp-package-folder-label">未选择目录</span></label>
+            </div>
+            <p class="form-helper">三种方式任选一种。ExoHarness 会自动识别常见的 Python、Node.js 或 Shell 启动方式。</p>
+            <div class="form-row">
+              <label>服务名称<input id="mcp-package-name" required placeholder="local-search"></label>
+              <label>版本<input id="mcp-package-version" value="0.1.0" required></label>
+            </div>
+            <label>这个服务能做什么？<input id="mcp-package-description" required placeholder="例如：读取本地项目数据"></label>
+            <label>工具名称前缀<input id="mcp-package-namespace" required placeholder="local"></label>
+            <label class="confirmation"><input id="mcp-package-network" type="checkbox"><span>这个 MCP 需要访问网络</span></label>
+            <div id="mcp-package-files" class="selected-files">等待选择启动文件、ZIP 或目录</div>
+            <button class="button primary import-primary-action" type="submit">添加本地 MCP</button>
+          </form>
+        </section>
+      </article>
+
+      <article id="import-panel-skill" class="panel import-kind-panel hidden" role="tabpanel" data-import-panel="skill">
+        <div class="import-panel-heading">
+          <div><p class="section-kicker">SKILL PACKAGE</p><h2>添加 Skill</h2><p>添加一套工作说明和配套资料，Agent 会在合适的任务中按需使用。</p></div>
+          <span class="safe-state">默认关闭</span>
+        </div>
+        <form id="skill-upload-form" class="stack-form focused-import-form">
+          <div class="local-source-grid">
+            <label class="file-picker">选择 Skill ZIP<input id="skill-zip" type="file" accept="application/zip,.zip"><span id="skill-zip-label">未选择 ZIP</span></label>
+            <label class="file-picker">选择单个 Skill Markdown<input id="skill-entry-file" type="file" accept="text/markdown,.md"><span id="skill-entry-label">未选择文件</span></label>
+            <label class="file-picker">选择 Skill 文件夹<input id="skill-folder" type="file" webkitdirectory multiple><span id="skill-folder-label">未选择文件夹</span></label>
+          </div>
+          <p class="form-helper">三种方式任选一种。单个 .md 文件会自动作为 Skill 入口；包含参考资料或模板时，目录或 ZIP 的根目录需有 SKILL.md。</p>
+          <div class="form-row">
+            <label>版本<input id="skill-version" type="text" value="0.1.0" required></label>
+            <label>需要的权限（可选）<input id="skill-permissions" type="text" placeholder="例如：filesystem.read"><small>多个权限使用逗号分隔</small></label>
+          </div>
+          <div id="skill-file-list" class="selected-files">等待选择 Skill 文件</div>
+          <section id="skill-update-preview" class="skill-update-preview hidden" aria-live="polite">
+            <div class="skill-update-preview-heading">
+              <div><span>更新检查</span><strong id="skill-preview-title">发现已有 Skill</strong></div>
+              <small id="skill-preview-version"></small>
+            </div>
+            <p id="skill-preview-summary"></p>
+            <ul id="skill-preview-changes"></ul>
+            <p class="skill-preview-note">确认后会创建新的不可变版本；当前启用状态和已有权限决定会保留。</p>
+          </section>
+          <button id="skill-submit" class="button primary import-primary-action" type="submit">检查并添加 Skill</button>
+        </form>
+      </article>
+
+      <article id="import-panel-tool" class="panel import-kind-panel tool-upload-panel hidden" role="tabpanel" data-import-panel="tool">
+        <div class="import-panel-heading">
+          <div><p class="section-kicker">LOCAL TOOL</p><h2>添加本地工具</h2><p>把一个脚本或代码包添加为 Agent 可调用的工具。添加完成后需要先验证再启用。</p></div>
+          <span class="safe-state">默认关闭</span>
+        </div>
+        <form id="tool-upload-form" class="stack-form focused-import-form">
+          <div class="local-source-grid full-row">
+            <label class="file-picker">选择工具脚本<input id="tool-file" type="file" accept=".py,.js,.mjs,.sh,text/x-python,text/javascript"><span id="tool-file-label">未选择文件</span></label>
+            <label class="file-picker">选择代码包 ZIP<input id="tool-package-zip" type="file" accept="application/zip,.zip"><span id="tool-package-zip-label">未选择 ZIP</span></label>
+            <label class="file-picker">选择代码包文件夹<input id="tool-package-folder" type="file" webkitdirectory multiple><span id="tool-package-folder-label">未选择目录</span></label>
+          </div>
+          <p class="form-helper full-row">三种方式任选一种。支持 Python、Node.js 和 Shell；添加过程中不会运行代码。</p>
+          <div class="form-row">
+            <label>工具组名称<input id="tool-capability-name" type="text" placeholder="my-tools" required></label>
+            <label>版本<input id="tool-version" type="text" value="0.1.0" required></label>
+          </div>
+          <label>工具组说明<input id="tool-capability-description" type="text" placeholder="例如：处理项目中的图片文件" required></label>
+          <div class="form-row">
+            <label>工具名称<input id="tool-name" type="text" placeholder="run" required></label>
+            <label>工具说明<input id="tool-description" type="text" placeholder="例如：压缩指定图片" required></label>
+          </div>
+          <label>输入参数格式<textarea id="tool-input-schema" rows="7" spellcheck="false">{
+  "type": "object"
+}</textarea><small>使用 JSON Schema 描述 Agent 调用工具时可以填写的参数</small></label>
+          <div class="form-row package-runtime-fields">
+            <label>代码包运行方式<select id="tool-package-runtime"><option value="python_script">Python Script</option><option value="python_module">Python Module</option><option value="node">Node.js</option><option value="shell">Shell</option></select></label>
+            <label>解释器或程序<input id="tool-package-executable" value="python3"></label>
+          </div>
+          <label class="package-runtime-fields">入口模块或文件<input id="tool-package-entrypoint" placeholder="src/main.py"></label>
+          <pre id="tool-preview" class="file-preview">选择文件后显示内容预览</pre>
+          <button class="button primary import-primary-action" type="submit">添加本地工具</button>
+        </form>
+      </article>
+    </section>
+
+    <section id="import-result-panel" class="panel import-result-panel hidden">
+      <div class="panel-header">
+        <div><p class="section-kicker">IMPORTED</p><h2>导入完成</h2></div>
+        <a class="button primary" href="/services">前往技能中心</a>
+      </div>
+      <div id="import-result-list" class="import-result-list"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

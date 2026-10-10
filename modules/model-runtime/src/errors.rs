@@ -1,0 +1,41 @@
+use crate::Usage;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ErrorKind {
+    Configuration,
+    Unsupported,
+    InvalidRequest,
+    Busy,
+    Cancelled,
+    Timeout,
+    Transport,
+    Http,
+    ProviderRejected,
+    InvalidResponse,
+    Incomplete,
+    OutputLimit,
+    Empty,
+}
+/// Safe classification only: never provider bodies, URLs, keys or reqwest errors.
+#[derive(Debug, thiserror::Error)]
+#[error("model request failed: {kind:?}")]
+pub struct ModelError {
+    pub kind: ErrorKind,
+    pub status: Option<u16>,
+    pub retry_after_seconds: Option<u64>,
+    pub usage: Option<Usage>,
+}
+impl ModelError {
+    pub(crate) fn new(kind: ErrorKind) -> Self {
+        Self {
+            kind,
+            status: None,
+            retry_after_seconds: None,
+            usage: None,
+        }
+    }
+    pub(crate) fn with_usage(mut self, usage: Usage) -> Self {
+        self.usage = Some(usage);
+        self
+    }
+}
+pub(crate) type Result<T> = std::result::Result<T, ModelError>;

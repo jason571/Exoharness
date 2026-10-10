@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>模型配置 · ExoHarness</title>
+  <script src="/assets/management-theme.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/management-theme.css">
+  <script src="/assets/auth.js" defer></script>
+  <script src="/assets/models.js" defer></script>
+<script src="/assets/i18n.js" defer></script></head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="/services" aria-label="ExoHarness 技能中心">
+      <span class="brand-mark" aria-hidden="true">EH</span>
+      <span><strong>ExoHarness</strong><small>Capability Console</small></span>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a href="/services">技能中心</a>
+      <a href="/imports">技能导入</a>
+      <a class="active" href="/models">模型配置</a>
+      <a href="/agents" data-admin-only>智能助理</a>
+      <a href="/knowledge" data-admin-only>资料管理</a>
+      <a href="/trace" data-admin-only>Trace</a>
+    </nav>
+    <div class="service-state"><span id="service-dot" class="status-dot"></span><span id="service-label">正在连接服务</span></div>
+  </header>
+
+  <main class="page model-settings-page">
+    <section class="model-page-heading">
+      <div><p class="eyebrow">模型设置</p><h1>模型配置</h1><p>按能力类型配置模型。启用后，LLM 负责对话推理，TTS 等生成模型可由用户端按需调用。</p></div>
+      <div class="phase-card"><span>当前启用配置</span><strong id="default-model-summary">LLM — · TTS —</strong><small>用于正式用户端的对话与任务</small></div>
+    </section>
+
+    <section class="model-management-grid">
+      <article class="panel unified-model-config">
+        <div class="panel-header"><div><h2 id="model-form-title">添加模型配置</h2><p class="panel-copy">每种类型可以保存多个配置，并独立启用一个；不同类型互不影响。</p></div></div>
+        <form id="model-config-form" class="stack-form">
+          <label>接口配置名称<input id="provider-name" required maxlength="128" list="provider-names" value="default-api" placeholder="例如 aliyun-tts-http"><small>不同 TTS 接口使用不同名称，保存新接口不会覆盖已配置的服务和密钥。</small></label>
+          <datalist id="provider-names"></datalist>
+
+          <section class="config-form-section">
+            <div class="config-section-heading"><span>01</span><div><h3>模型类型</h3><p>先选择能力类型，页面只显示该类型需要的配置。</p></div></div>
+            <label>模型类型<select id="model-type" required><option value="llm">LLM · 大语言模型</option><option value="tts">TTS · 文字转语音</option><option value="asr">ASR · 语音转文字</option></select></label>
+          </section>
+
+          <section class="config-form-section">
+            <div class="config-section-heading"><span>02</span><div><h3>接口连接</h3><p id="connection-section-copy">连接 LLM 服务所需的信息。</p></div></div>
+            <div class="form-row">
+              <label>API 协议<select id="provider-api" required><option value="openai_compatible" data-model-type="llm">OpenAI 兼容接口</option><option value="anthropic" data-model-type="llm">Anthropic 接口</option><option value="volcengine_tts_sse" data-model-type="tts">火山引擎 TTS · SSE v3</option><option value="aliyun_qwen_tts_http" data-model-type="tts">阿里云千问 TTS · 非实时 HTTP</option><option value="aliyun_qwen_audio_tts_websocket" data-model-type="tts">阿里云 Qwen-Audio TTS · 实时 WebSocket</option><option value="openai_transcription" data-model-type="asr">OpenAI 兼容 · 音频转录</option></select></label>
+              <label>API Key<input id="provider-api-key" type="password" required autocomplete="new-password" placeholder="请输入 API Key"><small id="provider-api-key-help">保存后不会回显明文</small></label>
+            </div>
+            <label>API 地址<input id="provider-base-url" required value="https://api.openai.com/v1"><small id="provider-base-url-help">例如 https://api.openai.com/v1</small></label>
+            <label id="provider-output-token-field">输出长度控制<select id="provider-output-token-parameter"><option value="">保持现有协议</option><option value="omit">不发送输出上限（由模型服务决定）</option><option value="max_completion_tokens">max_completion_tokens</option><option value="max_tokens">max_tokens</option></select><small>不发送上限时，模型服务自身的输出限制仍然有效。仅适用于支持省略该参数的兼容接口。</small></label>
+          </section>
+
+          <section class="config-form-section">
+            <div class="config-section-heading"><span>03</span><div><h3>模型信息</h3><p id="model-section-copy">配置名称用于区分保存的配置；模型名称会直接发送给 API 服务。</p></div></div>
+            <div class="form-row">
+              <label>配置名称<input id="model-name" required maxlength="128" placeholder="例如：主力模型"><small>用于区分多套配置，支持中文</small></label>
+              <label><span id="model-id-label">模型名称</span><input id="model-display-name" required placeholder="例如：gpt-5.1"><small id="model-id-help">填写模型服务提供的模型名称</small></label>
+            </div>
+            <div id="tts-model-fields" class="type-specific-fields" hidden>
+              <div class="form-row">
+                <label>Profile ID<input id="tts-profile-id" maxlength="128" placeholder="例如：persona-nova"><small>ExoHarness 中稳定的声音角色标识</small></label>
+                <label><span id="tts-speaker-label">音色</span><input id="tts-speaker" maxlength="256" placeholder="例如：Cherry"><small id="tts-speaker-help">服务商提供的音色标识</small></label>
+              </div>
+              <div id="tts-language-field" class="form-row" hidden>
+                <label>语言<select id="tts-language-type"><option value="Auto">Auto · 自动识别</option><option value="Chinese">Chinese · 中文</option><option value="English">English · 英文</option><option value="German">German · 德文</option><option value="Italian">Italian · 意大利文</option><option value="Portuguese">Portuguese · 葡萄牙文</option><option value="Spanish">Spanish · 西班牙文</option><option value="Japanese">Japanese · 日文</option><option value="Korean">Korean · 韩文</option><option value="French">French · 法文</option><option value="Russian">Russian · 俄文</option></select><small>对应请求中的 language_type；单一语种建议明确选择</small></label>
+              </div>
+              <div id="tts-stream-fields" class="form-row" hidden>
+                <label>音频格式<select id="tts-audio-format"><option value="mp3">MP3</option><option value="wav">WAV</option><option value="pcm">PCM（保存时封装为 WAV）</option></select></label>
+                <label>采样率<input id="tts-sample-rate" type="number" min="8000" max="96000" step="1" value="22050"><small>实时 WebSocket 默认 22050 Hz</small></label>
+              </div>
+            </div>
+          </section>
+
+          <details id="llm-advanced-fields" class="config-form-section advanced-config-section">
+            <summary class="advanced-config-summary"><div class="config-section-heading"><span>04</span><div><h3>LLM 高级配置</h3><p>已提供常用默认值，点击展开后可以修改。</p></div></div></summary>
+            <div class="advanced-config-content">
+              <div class="form-row three-column-row">
+                <label>Temperature<input id="model-temperature" type="number" min="0" max="2" step="0.01" value="0.7" required><small>默认 0.7；Anthropic 最大为 1</small></label>
+                <label>Top P<input id="model-top-p" type="number" min="0.01" max="1" step="0.01" value="0.9" required><small>默认 0.9，范围 0.01–1</small></label>
+                <label>Top K<input id="model-top-k" type="number" min="1" max="1000" step="1" value="40" required><small>默认 40；OpenAI 官方接口不发送此参数</small></label>
+              </div>
+              <div class="form-row three-column-row">
+                <label>上下文窗口<input id="model-context" type="number" min="1" value="128000" required></label>
+                <label>最大输出 Token<input id="model-max-tokens" type="number" min="1" value="16384" required></label>
+                <label>思考模式<select id="model-thinking"><option value="none">关闭思考</option><option value="openai">OpenAI</option><option value="anthropic">Anthropic</option><option value="qwen">Qwen</option></select></label>
+              </div>
+            </div>
+          </details>
+
+          <label class="confirmation model-enable-control"><input id="model-enabled" type="checkbox"><span id="model-enabled-copy">启用这个 LLM；保存后自动停用其他 LLM</span></label>
+          <button class="button primary save-configuration" type="submit">保存配置</button>
+        </form>
+      </article>
+
+      <aside class="panel configured-models-panel">
+        <div class="panel-header"><div><h2>模型列表</h2><p class="panel-copy">LLM、TTS 与 ASR 分组显示；已启用模型可在用户端使用，点击配置载入左侧修改。</p></div><span id="model-count" class="count-badge">0 个模型</span></div>
+        <button id="new-model" class="button secondary new-model-button" type="button">＋ 添加新模型</button>
+        <div id="model-list" class="model-list"></div>
+      </aside>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

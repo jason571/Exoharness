@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>系统设置 · ExoHarness</title>
+  <script src="/assets/management-theme.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/management-theme.css">
+  <script src="/assets/auth.js" defer></script>
+  <script src="/assets/security.js" defer></script>
+<script src="/assets/i18n.js" defer></script></head>
+<body class="security-page">
+  <header class="topbar">
+    <a class="brand" href="/services"><span class="brand-mark">EH</span><span><strong>ExoHarness</strong><small>Capability Console</small></span></a>
+    <nav class="main-nav"><a href="/services">技能中心</a><a href="/imports">技能导入</a><a href="/models">模型配置</a><a href="/agents" data-admin-only>智能助理</a><a href="/knowledge" data-admin-only>资料管理</a><a href="/trace" data-admin-only>Trace</a></nav>
+  </header>
+  <main class="page security-shell">
+    <section class="model-page-heading"><div><p class="eyebrow">SYSTEM SETTINGS</p><h1>系统设置</h1><p>管理运行调度、共享资源、登录密码与注册通知。</p></div></section>
+    <section class="security-grid">
+      <form id="password-update-form" class="panel stack-form password-form">
+        <div class="password-form-heading"><h2>修改登录密码</h2><p id="password-role-description">管理员拥有全部配置与管理权限。</p></div>
+        <div class="password-form-fields">
+          <label>选择用户<select id="password-role" name="role"><option value="admin">管理员</option><option value="chat">只读用户</option></select></label>
+          <label>当前管理密码<input name="current_password" type="password" autocomplete="current-password" required></label>
+          <label>新密码<input name="new_password" type="password" autocomplete="new-password" minlength="8" maxlength="256" required></label>
+          <label>再次输入新密码<input name="confirmation" type="password" autocomplete="new-password" minlength="8" maxlength="256" required></label>
+        </div>
+        <div class="password-form-actions"><span>更新后，该用户类型已有的登录会话会立即退出。</span><button id="password-update-button" class="button primary" type="submit">更新管理员密码</button></div>
+      </form>
+    </section>
+    <section class="panel scheduler-panel">
+      <div class="scheduler-heading">
+        <div><p class="eyebrow">RUN SCHEDULER</p><h2>运行与资源调度</h2><p>同一会话始终按顺序执行；不同会话可在账号与全局上限内并行。共享资源池可让多个 MCP 共同竞争同一组设备。</p></div>
+        <span id="scheduler-state" class="scheduler-state">正在读取配置</span>
+      </div>
+      <form id="scheduler-form" class="stack-form scheduler-form">
+        <div class="scheduler-limit-grid">
+          <label class="scheduler-limit-card"><span>单个用户活跃 Run</span><input id="scheduler-user-limit" type="number" min="1" max="128" required><small>跨不同会话并行；同一会话不并行。默认 2。</small></label>
+          <label class="scheduler-limit-card"><span>全局 Agent 并发</span><input id="scheduler-global-limit" type="number" min="1" max="1024" required><small>所有用户与管理端任务共享。默认 1000。</small></label>
+        </div>
+        <div class="scheduler-section-heading"><div><h3>共享资源池</h3><p>例如多项 MCP 共用同一块 GPU 时，将它们指向同一个池；池的并发设为设备可安全承载的任务数。</p></div><button id="add-resource-pool" class="button secondary compact" type="button">添加资源池</button></div>
+        <div id="resource-pool-list" class="resource-pool-list"></div>
+        <div class="scheduler-section-heading mcp-assignment-heading"><div><h3>MCP 资源声明</h3><p>未分配资源池的 MCP 继续使用自身 Manifest 中的并发限制。</p></div></div>
+        <div id="mcp-resource-list" class="mcp-resource-list"></div>
+        <div class="scheduler-actions"><span id="scheduler-updated" class="scheduler-updated"></span><button id="scheduler-save" class="button primary" type="submit">保存调度配置</button></div>
+      </form>
+    </section>
+    <section class="panel scheduler-panel">
+      <div class="scheduler-heading"><div><h2>生成文件与下载</h2><p>视频、音频等生成文件由 ExoHarness 保存，播放与下载使用同一有效期；无需依赖原服务的临时链接。文件仍仅向有权查看该对话的用户开放。</p></div></div>
+      <form id="artifact-configuration-form" class="stack-form scheduler-form">
+        <label>访问有效期<select id="artifact-access-mode"><option value="permanent">永久有效（默认）</option><option value="limited">指定天数</option></select></label>
+        <label id="artifact-access-days-field" hidden>有效天数<input id="artifact-access-days" type="number" min="1" max="36500" step="1" value="30"></label>
+        <p>设置对已保存和新生成的文件立即生效，从文件登记时间计算。到期只限制访问，不删除文件；改回永久有效后可继续访问。删除对话时，其生成文件也会删除。</p>
+        <div class="scheduler-actions"><span id="artifact-configuration-state" role="status">正在读取配置</span><button id="artifact-configuration-save" class="button primary" type="submit" disabled>保存文件配置</button></div>
+      </form>
+    </section>
+    <section class="panel registration-email-panel">
+      <div class="registration-email-heading">
+        <div><p class="eyebrow">REGISTRATION EMAIL</p><h2>注册邮件</h2><p>设置新用户收到的验证码邮件标题和正文。保存后，新发送的邮件会立即使用这里的内容。</p></div>
+        <span id="registration-mailer-status" class="registration-mailer-status">正在读取邮件服务</span>
+      </div>
+      <form id="registration-email-form" class="stack-form registration-email-form">
+        <label>邮件标题<input id="registration-email-subject" name="subject" type="text" maxlength="200" required></label>
+        <label>邮件正文<textarea id="registration-email-body" name="body" rows="8" maxlength="20480" required></textarea></label>
+        <div class="registration-template-help">
+          <span>点击插入可用内容</span>
+          <div id="registration-template-placeholders" class="registration-template-placeholders"></div>
+        </div>
+        <p class="registration-template-note"><code>{{code}}</code> 是必填的验证码位置；邮件按纯文本发送。</p>
+        <div class="registration-email-actions">
+          <span id="registration-email-updated" class="registration-email-updated"></span>
+          <button class="button primary" type="submit">保存邮件内容</button>
+        </div>
+      </form>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

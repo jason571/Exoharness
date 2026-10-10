@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>登录 · ExoHarness</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/login.js" defer></script>
+<script src="/assets/i18n.js" defer></script></head>
+<body class="login-page">
+  <main class="login-shell">
+    <div class="login-intro">
+      <p class="access-intro-kicker"><span></span> EXOHARNESS · CONTROL PLANE</p>
+      <h2>看见每一次执行，<br><em>掌控每一项能力。</em></h2>
+      <p>管理模型、能力与运行状态，让智能体在清晰的边界内可靠工作。</p>
+      <div class="login-intro-line" aria-hidden="true"><span>CONFIGURE</span><span>OBSERVE</span><span>CONTROL</span></div>
+    </div>
+    <section class="login-card">
+      <span class="brand-mark">EH</span>
+      <p class="eyebrow">SECURE CONSOLE</p>
+      <h1>登录 ExoHarness</h1>
+      <p>输入管理员密码或只读用户密码，系统会自动进入对应权限。</p>
+      <form id="login-form" class="stack-form">
+        <label>登录密码<input id="login-password" type="password" autocomplete="current-password" minlength="8" maxlength="256" required autofocus></label>
+        <button id="login-submit" class="button primary" type="submit">登录</button>
+      </form>
+      <p id="login-error" class="login-error hidden" role="alert"></p>
+      <p class="login-security-note">管理员可修改系统配置；只读用户可查看获授权的管理页面。正式聊天请使用用户端。</p>
+    </section>
+  </main>
+</body>
+</html>

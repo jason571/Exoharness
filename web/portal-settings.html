@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b0b0c">
+  <title>设置 · ExoHarness</title>
+  <script src="/assets/portal-theme.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/portal-auth.js" defer></script>
+  <script src="/assets/portal-settings.js" defer></script>
+<script src="/assets/i18n.js" defer></script></head>
+<body class="portal-page portal-settings-page settings-loading">
+  <header class="portal-settings-header"><a href="/chat">← 返回对话</a><strong id="settings-header-title"></strong></header>
+  <p class="portal-settings-loading-message" role="status">正在打开设置…</p>
+  <main class="portal-settings-shell">
+    <section class="portal-settings-intro"><p class="eyebrow">EXOHARNESS</p><h1 id="settings-title">设置</h1><p id="settings-description">了解当前版本与 ExoHarness。</p></section>
+    <p id="settings-error" class="login-error hidden" role="alert"></p>
+    <section class="portal-settings-card" data-settings-panel="about" hidden>
+      <h2>版本信息</h2><div class="portal-version-row"><span>ExoHarness</span><strong id="settings-version">正在读取…</strong></div>
+    </section>
+    <section class="portal-settings-card" data-settings-panel="about" hidden>
+      <h2>关于我们</h2><p class="portal-about-copy">ExoHarness 是连接智能助理、模型与工具的通用执行平台。通过对话组织任务，让能力调用、执行进度和生成结果清晰可见。</p>
+    </section>
+    <section class="portal-settings-card" data-settings-panel="about" hidden>
+      <div class="portal-settings-card-heading">
+        <div><h2>聊天宠物</h2><p>选择聊天中的陪伴角色，也可以随时关闭浮动宠物。</p></div>
+        <label class="portal-toggle" for="settings-pet-enabled">
+          <input id="settings-pet-enabled" type="checkbox">
+          <span class="portal-toggle-track" aria-hidden="true"><span></span></span>
+          <strong id="settings-pet-status">已启用</strong>
+        </label>
+      </div>
+      <div id="settings-pet-gallery" aria-label="选择聊天宠物"></div>
+    </section>
+    <section class="portal-settings-card" data-settings-panel="capabilities" hidden>
+      <h2>已安装的能力</h2>
+      <p>管理员授权后，可连接远程 MCP 地址、粘贴地址型 mcpServers JSON，或从公开 GitHub 项目安装本地 MCP。Skill 只从公开 GitHub 项目安装；用户安装 Skill/MCP 不接受上传文件。远程 MCP 所需的认证信息在对应能力下填写，页面只显示“已配置”。</p>
+      <p id="settings-capability-policy" class="portal-form-message" role="status"></p>
+      <form id="portal-mcp-install-form" class="stack-form" hidden>
+        <label>MCP 地址、mcpServers JSON 或 GitHub 项目
+          <textarea id="settings-mcp-source" rows="4" maxlength="1048576" spellcheck="false" placeholder="https://example.com/mcp" required></textarea>
+        </label>
+        <button id="settings-mcp-submit" class="button primary" type="submit">安装 MCP</button>
+      </form>
+      <p id="settings-mcp-message" class="portal-form-message hidden" role="status"></p>
+      <div id="settings-capability-list" class="portal-capability-list" aria-live="polite"></div>
+      <div id="settings-install-jobs" class="portal-capability-list" aria-live="polite"></div>
+    </section>
+    <section class="portal-settings-card" data-settings-panel="knowledge" hidden>
+      <div class="portal-settings-card-heading"><div><h2>添加与管理资料</h2><p>助理可在你的对话中检索并使用相关资料；资料只属于当前账号，不会自动分享给其他用户。</p></div></div>
+      <div class="knowledge-category-picker"><label>分类<select id="settings-document-category"><option value="">未分类</option></select></label><button id="settings-quick-category-toggle" class="button secondary" type="button">＋ 新建分类</button></div>
+      <form id="settings-quick-category-form" class="knowledge-quick-category" hidden><input id="settings-quick-category-name" type="text" maxlength="60" placeholder="输入分类名称" aria-label="新分类名称" required><button class="button secondary" type="submit">创建并选中</button><button id="settings-quick-category-cancel" class="button ghost" type="button">取消</button></form>
+      <label class="knowledge-file-picker"><input id="settings-file-import" type="file" multiple accept=".docx,.pdf,.txt,.md,.markdown,.csv,.json,.jsonl,.html,.htm"><span>选择文件导入</span></label>
+      <p class="portal-about-copy">支持 DOCX、文字型 PDF（最大 4 MB），以及 UTF-8 文字文件（最大 2 MB）。DOCX 表格完整保留，PDF 不确定的表格保留版面文字并提示；暂不支持扫描件或图片 OCR。提取文字最多 1 MB。</p>
+      <p id="settings-file-message" class="portal-form-message" role="status"></p>
+      <details id="settings-manual-editor" class="knowledge-optional"><summary>手动添加文字资料</summary><form id="portal-knowledge-form" class="stack-form">
+        <input id="settings-document-id" type="hidden">
+        <input id="settings-document-revision" type="hidden">
+        <label>资料名称<input id="settings-document-title" type="text" maxlength="160" required></label>
+        <label>资料内容<textarea id="settings-document-content" rows="7" maxlength="1048576" required></textarea></label>
+        <details class="knowledge-advanced"><summary>标签与来源（可选）</summary>
+          <label>标签（逗号分隔，最多 8 个）<input id="settings-document-tags" type="text" maxlength="270" placeholder="例如：品牌, 门店"></label>
+          <label>来源链接（可选，仅记录出处，不自动抓取）<input id="settings-document-source" type="url" maxlength="2048" placeholder="https://"></label>
+        </details>
+        <div class="portal-settings-actions"><button class="button primary" type="submit">保存资料</button><button id="settings-document-clear" class="button secondary" type="button">新建</button></div>
+      </form></details>
+      <details class="knowledge-admin-section knowledge-optional"><summary>管理分类（可选）</summary><form id="portal-category-form" class="stack-form">
+        <input id="settings-category-id" type="hidden"><input id="settings-category-revision" type="hidden">
+        <label>分类名称<input id="settings-category-name" type="text" maxlength="60" required></label>
+        <label>上级分类<select id="settings-category-parent"><option value="">顶层分类</option></select></label>
+        <div class="portal-settings-actions"><button class="button secondary" type="submit">保存分类</button><button id="settings-category-clear" class="button secondary" type="button">新建</button></div>
+      </form><div id="settings-category-list" class="portal-knowledge-list" aria-live="polite"></div></details>
+      <p id="settings-knowledge-message" class="portal-form-message hidden" role="status"></p>
+      <form id="portal-knowledge-search" class="stack-form portal-knowledge-search">
+        <label>检索我的资料<input id="settings-knowledge-query" type="search" maxlength="160" placeholder="输入要查找的词句"></label>
+        <button class="button secondary" type="submit">搜索</button>
+      </form>
+      <div id="settings-search-results" class="portal-knowledge-list" aria-live="polite"></div>
+      <div id="settings-document-list" class="portal-knowledge-list" aria-live="polite"></div>
+    </section>
+    <section class="portal-settings-card" data-settings-panel="memory" hidden>
+      <div class="portal-settings-card-heading"><div><h2>长期偏好</h2><p>仅保存你明确填写的长期偏好。可随时停用、修改或删除；不会自动从聊天中提取。</p></div></div>
+      <form id="portal-memory-form" class="stack-form">
+        <input id="settings-memory-id" type="hidden">
+        <input id="settings-memory-revision" type="hidden">
+        <label>希望记住的偏好<textarea id="settings-memory-content" rows="3" maxlength="500" required></textarea></label>
+        <label class="portal-checkbox"><input id="settings-memory-enabled" type="checkbox" checked> 启用这条记忆</label>
+        <div class="portal-settings-actions"><button class="button primary" type="submit">保存记忆</button><button id="settings-memory-clear" class="button secondary" type="button">新建</button></div>
+      </form>
+      <p id="settings-memory-message" class="portal-form-message hidden" role="status"></p>
+      <div id="settings-memory-list" class="portal-knowledge-list" aria-live="polite"></div>
+    </section>
+    <section class="portal-settings-card" data-settings-panel="profile" hidden>
+      <h2>个人资料</h2>
+      <dl class="portal-account-details"><div><dt>用户名</dt><dd id="settings-username">—</dd></div><div><dt>邮箱</dt><dd id="settings-email">—</dd></div></dl>
+      <form id="portal-profile-form" class="stack-form">
+        <label>显示名称<input id="settings-display-name" type="text" maxlength="64" required></label>
+        <button id="settings-profile-submit" class="button primary" type="submit">保存资料</button>
+      </form>
+      <p id="settings-profile-message" class="portal-form-message hidden" role="status"></p>
+    </section>
+    <section class="portal-settings-card" data-settings-panel="password" hidden>
+      <h2>修改密码</h2>
+      <p>修改后，所有设备上的登录会话都会退出。</p>
+      <form id="portal-password-form" class="stack-form">
+        <label>当前密码<input id="settings-current-password" type="password" autocomplete="current-password" required></label>
+        <label>新密码<input id="settings-new-password" type="password" autocomplete="new-password" minlength="8" maxlength="256" required></label>
+        <label>确认新密码<input id="settings-confirm-password" type="password" autocomplete="new-password" minlength="8" maxlength="256" required></label>
+        <button id="settings-password-submit" class="button secondary" type="submit">更新密码</button>
+      </form>
+      <p id="settings-password-message" class="portal-form-message hidden" role="status"></p>
+    </section>
+  </main>
+</body>
+</html>

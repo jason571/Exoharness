@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ExoHarness · 本机验证</title><link rel="stylesheet" href="/local-runtime.css"><script src="/local-runtime.js" defer></script></head>
+<body><main><header><div><span class="tag">本机基础设施验证 · %SURFACE%</span><h1>ExoHarness</h1><p>独立模块 · PostgreSQL 持久执行 · 可重放事件</p></div><span id="health" class="tag">连接检查中</span></header>
+<section class="notice"><strong>当前不是完整聊天产品。</strong> 这里验证真实的会话记录、状态变更、恢复和事件重放；模型、MCP、Skill 执行尚未接通，不会发起生成任务或消耗模型 Token。</section>
+<section id="login"><h2>访问验证</h2><form id="login-form"><label for="token">本机访问密钥</label><div class="row"><input id="token" type="password" autocomplete="off" placeholder="从本机启动脚本查看访问密钥" required><button>进入</button></div></form><p class="muted">使用 scripts/local-service.sh access 查看管理员和测试用户密钥。密钥只保存在本机权限为 0600 的文件，不写入浏览器存储。</p></section>
+<div id="workspace" hidden><div class="row toolbar"><span id="identity"></span><button id="new-session">新建验证会话</button><button id="refresh">刷新记录</button><button id="logout" class="secondary">退出</button></div>
+<div class="grid"><section><h2>持久会话</h2><div id="sessions"></div></section><section><h2 id="detail-title">选择会话</h2><form id="run-form" hidden><label for="input">状态机验证说明（不提交模型）</label><textarea id="input" rows="3" placeholder="例如：验证暂停后继续使用同一 Run" required></textarea><button>创建检查记录</button></form><div id="runs"></div></section></div>
+<section><h2>执行事件 · 真实数据库日志</h2><p class="muted">仅显示所选 Run 已提交的事件。浏览器刷新后可重新读取；断线恢复依靠持久事件游标，不重新执行任务。</p><pre id="events">尚未选择 Run</pre></section></div>
+<p id="message" role="status" aria-live="polite"></p><footer>9797 管理端 · 9798 用户端 · 未改动旧版 8787/8788</footer></main></body></html>

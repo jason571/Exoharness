@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>智能助理配置 · ExoHarness</title>
+  <script src="/assets/management-theme.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/management-theme.css">
+  <link rel="stylesheet" href="/assets/management.css">
+  <script src="/assets/auth.js" defer></script>
+  <script src="/assets/agents.js" defer></script>
+<script src="/assets/i18n.js" defer></script></head>
+<body class="agents-page">
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="/services" aria-label="ExoHarness 技能中心">
+      <span class="brand-mark" aria-hidden="true">EH</span>
+      <span><strong>ExoHarness</strong><small>Capability Console</small></span>
+    </a>
+    <nav class="main-nav" aria-label="主导航">
+      <a href="/services">技能中心</a>
+      <a href="/imports">技能导入</a>
+      <a href="/models">模型配置</a>
+      <a class="active" href="/agents" data-admin-only>智能助理</a>
+      <a href="/knowledge" data-admin-only>资料管理</a>
+      <a href="/trace" data-admin-only>Trace</a>
+    </nav>
+    <div class="service-state"><span id="service-dot" class="status-dot"></span><span id="service-label">正在连接服务</span></div>
+  </header>
+
+  <main class="page agent-settings-page">
+    <section class="model-page-heading">
+      <div><p class="eyebrow">智能助理</p><h1>为不同任务配置助理</h1><p>独立设置身份、可用能力和发布状态。能力选择由后端执行检查，不只是提示词。</p></div>
+      <div class="phase-card"><span>默认助理</span><strong id="default-agent-summary">尚未设置</strong><small>用于正式用户端的新对话</small></div>
+    </section>
+
+    <section class="agent-management-grid">
+      <article class="panel agent-profile-editor">
+        <div class="panel-header"><div><h2 id="agent-form-title">创建智能助理</h2><p class="panel-copy">身份提示词属于部署配置，不会写入 Harness 代码。</p></div></div>
+        <div class="management-tabs" role="tablist" aria-label="助理配置"><button type="button" role="tab" data-agent-tab="identity" aria-selected="true">基本信息</button><button type="button" role="tab" data-agent-tab="capabilities" aria-selected="false">能力范围</button><button type="button" role="tab" data-agent-tab="runtime" aria-selected="false">运行与发布</button></div>
+        <form id="agent-profile-form" class="stack-form" novalidate>
+          <div class="agent-tab-panel" data-agent-panel="identity" role="tabpanel">
+          <section class="config-form-section">
+            <div class="config-section-heading"><span>01</span><div><h3>形象与名称</h3><p>头像上传后按内容保存；旧会话仍保留创建时的助理快照。</p></div></div>
+            <div class="agent-identity-row">
+              <div class="agent-avatar-editor">
+                <span id="agent-avatar-preview" class="agent-avatar-preview" aria-label="头像预览">AI</span>
+                <label class="button secondary agent-avatar-upload"><span id="agent-avatar-upload-label">选择头像</span><input id="agent-avatar-file" type="file" accept="image/png,image/jpeg,image/webp"></label>
+                <button id="remove-agent-avatar" class="button ghost" type="button">移除图片</button>
+                <small>PNG、JPEG 或 WebP，最大 2 MiB</small>
+              </div>
+              <div class="agent-identity-fields">
+                <div class="form-row">
+                  <label>配置 ID<input id="agent-id" required maxlength="64" pattern="[a-z][a-z0-9-]{0,63}" placeholder="例如 xiaolan"><small>创建后不可修改</small></label>
+                  <label>显示名称<input id="agent-display-name" required maxlength="64" placeholder="例如 小澜"></label>
+                </div>
+                <label>文字头像<input id="agent-avatar-text" required maxlength="4" value="AI"><small>未选择图片或图片无法加载时显示</small></label>
+                <label>简短说明<textarea id="agent-description" required maxlength="512" rows="2" placeholder="用户在对话界面看到的助理说明"></textarea></label>
+              </div>
+            </div>
+          </section>
+
+          <section class="config-form-section">
+            <div class="config-section-heading"><span>02</span><div><h3>身份提示词</h3><p>定义助理是谁、服务对象、能力边界和表达方式；具体能力知识应放入 Skill。</p></div></div>
+            <label>System Prompt<textarea id="agent-system-prompt" class="agent-system-prompt" required maxlength="32768" rows="14" placeholder="输入智能助理的身份、职责、边界与交互风格"></textarea></label>
+            <label>默认对话模型<select id="agent-default-llm"><option value="">跟随全局默认</option></select></label>
+            <p class="agent-capability-help">用于理解与回答的 LLM。TTS、ASR、图片生成等执行权限请在“能力范围 → 模型能力”中单独配置。</p>
+          </section>
+          </div>
+          <div class="agent-tab-panel" data-agent-panel="capabilities" role="tabpanel" hidden>
+          <section class="config-form-section">
+            <div class="agent-capabilities-heading"><h3>能力授权范围</h3><p>按类别选择助理可以使用的能力，修改后保存生效。</p></div>
+            <section class="config-form-section agent-engineering-config">
+              <label class="confirmation"><input id="agent-engineering-enabled" type="checkbox"><span>启用软件工程</span></label>
+              <p class="panel-copy">允许此助理在用户私有项目中读写代码、运行构建和测试、查看差异并恢复检查点。不依赖特定 Skill；仅在任务需要时加载工具。</p>
+              <label>沙盒运行环境<select id="agent-engineering-runtime" disabled><option value="">请选择已启用的沙盒服务</option></select></label>
+              <p class="panel-copy">仅授权该服务声明的软件工程工具，不会自动授予其他 MCP 工具。执行始终在隔离容器中，不能访问宿主机、凭据或网络；额外依赖由管理员准备。</p>
+            </section>
+            <p id="agent-capability-summary" class="agent-capability-summary" role="status">正在读取能力…</p>
+            <div class="agent-capability-picker">
+            <div class="agent-scope-tabs" role="tablist" aria-label="能力类别">
+              <button id="agent-scope-skills" type="button" role="tab" data-capability-tab="skills" aria-controls="agent-scope-panel-skills" aria-selected="true"><span>Skill</span><small data-scope-count="skills">—</small></button>
+              <button id="agent-scope-mcp" type="button" role="tab" data-capability-tab="mcp" aria-controls="agent-scope-panel-mcp" aria-selected="false" tabindex="-1"><span>MCP</span><small data-scope-count="mcp">—</small></button>
+              <button id="agent-scope-tools" type="button" role="tab" data-capability-tab="tools" aria-controls="agent-scope-panel-tools" aria-selected="false" tabindex="-1"><span>Tool</span><small data-scope-count="tools">—</small></button>
+              <button id="agent-scope-models" type="button" role="tab" data-capability-tab="models" aria-controls="agent-scope-panel-models" aria-selected="false" tabindex="-1"><span>模型能力</span><small data-scope-count="models">—</small></button>
+            </div>
+            <div class="agent-capability-toolbar">
+              <label class="agent-capability-search"><span id="agent-search-label">搜索 Skill</span><input id="agent-capability-search" type="search" placeholder="搜索名称、描述或 ID" autocomplete="off"></label>
+              <button id="refresh-agent-capabilities" class="button secondary" type="button">刷新列表</button>
+              <label class="agent-selection-only"><input id="agent-selected-only" type="checkbox">只看已选</label>
+            </div>
+            <section id="agent-scope-panel-skills" class="agent-access-group" data-capability-panel="skills" role="tabpanel" aria-labelledby="agent-scope-skills">
+            <div class="agent-access-heading"><h4>技能说明 <span id="agent-skill-selection-count" data-selection-count="skills"></span></h4><select data-scope="skills" aria-label="Skill 范围"><option value="all">全部已启用</option><option value="selected">指定能力</option><option value="none">不使用</option></select></div>
+            <p class="agent-capability-help">按需读取已授权的技能；选择“指定能力”后，只有勾选的技能可供此助理使用。</p>
+            <div id="agent-skill-list" class="agent-skill-list" tabindex="0" role="region" aria-label="可关联技能列表"><p class="settings-empty">正在读取 Skill…</p></div>
+            </section>
+            <section id="agent-scope-panel-mcp" class="agent-access-group" data-capability-panel="mcp" role="tabpanel" aria-labelledby="agent-scope-mcp" hidden>
+            <div class="agent-access-heading"><h4>MCP 服务 <span data-selection-count="mcp"></span></h4><select data-scope="mcp" aria-label="MCP 范围"><option value="selected">指定服务</option><option value="all">允许全部已启用</option><option value="none">不使用</option></select></div>
+            <p class="agent-capability-help">MCP 默认不授权。勾选并保存后才允许调用；全局启用不代表已分配给助理。</p>
+            <div id="agent-mcp-list" class="agent-skill-list" tabindex="0" role="region" aria-label="MCP 选择"></div>
+            </section>
+            <section id="agent-scope-panel-tools" class="agent-access-group" data-capability-panel="tools" role="tabpanel" aria-labelledby="agent-scope-tools" hidden>
+            <div class="agent-access-heading"><h4>独立工具 <span data-selection-count="tools"></span></h4><select data-scope="tools" aria-label="Tool 范围"><option value="all">全部已启用</option><option value="selected">指定能力</option><option value="none">不使用</option></select></div>
+            <p class="agent-capability-help">选择此助理可调用的已登记工具。执行仍遵守系统权限与沙盒限制。</p>
+            <div id="agent-tools-list" class="agent-skill-list" tabindex="0" role="region" aria-label="Tool 选择"></div>
+            </section>
+            <section id="agent-scope-panel-models" class="agent-access-group" data-capability-panel="models" role="tabpanel" aria-labelledby="agent-scope-models" hidden>
+            <div class="agent-access-heading"><h4>模型能力 <span data-selection-count="models"></span></h4><select data-scope="models" aria-label="模型能力范围"><option value="all">全部已启用</option><option value="selected">指定能力</option><option value="none">不使用</option></select></div>
+            <p class="agent-capability-help">单独授权 TTS、ASR、图片生成等执行能力；不决定对话 LLM。全部已启用会自动包含后续新增且已接通的模型；指定能力只允许勾选项。</p>
+            <div id="agent-models-list" class="agent-skill-list" tabindex="0" role="region" aria-label="模型能力选择"></div>
+            </section>
+            <p id="agent-scope-results" class="agent-scope-results" role="status"></p>
+            </div>
+            <p id="agent-policy-note" class="agent-policy-warning"></p>
+            <details id="agent-readiness" class="agent-readiness"><summary id="agent-readiness-summary"></summary><ul id="agent-readiness-issues"></ul></details>
+          </section>
+          </div>
+          <div class="agent-tab-panel" data-agent-panel="runtime" role="tabpanel" hidden>
+          <h3>运行与用户端发布</h3><p class="panel-copy">对话推理使用系统模型配置；并发与预算继续服从系统上限。默认助理始终在用户端可用。</p>
+          <div class="agent-profile-controls">
+            <label class="confirmation"><input id="agent-enabled" type="checkbox" checked><span>启用这个智能助理</span></label>
+            <label class="confirmation"><input id="agent-default" type="checkbox"><span>设为新对话默认助理</span></label>
+            <label class="confirmation"><input id="agent-published" type="checkbox"><span>发布到用户端，允许注册用户在新对话中选择</span></label>
+          </div>
+          <p class="panel-copy">身份与任务指引保留在会话快照中；收紧能力范围会对后续调用和恢复检查生效。停用助理会禁止继续调用能力，不会删除已有成果。</p>
+          </div>
+          <div class="agent-save-bar"><span id="agent-save-status" class="agent-tab-status">尚未修改</span><button id="save-agent-profile" class="button primary save-configuration" type="submit">创建智能助理</button></div>
+        </form>
+      </article>
+
+      <aside class="panel agent-profile-list-panel">
+        <div class="panel-header"><div><h2>助理列表</h2><p class="panel-copy">选择后编辑当前助理；只有点击“创建智能助理”才会新增。</p></div><span id="agent-count" class="count-badge">0 个助理</span></div>
+        <button id="new-agent" class="button secondary new-model-button" type="button">＋ 创建智能助理</button>
+        <div id="agent-profile-list" class="agent-profile-list"></div>
+        <section id="agent-profile-actions-panel" class="agent-revision-panel hidden">
+          <h3>管理当前助理</h3>
+        </section>
+      </aside>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

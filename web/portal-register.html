@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b0b0c">
+  <title>注册 · ExoHarness</title>
+  <script src="/assets/portal-theme.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/portal-register.js" defer></script>
+<script src="/assets/i18n.js" defer></script></head>
+<body class="portal-access-page">
+  <main class="portal-access-shell">
+    <div class="access-intro">
+      <p class="access-intro-kicker"><span></span> EXOHARNESS · CREATIVE SPACE</p>
+      <h2>从今天开始，<br><em>把灵感实现。</em></h2>
+      <p>创建账号，开启属于你的创作空间。想法、素材与作品，都在同一个地方延续。</p>
+      <div class="access-intro-tags" aria-hidden="true"><span>想象</span><span>创作</span><span>交付</span></div>
+    </div>
+    <section class="portal-access-card portal-register-card">
+      <span class="portal-access-mark" aria-hidden="true">EXO</span>
+      <p class="eyebrow">CREATE YOUR ACCOUNT</p>
+      <h1>创建账号</h1>
+      <p>验证码将发送到你的邮箱，验证完成后才能注册。</p>
+      <form id="portal-register-form" class="stack-form portal-access-form">
+        <label>邮箱
+          <span class="portal-code-row"><input id="portal-register-email" type="email" autocomplete="email" maxlength="254" required autofocus><button id="portal-send-code" class="button secondary" type="button">发送验证码</button></span>
+        </label>
+        <label>邮箱验证码<input id="portal-register-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="6 位数字" required></label>
+        <label>用户名<input id="portal-register-username" type="text" autocomplete="username" minlength="3" maxlength="32" pattern="[A-Za-z0-9_.-]+" required></label>
+        <label>显示名称<input id="portal-register-display-name" type="text" autocomplete="name" maxlength="64" required></label>
+        <label>密码<span class="password-input-wrap"><input id="portal-register-password" type="password" autocomplete="new-password" minlength="8" maxlength="256" required><button class="password-visibility" type="button" data-password-target="portal-register-password" aria-label="显示密码" aria-pressed="false"><svg class="password-eye-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle><path class="password-eye-slash" d="M4 4l16 16"></path></svg></button></span></label>
+        <label>确认密码<span class="password-input-wrap"><input id="portal-register-confirm" type="password" autocomplete="new-password" minlength="8" maxlength="256" required><button class="password-visibility" type="button" data-password-target="portal-register-confirm" aria-label="显示确认密码" aria-pressed="false"><svg class="password-eye-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle><path class="password-eye-slash" d="M4 4l16 16"></path></svg></button></span></label>
+        <button id="portal-register-submit" class="button primary" type="submit">验证并注册</button>
+      </form>
+      <p id="portal-register-message" class="portal-form-message hidden" role="status"></p>
+      <p id="portal-register-error" class="login-error hidden" role="alert"></p>
+      <p class="portal-access-switch">已有账号？<a href="/login">返回登录</a></p>
+    </section>
+  </main>
+</body>
+</html>

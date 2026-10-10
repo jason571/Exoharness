@@ -1,0 +1,13 @@
+[package]
+name = "exoharness-database"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+[dependencies]
+postgres.workspace = true
+r2d2.workspace = true
+r2d2_postgres.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+

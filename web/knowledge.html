@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>资料管理 · ExoHarness</title>
+  <script src="/assets/management-theme.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/management-theme.css">
+  <link rel="stylesheet" href="/assets/management.css">
+  <script src="/assets/auth.js" defer></script>
+  <script src="/assets/knowledge.js" defer></script>
+<script src="/assets/i18n.js" defer></script></head>
+<body class="services-page">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="/services"><span class="brand-mark">EH</span><span><strong>ExoHarness</strong><small>Capability Console</small></span></a>
+    <nav class="main-nav" aria-label="主导航">
+      <a href="/services">技能中心</a><a href="/imports">技能导入</a><a href="/models">模型配置</a>
+      <a href="/agents" data-admin-only>智能助理</a><a class="active" href="/knowledge" data-admin-only>资料管理</a><a href="/trace" data-admin-only>Trace</a>
+    </nav>
+  </header>
+  <main class="page knowledge-admin-page">
+    <section class="model-page-heading"><div><p class="eyebrow">KNOWLEDGE</p><h1>资料管理</h1><p>先建立资料库，再分类并导入文件，最后授权助理在相关对话中检索使用。用户私人资料独立保存。</p></div></section>
+    <p id="knowledge-error" class="login-error hidden" role="alert"></p>
+    <div class="knowledge-admin-grid">
+      <section class="panel">
+        <div class="panel-header"><div><h2>资料库</h2><p class="panel-copy">每个资料库可单独授权助理。</p></div><button id="library-new" class="button secondary" type="button">新建</button></div>
+        <div id="library-list" class="portal-knowledge-list" aria-live="polite"></div>
+      </section>
+      <section class="panel">
+        <h2 id="library-editor-title">第一步 · 新建资料库</h2>
+        <form id="library-form" class="stack-form">
+          <input id="library-id" type="hidden"><input id="library-revision" type="hidden">
+          <label>名称<input id="library-name" type="text" maxlength="160" required></label>
+          <details id="library-description-details" class="knowledge-optional"><summary>资料库说明（可选）</summary><label>说明<textarea id="library-description" rows="2" maxlength="1000"></textarea></label></details>
+          <button class="button primary" type="submit">保存资料库</button>
+        </form>
+        <button id="library-delete" class="button ghost" type="button" hidden>删除资料库</button>
+        <p id="library-message" class="panel-copy" role="status"></p>
+        <p id="library-prerequisite" class="knowledge-prerequisite" role="status">请先保存上方资料库；保存后即可创建分类并导入文件。</p>
+        <section id="library-content" inert aria-disabled="true">
+          <div class="knowledge-admin-section"><h3>第二步 · 分类与导入</h3><p class="panel-copy">分类可选。先选择分类，再导入文件；新建分类时可选上级，最多三级。</p>
+            <div class="knowledge-category-picker"><label>资料分类<select id="library-document-category"><option value="">未分类</option></select></label><button id="library-quick-category-toggle" class="button secondary" type="button">＋ 新建分类</button></div>
+            <form id="library-quick-category-form" class="knowledge-quick-category" hidden><label>上级分类<select id="library-quick-category-parent"><option value="">顶层分类（第一级）</option></select></label><label>分类名称<input id="library-quick-category-name" type="text" maxlength="60" placeholder="例如：品牌规范" required></label><button class="button secondary" type="submit">创建并选中</button><button id="library-quick-category-cancel" class="button ghost" type="button">取消</button></form>
+            <details id="library-category-management" class="knowledge-optional knowledge-inline-manager"><summary>查看与编辑分类</summary><form id="library-category-form" class="stack-form"><input id="library-category-id" type="hidden"><input id="library-category-revision" type="hidden"><label>分类名称<input id="library-category-name" type="text" maxlength="60" required></label><label>上级分类<select id="library-category-parent"><option value="">顶层分类（第一级）</option></select></label><div class="portal-settings-actions"><button class="button secondary" type="submit">保存分类</button><button id="library-category-new" class="button secondary" type="button">新建</button></div></form><div id="library-category-list" class="portal-knowledge-list" aria-live="polite"></div></details>
+            <div class="knowledge-import-card"><label class="knowledge-file-picker"><input id="library-file-import" type="file" multiple accept=".docx,.pdf,.txt,.md,.markdown,.csv,.json,.jsonl,.html,.htm"><span>选择文件导入</span></label><p class="panel-copy">支持 DOCX、文字型 PDF（最大 4 MB），以及 UTF-8 文字文件（最大 2 MB）；每次最多 10 个。DOCX 表格完整保留，PDF 不确定的表格仅保留版面文字并提示。暂不支持扫描件或图片 OCR。提取文字最多 1 MB。</p><p id="library-file-message" class="portal-form-message" role="status"></p></div>
+            <details id="library-manual-editor" class="knowledge-optional"><summary>手动添加文字资料</summary><form id="library-document-form" class="stack-form">
+            <input id="library-document-id" type="hidden"><input id="library-document-revision" type="hidden">
+            <label>标题<input id="library-document-title" type="text" maxlength="160" required></label>
+            <label>正文<textarea id="library-document-content" rows="8" maxlength="1048576" required></textarea></label>
+            <details class="knowledge-advanced"><summary>标签与来源（可选）</summary>
+              <label>标签（逗号分隔，最多 8 个）<input id="library-document-tags" type="text" maxlength="270"></label>
+              <label>来源链接（可选，不自动抓取）<input id="library-document-source" type="url" maxlength="2048" placeholder="https://"></label>
+            </details>
+            <div class="portal-settings-actions"><button class="button primary" type="submit">保存资料</button><button id="library-document-new" class="button secondary" type="button">新建</button></div>
+          </form></details><div id="library-document-list" class="portal-knowledge-list" aria-live="polite"></div></div>
+          <div class="knowledge-admin-section"><h3>第三步 · 授权助理</h3><p class="panel-copy">只允许已启用的助理使用本库；修改授权后，新请求立即生效。</p><div id="library-assistants" class="knowledge-assistant-list"></div><button id="library-grants-save" class="button secondary" type="button">保存授权</button></div>
+        </section>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

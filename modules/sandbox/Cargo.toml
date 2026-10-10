@@ -1,0 +1,18 @@
+[package]
+name = "exoharness-sandbox"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+[dependencies]
+exoharness-coding.workspace = true
+exoharness-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+sha2.workspace = true
+tokio = { workspace = true, features = ["process", "io-util"] }
+tempfile = "3"
+fs2 = "0.4.3"
+[dev-dependencies]
+tokio.workspace = true

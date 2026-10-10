@@ -1,0 +1,14 @@
+# Overlay for the existing standalone ASR compose, not a new image build.
+services:
+  asr:
+    environment:
+      # Local GPU may have less VRAM than the production 96 GB GPU. This is
+      # explicit deployment policy, not an Agent/MCP business heuristic.
+      ASR_GPU_MEMORY_FRACTION: "${EXOHARNESS_ASR_GPU_FRACTION:-0.15}"
+    volumes:
+      - type: bind
+        source: "${EXOHARNESS_ASR_KEY_FILE:?private ASR credential required}"
+        target: /run/secrets/api_key
+        read_only: true
+        bind:
+          create_host_path: false

@@ -1,0 +1,29 @@
+[package]
+name = "exoharness-tools"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+exoharness-coding.workspace = true
+exoharness-contracts.workspace = true
+exoharness-core.workspace = true
+exoharness-registry.workspace = true
+exoharness-skills.workspace = true
+exoharness-mcp.workspace = true
+exoharness-sandbox.workspace = true
+exoharness-artifacts.workspace = true
+exoharness-storage-postgres.workspace = true
+exoharness-model-runtime.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+url = "2"
+tokio.workspace = true
+thiserror.workspace = true
+jsonschema = { version = "=0.33.0", default-features = false }
+tempfile = "3"
+
+[dev-dependencies]
+tempfile = "3"
