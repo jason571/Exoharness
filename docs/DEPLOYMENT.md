@@ -67,6 +67,18 @@ Native logs are written to `service.log` in the active data directory. Scripts v
 
 The application uses three independent IPv4 loopback listeners. When a production proxy exposes them as 8787 / 8788 / 8790, set the corresponding bind variables. This table and the launch code define supported settings. Public-access requirements are documented in [Security](SECURITY.md).
 
+## Reverse proxy upload limits
+
+Set the management and user-portal Nginx `server` blocks to accept the same 96 MiB request size as the chat API:
+
+```nginx
+client_max_body_size 96m;
+```
+
+Apply this limit at every proxy in the path, including public ingress and tunnel gateways. The smallest limit in the chain can return HTTP 413 before the request reaches ExoHarness. Chat attachments use Base64 inside JSON, so request size exceeds the original file size; decoded attachments remain limited to 64 MiB in total and 32 MiB per audio file.
+
+Back up the proxy configuration, run `nginx -t`, then reload Nginx. Changing the proxy limit does not require restarting ExoHarness.
+
 ## Container startup
 
 Build the native release from source, then create the main-service image:

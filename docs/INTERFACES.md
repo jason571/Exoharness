@@ -78,6 +78,8 @@ Example MCP content uses a placeholder address and no real secret:
 
 Import parses and registers a service without starting it. Sensitive headers move to the Secret Store. ToolNode records exist, but standalone Tool execution preparation is not connected; do not confuse this with the working native sandbox path.
 
+`activate_tools` rejects unknown or ambiguous names before changing the loaded set. The rejection is correctable and provides authorized discovery arguments, resolved names and the original selection mode; the Agent can discover the exact names and resubmit the entire selection. Correction uses the existing Run-wide budget of two corrections, preserves successful receipts and never grants access to an unavailable tool.
+
 ## Models, assistants and speech
 
 | Method | Path | Purpose |

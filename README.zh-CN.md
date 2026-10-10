@@ -1,6 +1,6 @@
 # ExoHarness
 
-[English](README.md) | 简体中文 · [在线体验](https://agent.clhh.tech/) · [技术文档](docs/README.md)
+[English](README.md) | 简体中文 · [在线体验](https://agent.flyang.art/) · [演示服务管理端](https://harness.flyang.art/) · [技术文档](docs/README.md)
 
 **基于 Rust 的可扩展 Agent Harness 框架，提供可自行部署的完整 Web 控制台。**
 
@@ -48,7 +48,9 @@ ExoHarness 为智能体提供通用运行基础：模型接入、上下文管理
 
 ## 在线体验与交流
 
-打开 [ExoHarness 在线体验](https://agent.clhh.tech/)，注册并登录后即可使用已授权的助理与能力。请勿在公开演示环境上传敏感资料。
+打开 [ExoHarness 在线体验](https://agent.flyang.art/)，注册并登录后即可使用已授权的助理与能力。请勿在公开演示环境上传敏感资料。
+
+演示服务管理端：[harness.flyang.art](https://harness.flyang.art/)。
 
 扫码添加微信，交流部署、反馈问题或申请加入技术讨论群。
 

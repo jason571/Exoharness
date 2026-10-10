@@ -40,6 +40,7 @@ Rust tests are in `modules/*/tests/`. Private implementation tests are included 
 - Ordinary conversation must not trigger tools. Authorized Skills/MCPs are discoverable; unauthorized capabilities are not contacted.
 - With multiple services and a 68-tool catalog, selection is service-scoped rather than a full traversal. Exact-name batches cover missing names, duplicates, and authorization boundaries. A changed query restarts pagination; continuation cursors are bound to query scope and version.
 - After selection, the old catalog is retired from model context without changing the journal. Unselected or failed selections, new queries, Skill instructions, and business JSON remain intact; tool calls and results stay paired.
+- Unknown activation names require authorized discovery and a corrected whole selection within the Run's two-correction budget. Rejection preserves the loaded set and resolved names; unavailable or ambiguous tools are never guessed or granted.
 - Every MCP call has its corresponding result. A valid checkpoint can be compacted without changing the full journal; invalid checkpoint declarations fall back safely.
 - Repeating the same tool with identical arguments is limited to three consecutive attempts. Search, reads, and background polling must not create an unbounded model loop.
 - With an MCP limit of one, a second call queues before submission. Cancelling while queued does not count as an attempt; unknown outcomes continue to hold capacity.

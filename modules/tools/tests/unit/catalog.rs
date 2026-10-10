@@ -162,7 +162,7 @@ fn incomplete_labels_never_select_among_providers_or_sanitization_collisions() {
 }
 
 #[test]
-fn unknown_typo_stale_id_and_mixed_unauthorized_names_remain_terminal_and_atomic() {
+fn unknown_typo_stale_id_and_mixed_unauthorized_names_require_discovery_without_loading() {
     let (mut catalog, complete, incomplete) = mv_selection_fixture();
     let before = catalog.active.clone();
     for invalid in [
@@ -172,10 +172,16 @@ fn unknown_typo_stale_id_and_mixed_unauthorized_names_remain_terminal_and_atomic
     ] {
         let mut batch = incomplete.clone();
         batch.push(invalid.into());
-        assert!(matches!(
-            catalog.activate(&batch),
-            Err(crate::ToolError::Input(_))
-        ));
+        let crate::ToolError::CorrectableInput(message) = catalog.activate(&batch).unwrap_err()
+        else {
+            panic!("unknown identity must require discovery without loading");
+        };
+        assert!(message.contains(&format!("\"unresolved_names\":[\"{invalid}\"]")));
+        assert!(message.contains(&format!("\"query\":\"{invalid}\"")));
+        assert!(message.contains("\"next_call\":null"));
+        for name in &complete {
+            assert!(message.contains(name));
+        }
         assert_eq!(catalog.active, before);
     }
     let raw: Vec<_> = complete

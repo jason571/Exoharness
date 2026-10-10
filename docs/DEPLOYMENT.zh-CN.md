@@ -67,6 +67,18 @@ bash release/scripts/start-native.sh stop
 
 App 使用三个独立 IPv4 loopback 端口。通过生产代理部署为 8787 / 8788 / 8790 时，设置对应监听变量。配置项以本表和启动代码为准；公网接入条件见 [安全](SECURITY.md)。
 
+## 反向代理上传限额
+
+管理端和用户端的 Nginx `server` 配置应与聊天 API 的 96 MiB 请求限额一致：
+
+```nginx
+client_max_body_size 96m;
+```
+
+公网入口、隧道网关等每一层代理都应配置此限额。链路中较小的限额会在请求到达 ExoHarness 前返回 HTTP 413。聊天附件通过 JSON 中的 Base64 传输，请求大小大于原文件；解码后的附件仍受总计 64 MiB、单个音频 32 MiB 的限制。
+
+修改前备份代理配置，执行 `nginx -t` 后重新加载 Nginx。调整代理限额无需重启 ExoHarness。
+
 ## 容器启动
 
 从源码原生编译 release 后，构建主服务运行镜像：

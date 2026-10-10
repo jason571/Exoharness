@@ -16,6 +16,7 @@ pub(crate) fn resolve(
     let mut resolved = BTreeSet::new();
     let mut corrections = Vec::new();
     let mut lookups = Vec::new();
+    let mut unresolved = Vec::new();
     for name in names {
         if bindings.contains_key(name) {
             resolved.insert(name.clone());
@@ -51,9 +52,15 @@ pub(crate) fn resolve(
             })
             .collect();
         if labels.is_empty() {
-            return Err(ToolError::Input(
-                "该名称没有唯一对应的已授权执行工具。Skill 是说明，不能直接激活；请用 search_capabilities 的 kind=tool 查询，使用返回的 name。加载集合未改变；尚未执行".into(),
-            ));
+            unresolved.push(name.clone());
+            // A logical name from a Skill need not be an installed identity.
+            // Discover metadata; never turn a lexical match into permission
+            // or silently activate a guessed alias. Respect query's schema.
+            lookups.push(json!({
+                "query":name.chars().take(200).collect::<String>(),
+                "kind":"tool"
+            }));
+            continue;
         }
         if labels.len() == 1 {
             let binding = labels[0];
@@ -76,10 +83,11 @@ pub(crate) fn resolve(
         } else {
             serde_json::Value::Null
         };
-        let diagnostics =
-            json!({"name_corrections":corrections,"required_lookups":lookups,"next_call":next});
+        let diagnostics = json!({"name_corrections":corrections,
+            "resolved_names":resolved,"unresolved_names":unresolved,"mode":mode,
+            "required_lookups":lookups,"next_call":next});
         return Err(ToolError::CorrectableInput(format!(
-            "Tool selection was rejected before loading or execution; the previous loaded set is unchanged. Use exact authorized names, not incomplete labels or service IDs. Correct the ENTIRE proposed batch once using {diagnostics}. If lookups are required, discover the scoped exact identities first; do not guess, widen permission or enumerate unrelated services."
+            "Tool selection was rejected before loading or execution; the previous loaded set is unchanged. Skill operation names are instructions, not installed identities. Use exact authorized names, not incomplete labels or service IDs. Correct the ENTIRE proposed batch once using {diagnostics}, retaining its resolved names and mode. If lookups are required, discover the exact identities first; do not guess, widen permission or enumerate unrelated services. If discovery finds no authorized match, report the missing capability instead of repeating the unchanged selection."
         )));
     }
     Ok(resolved)

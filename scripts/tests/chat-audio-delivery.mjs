@@ -8,7 +8,7 @@ import {browser,until} from './support/browser.mjs';
 const root=new URL('../../web',import.meta.url).pathname;
 if(!process.argv[2])throw new Error('Pass an existing published audio card JSON file. No generation is performed.');
 const card=JSON.parse(await readFile(process.argv[2],'utf8'));
-assert.ok(card.url.startsWith('https://media.clhh.tech/artifacts/'));
+assert.ok(card.url.startsWith('https://media.flyang.art/artifacts/'));
 const profile={id:'fixture',revision:1,display_name:'测试助理',avatar_text:'测',digest:'fixture'};
 const session={id:'fixture-session',title:'已生成的歌曲',pinned:false,created_at:Date.now(),updated_at:Date.now(),turn_count:1,latest_run_status:'succeeded',latest_run_id:'fixture-run',managed_coding:false,parent_id:null,project_name:null,agent_profile:profile};
 const turn={id:'fixture-turn',ordinal:1,prompt:'生成歌曲',attachments:[],answer:'歌曲已生成。',response:{answer:'歌曲已生成。',artifacts:[card],model:{name:'fixture',provider:'fixture',model_id:'fixture',api:'fixture'},usage:{total_tokens:0},tool_calls:[],warnings:[]},run_id:'fixture-run',run_status:'succeeded',run_error:null,created_at:Date.now(),updated_at:Date.now()};
@@ -45,7 +45,7 @@ try {
     await until(()=>chrome.evaluate("document.querySelector('audio').currentTime>=120 && !document.querySelector('audio').seeking"),'range seek',15000);
     await chrome.evaluate("document.querySelector('audio').pause()");
     assert.deepEqual(chrome.errors,[]);
-    console.log(JSON.stringify({passed:true,duration_seconds:state.duration,host:'media.clhh.tech',playback_advances:true,seek_seconds:120,source:'real existing song',generated_again:false}));
+    console.log(JSON.stringify({passed:true,duration_seconds:state.duration,host:'media.flyang.art',playback_advances:true,seek_seconds:120,source:'real existing song',generated_again:false}));
 } catch(error) {
     console.log(JSON.stringify({errors:chrome?.errors,state:await chrome?.evaluate("(()=>{const a=document.querySelector('audio');return {present:!!a,duration:a?.duration,ready:a?.readyState,media_error:a?.error?.code,cards:document.querySelectorAll('.chat-audio-artifact').length}})()") }));
     throw error;

@@ -1,6 +1,6 @@
 # ExoHarness
 
-English | [简体中文](README.zh-CN.md) · [Live demo](https://agent.clhh.tech/) · [Documentation](docs/README.md)
+English | [简体中文](README.zh-CN.md) · [Live demo](https://agent.flyang.art/) · [Demo administration](https://harness.flyang.art/) · [Documentation](docs/README.md)
 
 **An extensible Agent Harness in Rust, with a ready-to-use, self-hosted web console.**
 
@@ -216,7 +216,9 @@ Public deployments should use an HTTPS reverse proxy and follow the current [Hos
 
 ## Try ExoHarness
 
-Visit the [live demo](https://agent.clhh.tech/) and register or sign in to use the configured assistants. Avoid uploading sensitive information to the public demo.
+Visit the [live demo](https://agent.flyang.art/) and register or sign in to use the configured assistants. Avoid uploading sensitive information to the public demo.
+
+Demo management console: [harness.flyang.art](https://harness.flyang.art/).
 
 ## Documentation and current scope
 
