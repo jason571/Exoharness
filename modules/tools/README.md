@@ -1,24 +1,26 @@
 # Tools
 
-`exoharness-tools` 将已登记能力转换为 Agent 可发现、可激活的工具，并负责调用前校验与执行派发。MCP、模型能力、Skill 读取和任务沙盒使用统一的目录与授权入口。
+English | [简体中文](README.zh-CN.md)
 
-## 主要接口
+`exoharness-tools` exposes registered capabilities as discoverable and activatable Agent tools, then validates and dispatches calls. MCP, model capabilities, Skill reads, and task sandboxes share one catalog and authorization entry point.
 
-- [catalog.rs](src/catalog.rs)：`Catalog` 保存当前授权范围的能力绑定；`search` 返回紧凑目录，`activate` 加载选定工具的 Schema。
-- [service.rs](src/service.rs)：`ToolRuntime` 组合登记、配置、模型、MCP、Skill、沙盒及产物服务。
-- [dispatch.rs](src/dispatch.rs)：`dispatch` 派发调用并返回 `DispatchResult`。
-- [schema.rs](src/schema.rs)：`validate` 校验原生 JSON，`input_diagnostics` 返回字段诊断。
-- [admission.rs](src/admission.rs)、[background.rs](src/background.rs)：处理授权准入、后台任务进度和取消。
-- [coding.rs](src/coding.rs)、[workspace.rs](src/workspace.rs)、[publication.rs](src/publication.rs)：连接工作区操作、代码执行和文件发布。
+## Main interfaces
 
-发现目录与实际加载的 Schema 分开管理。调用前复核授权、能力版本、运行状态和参数类型；派发结果记录实际执行情况、文件和工作流元数据。后台轮询使用已取得的任务句柄，执行事实由调用账本保存。
+- [catalog.rs](src/catalog.rs): `Catalog` holds capability bindings in the current authorization scope; `search` returns a compact catalog and `activate` loads selected tool schemas.
+- [service.rs](src/service.rs): `ToolRuntime` composes registration, configuration, model, MCP, Skill, sandbox, and artifact services.
+- [dispatch.rs](src/dispatch.rs): `dispatch` dispatches calls and returns `DispatchResult`.
+- [schema.rs](src/schema.rs): `validate` checks native JSON; `input_diagnostics` returns field-level diagnostics.
+- [admission.rs](src/admission.rs), [background.rs](src/background.rs): handle authorization admission, background progress, and cancellation.
+- [coding.rs](src/coding.rs), [workspace.rs](src/workspace.rs), [publication.rs](src/publication.rs): connect workspace operations, code execution, and file publication.
 
-## 测试
+Discovery catalogs and loaded schemas are managed separately. Before a call, the runtime rechecks authorization, capability revision, readiness, and argument types. Dispatch results record actual execution, files, and workflow metadata. Background polling uses an acquired task handle, and the invocation ledger stores execution facts.
 
-[tests/](tests/) 覆盖原生工具 Schema、目录激活、字段诊断、后台任务和产物提取：
+## Tests
+
+[tests/](tests/) covers native tool schemas, catalog activation, field diagnostics, background tasks, and artifact extraction:
 
 ```sh
 cargo test --locked -p exoharness-tools
 ```
 
-完整执行链的数据库与 OCI 用例位于 API 模块。相关设计：[能力接入](../../docs/CAPABILITIES.md)。
+End-to-end database and OCI cases are in the API module. See [Capabilities](../../docs/CAPABILITIES.md) for related design.

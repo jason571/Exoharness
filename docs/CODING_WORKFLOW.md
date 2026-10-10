@@ -1,36 +1,38 @@
-# Coding 工作流
+# Coding workflow
 
-Coding 支持代码任务的工作区、检索、局部修改、检查和交付，网页是其中一种场景。语言、业务与视觉规范放在按需读取的 Skill 中；Coding 不另建 Agent 循环，不绕过模型、授权、预算或日志。
+English | [简体中文](CODING_WORKFLOW.zh-CN.md)
 
-## 流程
+Coding provides a workspace for code tasks, focused search, local edits, checks and delivery. Website generation is one use case. Language, business and visual conventions belong in on-demand Skills. Coding does not create a second Agent loop or bypass model, authorization, budgets or journals.
 
-创建或复用任务工作区 → 聚焦检索/读取 → 写入或原子补丁 → 执行保存的检查 → 依据真实诊断局部修复 → 检查新 revision → 发布最终文件。
+## Workflow
 
-Coding 工具 Schema 在任务需要时加载。工作文件持久保存，失败后基于已有文件进行局部修复。
+Create or reuse a task workspace → search/read a focused area → write files or apply an atomic patch → run a check against saved files → repair only the diagnosed area → verify the new revision → publish selected files.
 
-| 工具 | 主要输入 | 语义 |
+Coding schemas are loaded when needed. Work files persist so a failed check can be repaired without recreating the whole project.
+
+| Tool | Main inputs | Semantics |
 | --- | --- | --- |
-| `coding_search` | workspace_id、query | 返回相关片段、行号、revision、SHA-256 和分页信息 |
-| `coding_apply_patch` | workspace_id、expected_revision、patch | 多文件 Add/Update/Move/Delete；一次 CAS 原子提交 |
-| `coding_check` | workspace_id、expected_revision、name、runtime、entrypoint | 在沙盒运行已保存的检查，不用内联代码覆盖源码 |
-| `coding_publish` | workspace_id、expected_revision、files | 项目 ZIP，可选静态 HTML 预览 |
+| `coding_search` | `workspace_id`, `query` | Returns relevant excerpts, line numbers, revision, SHA-256 and pagination |
+| `coding_apply_patch` | `workspace_id`, `expected_revision`, `patch` | Multi-file Add/Update/Move/Delete in one compare-and-swap transaction |
+| `coding_check` | workspace, revision, name, runtime, entrypoint | Runs a saved check in the sandbox; inline code cannot overwrite source |
+| `coding_publish` | workspace, revision, files | Creates a project ZIP and optionally a static HTML preview |
 
-通用 `workspace_*` 和 `sandbox_run` 继续用于单文件、文档、绘图等任务，不强制打包成网站。
+General `workspace_*` and `sandbox_run` tools remain available for single files, documents, plots and similar work; they do not force every task into a website project.
 
-## 修改与失败
+## Edits and failures
 
-路径必须是工作区相对路径；拒绝目录穿越、绝对路径和符号链接越界。补丁锚点要求明确，旧 revision、歧义或部分失败拒绝整批写入。幂等操作不能重新修改已经提交的文件。
+Paths are relative to the workspace. Traversal, absolute paths and escaping symlinks are rejected. Patch anchors must be unambiguous; stale revisions, ambiguity or partial failure reject the entire patch. Replaying an idempotent operation does not modify already committed files again.
 
-检查返回非零退出码时，保留源文件和日志并修复失败部分。检查与发布使用独立操作，发布读取已生成文件。权限拒绝、存储冲突、取消和结果未知按独立状态处理。
+When a check exits unsuccessfully, source files and logs are retained so the failed part can be corrected. Checking and publishing are separate operations; publishing reads the saved files. Permission denial, storage conflicts, cancellation and unknown outcomes have distinct states.
 
-默认断网、固定镜像、只读包挂载和资源限制；缺依赖返回明确诊断，不自动联网安装，也不回退宿主机 Shell。旧版 Task / Worker / Worktree / Review / Merge 完整协作流程没有迁入当前 Coding，不能照搬旧 CLI 命令。
+Execution uses network-disabled fixed images, read-only package mounts and resource limits by default. Missing dependencies yield a diagnostic; there is no automatic network install or host-shell fallback. The complete legacy Task/Worker/Worktree/Review/Merge collaboration flow has not been migrated into Coding; old CLI commands do not apply.
 
-## 交付
+## Delivery
 
-最终发布清单决定哪些文件可下载；未选择的中间文件仍私有。多页面静态预览保留相对 CSS、JS 和媒体资源，只开放清单成员。CSP 隔离预览，不提供后端服务执行。
+The final publication manifest selects downloadable files; unselected intermediate files remain private. Multi-page static previews retain relative CSS, JavaScript and media resources and expose only manifest entries. Preview is isolated by CSP and does not run a backend service.
 
-项目发布支持最多 128 个文件，单文件上限 8 MiB、总量上限 32 MiB，补丁上限 4 MiB。模型单次输出长度由模型配置和上游接口共同决定。
+Projects support up to 128 files, 8 MiB per file, 32 MiB total and 4 MiB per patch. A model's single-response output limit depends on model configuration and the upstream API.
 
-实现分布：`modules/coding` 纯策略，`sandbox/src/task/coding.rs` 工作区提交，`tools/src/coding*.rs` Schema/派发，`artifacts/src/project.rs` 发布，`api/src/media/project.rs` 预览。
+Implementation: `modules/coding` contains pure policies; `sandbox/src/task/coding.rs` commits workspace changes; `tools/src/coding*.rs` defines schemas and dispatch; `artifacts/src/project.rs` publishes projects; `api/src/media/project.rs` serves previews.
 
-验收覆盖多文件、检查失败后的局部修改、Unicode、版本冲突、取消、ZIP 内容及桌面和手机浏览器资源加载。
+Acceptance covers multi-file projects, focused repair after failed checks, Unicode, revision conflicts, cancellation, ZIP contents and desktop/mobile resource loading.

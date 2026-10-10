@@ -1,49 +1,51 @@
-# 数据库与持久化
+# Database and persistence
 
-关系状态使用 PostgreSQL，模型/助理配置、包、Secret 和产物文件使用受管目录。数据库记录路径、标识、版本与 SHA-256，不把文件 Base64 作为持久工作数据或模型上下文。
+English | [简体中文](DATABASE.zh-CN.md)
 
-## 数据分组
+PostgreSQL stores relational state. Managed directories hold model/assistant configuration, packages, secrets and artifact files. The database records paths, identities, revisions and SHA-256 values; Base64 file content is not used as persistent work data or model context.
 
-| 数据 | 主要表或存储位置 | 用途 |
+## Data groups
+
+| Data | Main tables/storage | Purpose |
 | --- | --- | --- |
-| 会话和执行 | `execution_sessions`、`execution_turns`、`execution_runs` | owner、输入、状态、版本、时间和执行快照 |
-| 助理快照 | `execution_session_agent_profiles`、`execution_run_agent_profiles` | 固定每次执行的助理身份与版本 |
-| 工具账本 | `execution_invocations`、`execution_background_observations` | 完整参数/结果、稳定身份、提交与后台状态 |
-| 调度 | `execution_scheduler_configuration`、`execution_resource_reservations` | 版本化并发配置与在途共享池占位 |
-| 事件和上下文 | `execution_events`、`execution_context_checkpoints`、`execution_context_transforms` | 有序事件、原上下文与投影证据 |
-| 模型与用量 | `execution_model_calls`、`execution_model_requests`、`execution_request_parts`、`execution_run_budgets` | 请求、实际用量、预算及按需读取证据 |
-| 产物 | `execution_run_artifacts`、`execution_artifact_files`、`execution_artifact_configuration` | 来源 Run、摘要、文件登记和交付配置 |
-| 对话交互 | `execution_response_actions`、`execution_session_metadata` 等 | 反馈、置顶、标题、会话元信息 |
-| 能力登记 | `capabilities`、`capability_versions`、`capability_permissions`、`capability_health` | 定义、不可变版本、权限和健康 |
-| 发现和审计 | `capability_discovery`、`registry_audit` | 实时工具 Schema、服务证据与变更记录 |
-| 身份 | `auth_users`、`auth_user_sessions`、`auth_passwords`、`auth_sessions` 等 | 用户、密码哈希、会话、邮箱验证、助理分配和政策 |
-| 资料和记忆 | `knowledge_documents`、`knowledge_categories`、`knowledge_libraries`、`knowledge_library_grants`、`personal_memories` | 用户资料、分类、公共库授权及个人记忆 |
-| 私有文件 | 配置 generation、包目录、Secret Store、Sandbox、Artifacts | 模型/助理配置、凭据、原文档、任务源码及输出 |
+| Sessions and execution | `execution_sessions`, `execution_turns`, `execution_runs` | Owner, input, state, revision, time and execution snapshots |
+| Assistant snapshots | `execution_session_agent_profiles`, `execution_run_agent_profiles` | Pin assistant identity and revision for each execution |
+| Invocation ledger | `execution_invocations`, `execution_background_observations` | Full arguments/results, stable identity, submission and background state |
+| Scheduling | `execution_scheduler_configuration`, `execution_resource_reservations` | Versioned concurrency settings and in-flight shared-pool reservations |
+| Events and context | `execution_events`, `execution_context_checkpoints`, `execution_context_transforms` | Ordered events, original context and projection evidence |
+| Models and usage | `execution_model_calls`, `execution_model_requests`, `execution_request_parts`, `execution_run_budgets` | Requests, actual usage, budgets and on-demand read evidence |
+| Artifacts | `execution_run_artifacts`, `execution_artifact_files`, `execution_artifact_configuration` | Source Run, digest, file registration and delivery settings |
+| Conversation actions | `execution_response_actions`, `execution_session_metadata`, and related tables | Feedback, pinning, titles and session metadata |
+| Capability registry | `capabilities`, `capability_versions`, `capability_permissions`, `capability_health` | Definitions, immutable versions, permissions and health |
+| Discovery and audit | `capability_discovery`, `registry_audit` | Live tool schemas, service evidence and change history |
+| Identity | `auth_users`, `auth_user_sessions`, `auth_passwords`, `auth_sessions`, and related tables | Users, password hashes, sessions, email verification, assistant assignments and policies |
+| Knowledge and memory | `knowledge_documents`, `knowledge_categories`, `knowledge_libraries`, `knowledge_library_grants`, `personal_memories` | User materials, categories, shared-library grants and personal memory |
+| Private files | Configuration generations, package directories, Secret Store, Sandbox, Artifacts | Model/assistant config, credentials, original documents, task source and output |
 
-执行 DDL 保留部分历史表；当前调度配置使用单例 `execution_scheduler_configuration`，共享池占位引用 invocation。其他历史表的存在不代表对应执行链已经接通，具体状态见 [功能状态](STATUS.md)。
+Execution DDL retains some historical tables. Current scheduler settings use the singleton `execution_scheduler_configuration`; shared-pool reservations reference invocations. The presence of another legacy table does not mean its execution path is connected; see [Feature status](STATUS.md).
 
-## 配置与迁移
+## Configuration and migrations
 
-`EXOHARNESS_DATABASE_URL` 提供连接地址；密码可通过 `EXOHARNESS_DATABASE_PASSWORD_FILE` 单独读取。执行 namespace 使用 `EXOHARNESS_DATABASE_NAMESPACE`，默认 `execution`；App 当前为登记与身份分别使用 `registry`、`auth`。资料表由执行存储的迁移管理，不应臆造独立连接配置。
+`EXOHARNESS_DATABASE_URL` provides the connection address; `EXOHARNESS_DATABASE_PASSWORD_FILE` can supply a separate password file. `EXOHARNESS_DATABASE_NAMESPACE` selects the execution namespace (default `execution`); the App currently uses `registry` and `auth` for registration and identity. Knowledge tables are migrated with execution storage; do not invent a separate connection setting.
 
-DDL 位于 `modules/storage/postgres/migrations/`，身份 DDL 位于 `modules/identity/src/schema.rs`。包括执行、登记、发现证据、资料、文档结构和标题的增量迁移。迁移显式执行，使用事务锁，重复执行不清空已有数据。
+DDL is under `modules/storage/postgres/migrations/`; identity DDL is in `modules/identity/src/schema.rs`. Incremental migrations cover execution, registration, discovery evidence, knowledge, document structure and titles. Migrations run explicitly, use transaction locks and do not erase existing data when repeated.
 
-模型/助理保存通过 `modules/configuration` 的不可变 generation 与 current 指针完成；运行时刷新配置，执行快照固定 revision。凭据不写入公共配置投影或 Run 快照。
+Model/assistant configuration uses immutable generations and a current pointer in `modules/configuration`; runtime refreshes configuration while each execution snapshot pins its revision. Credentials are not written into public configuration projections or Run snapshots.
 
-## 事务和并发
+## Transactions and concurrency
 
-Session 是 owner 校验和创建 Turn 的锁定边界；同会话不能同时驱动两个活跃 Run。Run 版本对应已提交事件序号。状态、Turn、控制元数据及事件在同事务中提交，任一步失败即回滚。
+A Session is the owner-validation and Turn-creation lock boundary; two active Runs cannot be driven simultaneously in the same Session. Run revisions correspond to committed event sequence numbers. State, Turn, control metadata and events commit in one transaction; failure at any step rolls it back.
 
-invocation 准备与领取分开。调用意图包含固定能力 revision、原生参数、摘要和逻辑键。同意图幂等；冲突意图拒绝。MCP admission 在短事务中对能力加 advisory lock，检查并发占用及等待顺序，不在网络调用期间持有数据库锁，也不新增另一套队列数据库。
+Invocation preparation and admission are separate. An intent includes the pinned capability revision, native arguments, digest and logical key. Repeating the same intent is idempotent; a conflicting intent is rejected. MCP admission takes a short advisory lock to check concurrency and queue order. It does not hold a database lock during a network call or create another queue database.
 
-调度配置写入、Run 准入与共享池领取使用执行 namespace 内统一事务锁，配置保存采用 revision CAS。活跃 Run 统计 running / waiting_authorization，queued 不占执行名额。MCP 池占用从 submitted 账本计算，包含 outcome_unknown；取消 Run 本身不释放外部占位。`0005_scheduler.sql` 为增量迁移，不删除历史记录。
+Scheduler updates, Run admission and shared-pool admission use a common transaction lock in the execution namespace; configuration writes use revision compare-and-swap. Active Run counts include `running` and `waiting_authorization`; `queued` Runs do not occupy an execution slot. MCP pool usage is calculated from submitted ledger entries, including `outcome_unknown`. Cancelling a Run alone does not release an external reservation. `0005_scheduler.sql` is an additive migration and does not delete historical records.
 
-`context_json._exoharness_pro` 保存宿主控制元数据；更新该键时保留其他上下文字段。完整参数/结果保存在调用账本，不在控制元数据里复制一遍。
+`context_json._exoharness_pro` stores host control metadata. Updating that key preserves other context fields. Full arguments and results are stored in the invocation ledger rather than duplicated in control metadata.
 
-同步 PostgreSQL 驱动采用连接池；API、Agent 经 `spawn_blocking` 边界访问。当前连接使用 NoTls，适用于本机或受保护私网，不应直接连接未受保护的公网数据库。
+The synchronous PostgreSQL driver uses a connection pool; API and Agent work crosses a `spawn_blocking` boundary. PostgreSQL currently uses NoTls, suitable only for localhost or a protected private network—not an exposed public database.
 
-## 兼容与备份
+## Compatibility and backups
 
-历史 Run 的控制数据需按新版格式显式迁移后恢复。迁移校验调用状态和执行参数，由单一版本持有 Run 执行权。详见 [迁移说明](MIGRATION.md)。
+Historical Run control data must be explicitly migrated to the current format before resuming. Migration validates invocation state and arguments, and only one version may hold execution ownership for a Run. See [Migration](MIGRATION.md).
 
-备份应同时覆盖 PostgreSQL、私有配置及密钥、包目录、任务与产物文件，并保持同一时间窗口。只有数据库备份无法恢复文件和模型凭据。签名密钥丢失会使既有链接不可验证；数据库恢复演练必须同时验证授权、版本、文件摘要和下载。
+Back up PostgreSQL, private configuration and keys, package directories, task files and artifacts from the same time window. A database-only backup cannot restore files or model credentials. Losing a signing key makes existing links unverifiable. A restore drill must check permissions, revisions, file digests and downloads as well as database connectivity.

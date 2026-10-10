@@ -2,6 +2,6 @@
 
 [English project overview](README.md) | [简体中文](README.zh-CN.md)
 
-The English homepage is now [README.md](README.md). It includes framework features, application examples, the technology stack, build and Docker deployment instructions, and the live demo.
+The English homepage is [README.md](README.md). It includes framework features, application examples, the technology stack, build and Docker deployment instructions, the live demo, and the current license.
 
-Full English technical documentation will be added later. The current documentation is available in the [documentation index](docs/README.md).
+English technical documentation is available by default from the [documentation index](docs/README.md); each document links to its Chinese version.

@@ -1,23 +1,25 @@
 # Core
 
-`exoharness-core` 提供扩展宿主、依赖解析、类型化服务和资源生命周期。应用在装配阶段注册扩展，宿主检查依赖图后按顺序启动服务。
+English | [简体中文](README.zh-CN.md)
 
-## 核心接口
+`exoharness-core` provides the extension host, dependency resolution, typed services and resource lifecycle. During composition, the application registers extensions; the host validates the dependency graph before starting services.
 
-- [graph.rs](src/graph.rs)：`ExtensionSpec` 声明服务提供项与依赖，`activation_order` 计算启动顺序并报告注册冲突。
-- [services.rs](src/services.rs)：`Service` 定义服务标识；`ExtensionContext` 用于发布服务、解析声明的依赖和登记资源。
-- [lifecycle.rs](src/lifecycle.rs)：`Extension` 定义启动和关闭行为，`Host` 管理注册、启动、关闭及生命周期事件。
-- [resources.rs](src/resources.rs)：`OwnedResource` 和 `ManagedTask` 管理扩展持有的资源与后台任务。
-- [context.rs](src/context.rs)：`JournalEntry`、`ContextItem` 和 `project` 定义执行记录到模型窗口的基础投影。
+## Main interfaces
 
-启动前检查重复服务、缺失依赖、循环和多提供者歧义。启动失败时清理已取得的资源；关闭按逆依赖顺序进行，并等待异步资源释放。服务通过声明的接口访问，业务模块各自管理状态。
+- [graph.rs](src/graph.rs): `ExtensionSpec` declares service providers and dependencies; `activation_order` computes startup order and reports registration conflicts.
+- [services.rs](src/services.rs): `Service` defines service identity; `ExtensionContext` publishes services, resolves declared dependencies and registers resources.
+- [lifecycle.rs](src/lifecycle.rs): `Extension` defines startup/shutdown behavior; `Host` manages registration, startup, shutdown and lifecycle events.
+- [resources.rs](src/resources.rs): `OwnedResource` and `ManagedTask` manage extension resources and background tasks.
+- [context.rs](src/context.rs): `JournalEntry`, `ContextItem` and `project` define the base projection from execution records into a model window.
 
-## 测试
+Before startup the host checks duplicate services, missing dependencies, cycles and ambiguous providers. If startup fails, acquired resources are cleaned up. Shutdown runs in reverse dependency order and waits for asynchronous resources to be released. Services are accessed through declared interfaces; business modules own their own state.
 
-[tests/](tests/) 覆盖依赖图、服务作用域、启动失败清理、异步关闭和调用结果配对。测试使用内存服务与任务：
+## Tests
+
+[tests/](tests/) covers dependency graphs, service scope, startup-failure cleanup, asynchronous shutdown and call/result pairing. Tests use in-memory services and tasks.
 
 ```sh
 cargo test --locked -p exoharness-core
 ```
 
-相关设计：[架构](../../docs/ARCHITECTURE.md)。
+See [Architecture](../../docs/ARCHITECTURE.md).

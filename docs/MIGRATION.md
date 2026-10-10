@@ -1,28 +1,30 @@
-# 数据与配置迁移
+# Data and configuration migration
 
-迁移保留用户、配置、能力包和生成文件。历史记录按运行协议划分为只读记录与可继续驱动的记录，并在迁移时校验版本。
+English | [简体中文](MIGRATION.zh-CN.md)
 
-## 迁移对象
+Migration preserves users, configuration, capability packages and generated files. Historical records are classified as read-only or eligible to continue under the current execution protocol, and versions are checked during migration.
 
-- PostgreSQL：身份、能力登记、会话、事件和文件元信息。
-- 私有配置：模型/助理 generation、密钥与头像。
-- 文件：Skill 包、任务工作区、资料原件、产物及签名密钥。
-- 部署：端口、数据库 namespace、可访问的外部服务地址和沙盒镜像摘要。
+## Migration scope
 
-迁移快照包括数据库、能力包、生成文件、模型配置和独立凭据。旧环境变量按新版配置项逐项映射，完成路径、端口及权限校验后启用。
+- PostgreSQL: identities, capability registrations, sessions, events and file metadata.
+- Private configuration: model/assistant generations, credentials and avatars.
+- Files: Skill packages, task workspaces, source documents, artifacts and signing keys.
+- Deployment: ports, database namespace, reachable external-service addresses and sandbox-image digests.
 
-## 顺序
+A migration snapshot includes the database, capability packages, generated files, model configuration and separately stored credentials. Map old environment variables to new settings one at a time; enable the new service only after paths, ports and permissions have been checked.
 
-1. 在私有目录保存同一时间窗口的数据库与文件备份，记录版本及 SHA-256。
-2. 新环境使用独立数据库或经核验的 namespace，不与旧进程争写同一 Run。
-3. 校验配置、账户哈希、助理分配、能力 revision/权限和文件引用。
-4. 对旧 Run 的快照/事件 JSON 做显式兼容判断，未转换记录保持只读，不猜状态重跑。
-5. 验证身份、读取、代表性文件和新任务，再切换写入所有者。
+## Sequence
 
-源码工具 `scripts/import-server-config.py`、`scripts/import-server-users.py` 用于指定来源的只读导出/导入，应先查看 `--help`。它们不属于独立 release 的自动运行流程，不能在不知来源时复制生产数据到公共开发环境。
+1. In a private directory, back up database and files from the same time window and record versions and SHA-256 values.
+2. Give the new environment an independent database or verified namespace; do not let old and new processes write the same Run concurrently.
+3. Validate configuration, account hashes, assistant assignments, capability revisions/permissions and file references.
+4. Explicitly check compatibility of historical Run snapshots and event JSON. Keep unconverted records read-only; do not infer a state and rerun them.
+5. Verify identities, reads, representative files and a new task before switching the write owner.
 
-## 当前边界
+Source utilities `scripts/import-server-config.py` and `scripts/import-server-users.py` perform read-only export/import for an explicitly selected source; inspect `--help` first. They are not part of the standalone release's automatic startup. Do not copy production data into a shared development environment without establishing its source and destination.
 
-底层表和控制格式有兼容检查；旧记录缺少新版控制元数据时返回 `migration_required`，不修改为默认配置。旧 Run 全量转换和安全 HTTP Resume 尚未完整实现。
+## Current boundaries
 
-账号/模型/助理导入成功后仍需检查实时权限、服务连通和沙盒环境。运行镜像标签相同也要校验摘要。回退旧服务前先检查新数据是否兼容，不能两者同时驱动同一任务。
+Database tables and control formats have compatibility checks. When old records lack current control metadata, the service returns `migration_required` rather than silently assigning defaults. Full conversion of old Runs and safe HTTP Resume are not yet implemented.
+
+After importing accounts, models and assistants, verify live permissions, service connectivity and sandbox readiness. Matching image tags do not prove matching image digests. Before reverting to an old service, check data compatibility; two versions must not drive the same task.

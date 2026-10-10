@@ -1,5 +1,6 @@
 [package]
 name = "exoharness-coding"
+authors.workspace = true
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

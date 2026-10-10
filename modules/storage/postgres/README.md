@@ -1,27 +1,29 @@
 # PostgreSQL Storage
 
-`exoharness-storage-postgres` 保存执行、能力登记、会话、资料和使用记录，提供带事务边界的持久化接口。连接池使用同步 PostgreSQL 驱动，异步调用方通过 blocking 工作线程访问。
+English | [简体中文](README.zh-CN.md)
 
-## 接口与文件
+`exoharness-storage-postgres` persists execution, capability registration, sessions, knowledge, and usage records through transactional storage interfaces. Its connection pool uses a synchronous PostgreSQL driver; asynchronous callers access it through blocking worker threads.
 
-- [lib.rs](src/lib.rs)：`PostgresStore` 管理连接、命名空间、迁移和健康检查。
-- [sessions.rs](src/sessions.rs)、[runs.rs](src/runs.rs)、[journal.rs](src/journal.rs)：会话、Turn、Run、状态与事件。
-- [invocations.rs](src/invocations.rs)、[mcp_admission.rs](src/mcp_admission.rs)：调用领取、回执和 MCP 并发准入。
-- [scheduler.rs](src/scheduler.rs)：版本化调度配置、用户/全局 Run 准入和跨 MCP 共享资源池。
-- [registry/](src/registry/)：能力版本、访问范围及登记视图。
-- [knowledge/](src/knowledge/)、[artifacts.rs](src/artifacts.rs)、[model_observation.rs](src/model_observation.rs)：资料、文件元信息和模型请求观察记录。
-- [migrations/](migrations/)：按版本管理的 SQL 迁移。
+## Interfaces and files
 
-调用资格领取、状态变更与事件写入使用事务。外部网络请求在事务提交后进行，完成回执随后写回；已提交或结果未知的调用保留相应账本状态。执行 schema 由 namespace 指定。
+- [lib.rs](src/lib.rs): `PostgresStore` manages connections, namespaces, migrations, and health checks.
+- [sessions.rs](src/sessions.rs), [runs.rs](src/runs.rs), [journal.rs](src/journal.rs): sessions, Turns, Runs, state, and events.
+- [invocations.rs](src/invocations.rs), [mcp_admission.rs](src/mcp_admission.rs): invocation claims, receipts, and MCP concurrency admission.
+- [scheduler.rs](src/scheduler.rs): versioned scheduler configuration, user/global Run admission, and shared resource pools across MCP services.
+- [registry/](src/registry/): capability revisions, access scopes, and registration views.
+- [knowledge/](src/knowledge/), [artifacts.rs](src/artifacts.rs), [model_observation.rs](src/model_observation.rs): knowledge, file metadata, and model-request observations.
+- [migrations/](migrations/): versioned SQL migrations.
 
-当前连接使用 `NoTls`，数据库应位于 loopback 或受保护的私网。部署连接与密码文件的配置见 [数据库设计](../../../docs/DATABASE.md)。
+Invocation claims, state changes, and event writes use transactions. External network requests occur after commit, and completion receipts are persisted afterward. Submitted invocations and calls with unknown outcomes retain their ledger state. The execution schema is selected by namespace.
 
-## 测试
+Connections currently use `NoTls`; place the database on loopback or a protected private network. See [Database design](../../../docs/DATABASE.md) for connection and password-file configuration.
 
-[tests/](tests/) 使用独立 PostgreSQL 检查持久化、并发准入、登记、标题和模型用量：
+## Tests
+
+[tests/](tests/) uses a dedicated PostgreSQL database to check persistence, concurrency admission, registration, titles, and model usage:
 
 ```sh
 cargo test --locked -p exoharness-storage-postgres
 ```
 
-执行前设置 `EXOHARNESS_PRO_TEST_DATABASE_URL`。完整准备步骤见 [测试与验收](../../../docs/TESTING.md)。
+Set `EXOHARNESS_PRO_TEST_DATABASE_URL` before running. See [Testing and acceptance](../../../docs/TESTING.md) for complete setup steps.

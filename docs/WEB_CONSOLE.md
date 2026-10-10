@@ -1,26 +1,28 @@
-# 界面与语言
+# Web Console and Languages
 
-## 页面与资源
+English | [简体中文](WEB_CONSOLE.zh-CN.md)
 
-管理端和用户端使用 TypeScript 与静态 HTML。源码位于 `web-console/src/`，构建输出位于 `web/`，API 模块将资源内嵌到二进制。更新页面需要重新编译发布包并重启主服务。
+## Pages and assets
 
-管理端默认监听 9797，提供模型、助理、用户、能力、资料、运行及审计管理。用户端默认监听 9798，提供注册登录、流式聊天和个人设置。文件服务默认监听 9790，负责媒体播放、文档下载及网页预览。端口通过部署配置调整。
+The management console and user portal use TypeScript and static HTML. Source files are in `web-console/src/`; build output is in `web/`; the API module embeds these assets in the executable. Page updates require rebuilding the release package and restarting the main service.
 
-## 中文与英文
+The management console listens on port 9797 by default and provides model, assistant, user, capability, knowledge, run, and audit management. The user portal defaults to 9798 and provides registration, login, streaming chat, and personal settings. The file service defaults to 9790 and handles media playback, document downloads, and website previews. Deployment configuration can change these ports.
 
-管理导航位于左侧，支持折叠和手机抽屉。桌面顶部使用统一右侧操作区：服务状态、账号操作、主题切换、语言选择；账号操作紧邻主题控件，各页面共用尺寸和间距。管理端支持明亮、暗色风格，偏好保存在 `exoharness.management.theme`。
+## Chinese and English
 
-语言控制器位于 `web-console/src/i18n.ts`，界面词条位于 `i18n-catalog.ts`。所有正式管理页面、用户页面及登录注册页面加载独立的 `i18n.js`。
+Management navigation is on the left, with collapse and mobile drawer behavior. Desktop pages share a consistent top-right control area for service status, account actions, theme, and language. The management console supports light and dark themes; the preference is stored under `exoharness.management.theme`.
 
-页面右上角提供中文、英文选择。首次访问默认中文，选择保存在浏览器 `localStorage` 的 `exoharness.ui-language` 中；同源标签页同步语言变化。切换时更新 `html.lang`、界面文案及输入提示，保持当前页面和表单状态。
+The language controller is in `web-console/src/i18n.ts`, and interface strings are in `i18n-catalog.ts`. All production management, user, login, and registration pages load the shared `i18n.js` bundle.
 
-语言控制器仅处理界面文本。用户消息、模型回复、会话标题、技能说明、工具进度原文、代码和 Trace 原始数据保留其原始语言；输入值、文件路径、API 字段和工具参数保持不变。新增数据展示区域可使用 `data-i18n="off"` 标记。
+The page header offers Chinese and English. The first visit defaults to Chinese; the selection is saved in browser `localStorage` as `exoharness.ui-language`, and same-origin tabs synchronize changes. Switching updates `html.lang`, interface strings, and input hints while preserving the current page and form state.
 
-动态插入的界面文案通过 `MutationObserver` 处理，仅遍历发生变化的子树；翻译结果保留对应原文，支持切回中文。语言模块独立于模型请求和执行流程。
+The language controller translates interface text only. User messages, model responses, conversation titles, Skill instructions, original tool progress, code, and raw Trace data retain their original language. Input values, file paths, API fields, and tool arguments are not changed. Mark newly added data regions with `data-i18n="off"` when they must remain untouched.
 
-## 维护与测试
+`MutationObserver` handles dynamically inserted interface strings by visiting only changed subtrees. Translated values retain their source text so users can switch back. Language handling is separate from model requests and execution.
 
-新增界面文案时同步添加英文词条，并明确该节点属于界面文本还是用户数据。运行以下检查：
+## Maintenance and tests
+
+When adding interface copy, add its English translation and identify whether the node is interface text or user data. Run:
 
 ```sh
 npm --prefix web-console run typecheck
@@ -28,4 +30,4 @@ npm --prefix web-console run build
 node scripts/tests/browser_i18n.mjs
 ```
 
-浏览器测试覆盖 15 个正式页面的静态文案、语言持久化与还原、动态插入、原始内容保护、表单值、事件处理和手机布局。认证、文件播放及执行过程另由对应浏览器和协议测试覆盖，测试分类见 [测试说明](TESTING.md)。
+Browser tests cover static copy across 15 production pages, language persistence and restoration, dynamic insertion, raw-content protection, form values, event handlers, and mobile layout. Authentication, file playback, and execution are covered by their respective browser and protocol tests. See [Testing](TESTING.md) for test categories.

@@ -1,37 +1,39 @@
-# 当前功能状态
+# Current feature status
 
-功能状态按接口与执行链列示。基础测试、真实任务和部署验证采用独立验收记录。
+English | [简体中文](STATUS.zh-CN.md)
 
-## 已接通
+Status is listed by interface and execution path. Baseline tests, real tasks and deployment checks are recorded separately.
 
-- 三端服务、独立用户与管理认证、模型/助理配置、用户分配、注册邮件及个人设置。
-- 流式聊天、会话标题/搜索/置顶/历史读取、回复行为、Trace 和审计。
-- 管理端和用户端中文、英文切换及浏览器语言偏好保存。
-- Skill 管理导入/读取/版本、远程 HTTP MCP 初始化/发现/调用、Secret 管理。
-- 按需能力和实时 Schema、工具调用账本、固定快照、有限修正和重复调用防护。
-- 真实 OCI 的 Python/Shell/JS/TS 执行与原生工作区，Coding 补丁/检查/交付。
-- MCP 真实进度、显式后台任务等待/取消，以及同 MCP 持久并发准入。
-- 管理调度配置、全局/每用户 Run 准入、跨 MCP 共享资源池与真实总览占用。
-- Artifact 保存、签名下载、音视频播放、静态项目预览。
-- DOCX/文字型 PDF 隔离导入、分类、结构块读取、字面检索和个人记忆管理。
-- LLM 协议、火山 TTS SSE 和兼容 ASR 执行；具体 adapter 见模型文档。
+## Connected
 
-## 剩余限制
+- Three service endpoints, separate user/administrator authentication, model and assistant configuration, user assignments, registration email and personal settings.
+- Streaming chat, conversation titles/search/pinning/history, response actions, Trace and audit records.
+- Chinese/English switching and saved browser language preference on management and user portals.
+- Skill import/read/revision management; remote HTTP MCP initialization, discovery and calls; Secret management.
+- On-demand capabilities and live schemas, invocation ledger, pinned snapshots, bounded repair and repeated-call protection.
+- Real OCI Python/Shell/JS/TS execution and native workspaces; Coding patches, checks and delivery.
+- Actual MCP progress, explicit background-task polling/cancellation and persistent concurrency admission per MCP.
+- Management scheduler settings, global/per-user Run admission, cross-MCP shared resource pools and live usage overview.
+- Artifact storage, signed downloads, media playback and static project previews.
+- Isolated DOCX/text-PDF import, categorization, structural block reads, literal search and personal-memory management.
+- LLM protocols, Volcengine TTS SSE and compatible ASR execution; see the model document for adapter details.
 
-| 功能 | 当前边界 |
+## Remaining limitations
+
+| Area | Current boundary |
 | --- | --- |
-| 安全 Run Resume | HTTP resume 路由当前返回 `resume_unavailable`；已支持事件重放和 checkpoint 保存 |
-| 调度恢复 | 并发配置和在途占位持久化；进程异常中断后不自动重新提交结果未知的外部调用 |
-| 用户自助安装 | 已提供政策和目录视图；安装执行链待接通，返回 `installation_ready=false` |
-| stdio MCP | 可登记，不允许宿主启动；完整受管执行未接通 |
-| 独立 ToolNode | 记录类型保留，独立执行准备未接通；原生 Sandbox 另有实际执行链 |
-| Skill 运行时构建 | 固定镜像核验与原生沙盒执行已接通；按包自动下载依赖和任意 uv/Conda/OCI 构建不支持 |
-| 主服务容器内沙盒 | 外部执行代理待接通；当前完整代码执行采用原生主服务模式 |
-| 模型类型 | 已接通协议由 model adapter 执行；新增协议需对应适配器 |
-| 资料自动使用 | 字面检索 API 可用；自动对话检索、pgvector/embedding、OCR、PDF 语义表格识别未实现 |
-| Git 协作 | 多文件 Coding 已接通，旧 Task/Worker/Worktree/Review/Merge 全流程未迁入 |
-| 动态插件 | 静态依赖/生命周期可用；热替换、完整代际租约及动态代码插件加载暂不支持 |
-| 公网与数据库 TLS | 当前采用本机认证 Origin 约束和 PostgreSQL NoTls；公网部署需匹配的代理策略 |
-| 验收 | 已有单元、协议、数据库、OCI 和浏览器用例；长期多模型成功率与成本持续统计 |
+| Safe Run Resume | HTTP resume currently returns `resume_unavailable`; event replay and checkpoint storage are available |
+| Scheduler recovery | Settings and in-flight reservations persist; after a process failure, an external call with unknown outcome is not automatically resubmitted |
+| User self-installation | Policy and catalog views exist; installation execution is not connected and returns `installation_ready=false` |
+| stdio MCP | Can be registered but is not launched by the host; managed execution is incomplete |
+| Standalone ToolNode | Record type exists, but standalone execution preparation is incomplete; native Sandbox has a separate execution path |
+| Skill runtime building | Pinned image validation and native sandbox execution work; automatic per-package dependency downloads and arbitrary uv/Conda/OCI builds are unsupported |
+| Sandbox inside main container | External execution proxy is pending; full code execution currently uses native main-service mode |
+| Model types | Connected protocols execute through model adapters; new protocols need a matching adapter |
+| Automatic knowledge use | Literal-search API works; automatic chat retrieval, pgvector/embeddings, OCR and semantic PDF table recognition are not implemented |
+| Git collaboration | Multi-file Coding works; the full legacy Task/Worker/Worktree/Review/Merge workflow has not migrated |
+| Dynamic plugins | Static dependencies/lifecycle work; hot replacement, full generation leases and dynamic code loading are unsupported |
+| Public access/database TLS | Current origin checks assume local authentication and PostgreSQL uses NoTls; public access needs a matching proxy policy |
+| Acceptance | Unit, protocol, database, OCI and browser tests exist; long-term multi-model success/cost tracking continues |
 
-部分诊断接口保留 `product_ready` 和 `infrastructure_validation` 字段，其取值表示对应接口的验证范围。部署验收以实际执行链与产物检查为依据。
+Some diagnostics retain `product_ready` and `infrastructure_validation` fields; their values describe the validation scope of those endpoints. Deployment acceptance is based on the actual execution path and artifact inspection.

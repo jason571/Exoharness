@@ -1,23 +1,25 @@
 # Skill Runtime
 
-`exoharness-skill-runtime` 检查指定 Skill revision 在执行镜像中的运行条件，并保存环境证据。它连接 Skill 包、能力登记与 Sandbox，供导入准备和执行准入使用。
+English | [简体中文](README.zh-CN.md)
 
-## 主要接口
+`exoharness-skill-runtime` checks whether a specific Skill revision can run in an execution image and records environment evidence. It connects Skill packages, capability registration, and Sandbox for import preparation and execution admission.
 
-- [service.rs](src/service.rs)：`SkillRuntime::open` 组合服务，`status` 查询环境状态，`prepare` 发起核验，`close` 结束受管检查任务。
-- [types.rs](src/types.rs)：`RuntimeStatus` 区分脚本存在、环境就绪及脚本执行就绪；`EnvironmentEvidence` 保存能力版本、包摘要、镜像摘要、运行类型和缺失依赖。
-- [metadata.rs](src/metadata.rs)：解析并检查运行依赖声明。
-- [probe.rs](src/probe.rs)、[probe.py](src/probe.py)：在沙盒中运行框架提供的依赖检查程序。
-- [cache.rs](src/cache.rs)：按版本与镜像身份保存和读取核验证据。
+## Main interfaces
 
-准备阶段使用已有执行镜像，将依赖声明作为数据传给检查程序。检查结果记录可用运行时、版本和缺失项。包 revision 或镜像摘要变化后重新核验；脚本执行仍需独立授权。依赖安装与镜像制作按部署流程处理。
+- [service.rs](src/service.rs): `SkillRuntime::open` composes the service; `status` reads environment state; `prepare` starts verification; and `close` ends a managed check job.
+- [types.rs](src/types.rs): `RuntimeStatus` distinguishes script presence, environment readiness, and script-execution readiness. `EnvironmentEvidence` records capability revision, package digest, image digest, runtime type, and missing dependencies.
+- [metadata.rs](src/metadata.rs): parses and validates runtime dependency declarations.
+- [probe.rs](src/probe.rs), [probe.py](src/probe.py): run the framework-provided dependency checker inside the sandbox.
+- [cache.rs](src/cache.rs): stores and reads verification evidence keyed by revision and image identity.
 
-## 测试
+Preparation uses an existing execution image and passes dependency declarations to the checker as data. Results record available runtimes, versions, and missing requirements. A package-revision or image-digest change triggers a new check; running Skill scripts still requires separate authorization. Dependency installation and image creation follow deployment procedures.
 
-[tests/preparation.rs](tests/preparation.rs) 验证环境检查、证据绑定和版本变化。需要独立 PostgreSQL、Docker 及 `EXOHARNESS_PRO_TEST_SANDBOX_IMAGE` 指定的镜像：
+## Tests
+
+[tests/preparation.rs](tests/preparation.rs) verifies environment checks, evidence binding, and revision changes. It requires dedicated PostgreSQL, Docker, and the image selected by `EXOHARNESS_PRO_TEST_SANDBOX_IMAGE`:
 
 ```sh
 cargo test --locked -p exoharness-skill-runtime
 ```
 
-相关说明：[能力接入](../../docs/CAPABILITIES.md)、[部署](../../docs/DEPLOYMENT.md)。
+Related documentation: [Capabilities](../../docs/CAPABILITIES.md), [Deployment](../../docs/DEPLOYMENT.md).

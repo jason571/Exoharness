@@ -1,24 +1,26 @@
 # Agent
 
-`exoharness-agent` 实现模型与工具之间的执行循环。它根据当前状态发起模型请求、处理待执行调用、保存回执，并决定完成、取消或暂停。模型供应商、HTTP 和数据库通过适配接口接入。
+English | [简体中文](README.zh-CN.md)
 
-## 入口与状态
+`exoharness-agent` implements the execution loop between models and tools. It requests model output from the current state, handles pending calls, saves receipts and decides whether to complete, cancel or pause. Model providers, HTTP and the database are supplied through adapters.
 
-- [engine.rs](src/engine.rs)：`run` 执行主循环。
-- [ports.rs](src/ports.rs)：`Driver` 提供模型请求、工具调用、状态保存与取消检查；`Receipt` 区分执行前拒绝、执行失败、完成和结果未知。
-- [state.rs](src/state.rs)：`EngineState` 保存执行游标、用量和计数，`EnginePolicy` 配置预算，`RunOutcome` 与 `StopReason` 描述停止结果。
-- [context.rs](src/context.rs)、[projection.rs](src/projection.rs)、[catalog_context.rs](src/catalog_context.rs)：构建当前请求的历史及能力投影。
-- [workflow.rs](src/workflow.rs)、[checkpoint_reads.rs](src/checkpoint_reads.rs)：处理持久工作流引用和读取记录。
-- [input_correction.rs](src/input_correction.rs)：处理执行前的有限参数修正。
+## Entry points and state
 
-Driver 使用固定配置版本，并保存精确参数和回执。已提交但结果未知的调用进入核实流程；已完成结果通过回执复用。上下文按调用身份保持配对，同一 Skill revision 的根说明去重，持久 checkpoint 引用完整工作数据。
+- [engine.rs](src/engine.rs): `run` implements the main loop.
+- [ports.rs](src/ports.rs): `Driver` provides model requests, tool calls, state persistence and cancellation checks. `Receipt` distinguishes pre-execution rejection, execution failure, completion and unknown outcome.
+- [state.rs](src/state.rs): `EngineState` tracks cursor, usage and counters; `EnginePolicy` configures budgets; `RunOutcome` and `StopReason` describe termination.
+- [context.rs](src/context.rs), [projection.rs](src/projection.rs), [catalog_context.rs](src/catalog_context.rs): build history and capability projections for the current request.
+- [workflow.rs](src/workflow.rs), [checkpoint_reads.rs](src/checkpoint_reads.rs): handle persistent workflow references and read records.
+- [input_correction.rs](src/input_correction.rs): bounded argument repair before execution.
 
-## 测试
+The Driver pins a configuration revision and saves exact arguments and receipts. A submitted call with an unknown outcome enters verification; completed results are reused from receipts. Context pairs calls and results by identity, deduplicates the root instructions for a Skill revision and uses persistent checkpoint references for full work data.
 
-[tests/](tests/) 使用 Mock Driver 覆盖模型/工具循环、预算、取消、重复调用、上下文投影和工作流续接：
+## Tests
+
+[tests/](tests/) uses a Mock Driver to cover the model/tool loop, budgets, cancellation, repeated calls, context projection and workflow continuation:
 
 ```sh
 cargo test --locked -p exoharness-agent
 ```
 
-相关设计：[上下文与 Token](../../docs/CONTEXT_AND_TOKENS.md)、[架构](../../docs/ARCHITECTURE.md)。
+See [Context and Tokens](../../docs/CONTEXT_AND_TOKENS.md) and [Architecture](../../docs/ARCHITECTURE.md).

@@ -1,41 +1,43 @@
-# 安全边界
+# Security boundaries
 
-Agent 输出和上传文件按不可信输入处理。服务端统一校验身份、权限、版本、路径、网络和执行限制。
+English | [简体中文](SECURITY.zh-CN.md)
 
-## 用户与助理隔离
+Agent output and uploaded files are untrusted input. The server enforces identity, permissions, revisions, paths, network policy and execution limits.
 
-用户仅访问自己的 Session、Run、资料和记忆；管理员可在管理端跨用户追踪。管理路由不注册在用户端。助理范围、用户政策、能力权限和当前就绪共同决定是否执行，固定快照不绕过后续撤销。
+## User and assistant isolation
 
-身份来自服务端认证结果。浏览器采用持久 Cookie 会话，API 使用 Bearer 凭据；密码哈希、登录限速和 CSRF 分别校验。管理员与普通用户采用独立权限范围。
+Users may access only their own Sessions, Runs, materials and memories; administrators can inspect cross-user traces. Management routes are not registered on the user portal. Execution requires the assistant scope, user policy, capability grant and current readiness. A pinned snapshot does not override a later authorization revocation.
 
-## 凭据
+Identity comes from server-side authentication. Browsers use persistent cookie sessions and API clients use Bearer credentials. Password hashing, login throttling and CSRF are checked separately. Administrators and regular users have distinct scopes.
 
-敏感 Header 从 MCP Manifest 移入 Secret Store；API 只返回是否配置。Unix 密钥文件为 0600、目录为 0700。配置和日志避免回显；完整 Header 值保持原语义，不任意添加 Bearer。
+## Credentials
 
-公开仓库排除密钥、环境文件、数据库密码、验证码、签名链接、账户导出及真实 Trace。凭据轮换保留仍被执行引用的旧版本；孤立 Secret 自动回收和完整代际租约尚待完善。
+Sensitive MCP manifest headers are moved into the Secret Store; APIs return only whether a value is configured. Unix secret files use mode 0600 and their directories use 0700. Configurations and logs do not echo secrets. Header values retain their original semantics; the framework does not add `Bearer` arbitrarily.
 
-## 代码与文件
+Public repositories exclude credentials, environment files, database passwords, verification codes, signed URLs, account exports and real Trace data. Rotation retains old versions referenced by active executions. Automatic collection of orphaned secrets and full generation leases remain incomplete.
 
-Skill 导入只解析/登记，不执行代码或依赖安装。准备只运行固定检查器。Python/Shell/JS/TS 执行必须经 OCI 沙盒，缺环境明确停止，无宿主机回退。
+## Code and files
 
-任务工作区、只读包、镜像摘要与授权固定。后端校验路径和符号链接范围，并实施默认禁网、非 root、受限挂载及资源预算。主服务容器与任务沙盒独立管理，Docker Socket 仅由受信执行后端使用。
+Skill import parses and registers a package without executing code or installing dependencies. Preparation runs fixed checkers only. Python/Shell/JavaScript/TypeScript execution must use an OCI sandbox; if it is unavailable, the task stops without falling back to the host.
 
-资料解析不执行宏、外部资源或未知脚本。预览只读发布清单，使用隔离 CSP，不允许浏览器获得主站同源权限。
+Task workspaces, read-only package mounts, image digests and authorization are pinned. The backend validates paths and symlink boundaries and applies network-disabled defaults, a non-root identity, restricted mounts and resource budgets. The main service container and task sandbox are managed separately; only a trusted execution backend may use the Docker Socket.
 
-## 外部调用
+Document parsing does not execute macros, external resources or unknown scripts. Previews expose only published manifests, with an isolated CSP and no same-origin access to the main site.
 
-输入通过实时 Schema 后提交。稳定 invocation 提供本地幂等和审计，外部幂等保证取决于服务协议。后台任务 poll/cancel 使用原授权范围；回执无法确认时保留未知状态并阻止重复提交。
+## External calls
 
-文件抓取校验来源。远程服务和签名文件地址由受信配置提供，公网与内网访问范围由部署网络策略限制。用户自助安装的网络安全检查随安装执行链完善。
+Inputs are checked against the live schema before submission. Stable invocation IDs provide local idempotency and audit records; external idempotency depends on the service protocol. Background polling and cancellation retain the original authorization scope. If a receipt cannot confirm the outcome, the call remains unknown and is not submitted again.
 
-## 公网部署边界
+Fetched files are checked against configured sources. Remote service and signed-file addresses come from trusted configuration; deployment network policy controls public and private reachability. Network checks for user-installed capabilities depend on completion of the installation workflow.
 
-应用监听 loopback，HTTPS 由反向代理终止。当前管理与用户认证接受对应本机 Host/HTTP Origin，代理需正确映射 Host 和 Origin，并保持现有校验。
+## Public deployment
 
-公网部署需核验同源代理映射、Cookie 安全属性及认证策略。通用公网 Origin 配置尚待实现。PostgreSQL 当前使用 NoTls，连接应限定于本机或受控私有网络。
+The application binds to loopback by default, with HTTPS terminated by a reverse proxy. Current management and user authentication accept corresponding local Host/HTTP Origin values; a proxy must map Host and Origin correctly and preserve the existing checks.
 
-媒体签名链接授予文件访问权。无到期时间的链接采用相同凭据保护；需要限制传播时，配置访问期限及相应交付策略。
+For public deployment, validate same-origin proxy mapping, secure cookie attributes and the authentication policy. A general public-Origin configuration is not yet available. PostgreSQL currently uses NoTls; restrict its connection to localhost or a protected private network.
 
-## 漏洞报告
+Media signatures grant file access. Links without expiry use the same credential protection; use expiration and an appropriate delivery policy when link propagation must be limited.
 
-漏洞报告包含脱敏最小复现、版本和影响范围。涉及凭据、用户文件或完整 Trace 的材料通过私密渠道传递。公开仓库的私密安全报告渠道在发布前配置。
+## Vulnerability reports
+
+Reports should include a minimal redacted reproduction, version and impact scope. Send credentials, user files and full Trace data through a private channel. Configure a private security-reporting channel for the public repository before release.

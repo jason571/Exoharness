@@ -1,20 +1,22 @@
-# 构建与部署
+# Build and Deployment
 
-ExoHarness 支持原生二进制和挂载发布包的容器启动。源码编译使用本机 Rust、Python 和 Node.js 工具链；OCI 沙盒和容器托管数据库使用 Docker Engine。代码及页面更新重新发布二进制，运行依赖变化时更新镜像。首次部署步骤见 [英文首页](../README.md) 和 [中文指南](../README.zh-CN.md)。
+[English](DEPLOYMENT.md) | [简体中文](DEPLOYMENT.zh-CN.md)
 
-## 构建
+ExoHarness can run as a native binary or in a container using a mounted release package. Source builds use the host Rust, Python, and Node.js toolchains. Docker Engine is used for OCI sandboxes and an optionally containerized database. Code and page changes require a new binary release; runtime dependency changes require an image update. For initial setup, see the [English project guide](../README.md) and [Chinese guide](../README.zh-CN.md).
 
-需要 Rust/Cargo 1.88+、Python 3.11+、Node/npm，以及锁文件对应的依赖。离线构建只使用已缓存依赖，不自动下载工具链或构建镜像。
+## Build
+
+Builds require Rust/Cargo 1.88+, Python 3.11+, Node/npm, and dependencies matching the lockfiles. Offline builds use cached dependencies only; they do not download toolchains or build images automatically.
 
 ```sh
 bash scripts/package-release.sh --offline
-# 同一构建入口
+# Equivalent build entry point
 bash scripts/build.sh --offline
-# Rust 调试构建（省略前端打包）
+# Rust debug build (skip frontend packaging)
 bash scripts/build.sh --offline --skip-web --profile dev --output /tmp/exoharness-debug
 ```
 
-前端构建先于 Rust，避免编入旧资源。当前页面使用二进制内嵌资源；只替换 release/web 不保证进程已加载新页面，页面更新也需重新打包并重启相应二进制。
+The frontend is built before Rust so that the binary does not embed stale assets. Pages are embedded in the binary: replacing `release/web` alone does not update a running process. Page changes must be packaged into a new binary and the corresponding process restarted.
 
 ```text
 release/
@@ -28,9 +30,9 @@ release/
   README.txt
 ```
 
-发布包包含二进制、页面资源、启动脚本和清单。数据库、配置 generation、用户文件和凭据保存在独立私有数据目录。发布到另一主机前，检查 CPU 架构、动态库和 glibc ABI 兼容性。
+The release package contains the executable, page assets, launch scripts, and a manifest. The database, configuration generations, user files, and credentials remain in a separate private data directory. Before deploying to another host, verify CPU architecture, shared libraries, and glibc ABI compatibility.
 
-## 原生启动
+## Native startup
 
 ```sh
 bash release/scripts/start-native.sh prepare-db
@@ -40,34 +42,34 @@ bash release/scripts/start-native.sh restart
 bash release/scripts/start-native.sh stop
 ```
 
-`prepare-db` 使用已缓存 PostgreSQL 镜像创建本项目测试容器/卷；缺镜像停止，不自动 pull/build。可改为已有 PostgreSQL，无须用 Docker 部署数据库。
+`prepare-db` uses a cached PostgreSQL image to create this project's database container and volume. If the image is unavailable, the command stops; it does not pull or build one. An existing PostgreSQL server can be used instead, without running the database in Docker.
 
-`access` 显示本地访问凭据，输出不可公开；`set-admin-password` 隐藏输入、更新数据库并撤销旧会话。`data-path` 显示实际私有数据位置。运行目录支持 `EXOHARNESS_LOCAL_DATA_DIR`，在无法保持 Unix 权限的 WSL 挂载盘上使用 Linux 私有目录，不放宽密钥权限检查。
+`access` displays local access credentials; do not share its output. `set-admin-password` hides input, updates the database, and revokes old sessions. `data-path` shows the active private data location. Set `EXOHARNESS_LOCAL_DATA_DIR` to use a Linux-private directory when a WSL-mounted drive cannot preserve Unix permissions. Secret-file permission checks are not relaxed.
 
-原生日志在实际数据目录的 `service.log`。脚本凭 executable、启动标识和发布摘要验证进程所有权，不只按 PID 杀进程；重启主服务不应重启数据库或业务 MCP。
+Native logs are written to `service.log` in the active data directory. Scripts verify process ownership using the executable, startup marker, and release digest rather than relying on a PID alone. Restarting the main service should not restart PostgreSQL or business MCP services.
 
-## 配置项
+## Configuration
 
-| 变量 | 用途 |
+| Variable | Purpose |
 | --- | --- |
-| `EXOHARNESS_BIND` | 管理监听；默认 `127.0.0.1:9797` |
-| `EXOHARNESS_PORTAL_BIND` | 用户监听；默认 `127.0.0.1:9798` |
-| `EXOHARNESS_MEDIA_BIND` | 文件监听；默认 `127.0.0.1:9790` |
-| `EXOHARNESS_MEDIA_PUBLIC_BASE_URL` | 对外下载/预览地址 |
-| `EXOHARNESS_DATABASE_URL` | PostgreSQL 地址 |
-| `EXOHARNESS_DATABASE_PASSWORD_FILE` | 独立密码文件 |
-| `EXOHARNESS_DATABASE_NAMESPACE` | 执行 schema，默认 execution |
-| `EXOHARNESS_LOCAL_CREDENTIALS_FILE` | 私有本地访问凭据 |
-| `EXOHARNESS_CONFIGURATION_DIR` | 模型/助理私有配置目录 |
-| `EXOHARNESS_CAPABILITY_DIRECTORY` | 不可变包及相关能力数据 |
-| `EXOHARNESS_SANDBOX_IMAGE` | 已准备的任务运行镜像，运行时固定摘要 |
-| `EXOHARNESS_MODEL_REQUEST_TIMEOUT_SECONDS` | 模型请求超时配置 |
+| `EXOHARNESS_BIND` | Management listener; defaults to `127.0.0.1:9797` |
+| `EXOHARNESS_PORTAL_BIND` | User listener; defaults to `127.0.0.1:9798` |
+| `EXOHARNESS_MEDIA_BIND` | File listener; defaults to `127.0.0.1:9790` |
+| `EXOHARNESS_MEDIA_PUBLIC_BASE_URL` | Public download/preview base URL |
+| `EXOHARNESS_DATABASE_URL` | PostgreSQL connection URL |
+| `EXOHARNESS_DATABASE_PASSWORD_FILE` | Separate password file |
+| `EXOHARNESS_DATABASE_NAMESPACE` | Execution schema; defaults to `execution` |
+| `EXOHARNESS_LOCAL_CREDENTIALS_FILE` | Private local access credentials |
+| `EXOHARNESS_CONFIGURATION_DIR` | Private model/assistant configuration directory |
+| `EXOHARNESS_CAPABILITY_DIRECTORY` | Immutable packages and related capability data |
+| `EXOHARNESS_SANDBOX_IMAGE` | Prepared task image, pinned by digest at runtime |
+| `EXOHARNESS_MODEL_REQUEST_TIMEOUT_SECONDS` | Model request timeout setting |
 
-App 使用三个独立 IPv4 loopback 端口。通过生产代理部署为 8787 / 8788 / 8790 时，设置对应监听变量。配置项以本表和启动代码为准；公网接入条件见 [安全](SECURITY.md)。
+The application uses three independent IPv4 loopback listeners. When a production proxy exposes them as 8787 / 8788 / 8790, set the corresponding bind variables. This table and the launch code define supported settings. Public-access requirements are documented in [Security](SECURITY.md).
 
-## 容器启动
+## Container startup
 
-从源码原生编译 release 后，构建主服务运行镜像：
+Build the native release from source, then create the main-service image:
 
 ```sh
 docker build -f runtime/server/Dockerfile -t exoharness-server:0.1 .
@@ -75,9 +77,9 @@ docker run --rm --network none --read-only exoharness-server:0.1 --version
 export EXOHARNESS_RUNTIME_IMAGE=exoharness-server:0.1
 ```
 
-`runtime/server/Dockerfile.dockerignore` 限制构建上下文，只允许执行文件及构建元数据。主服务镜像与 `runtime/sandbox/Dockerfile` 的任务执行镜像独立。任务沙盒镜像的构建、登记和离线传输见 [沙盒准备](../README.zh-CN.md#准备沙盒执行镜像)。
+`runtime/server/Dockerfile.dockerignore` limits the build context to the executable and build metadata. The main-service image is separate from the task execution image built from `runtime/sandbox/Dockerfile`. See [sandbox image preparation](../README.md#preparing-the-sandbox-execution-image) for building, registering, and transferring the sandbox image offline.
 
-先停原生监听，再启动容器方式：
+Stop native listeners before starting the container deployment:
 
 ```sh
 bash release/scripts/start-native.sh stop
@@ -87,22 +89,22 @@ bash release/scripts/start-docker.sh restart
 bash release/scripts/start-docker.sh stop
 ```
 
-使用已缓存兼容镜像，`EXOHARNESS_RUNTIME_IMAGE` 可以指定。启动前以无网络的 `--version` 检验 ABI，失败不自动换镜像或下载。主服务只读挂载二进制等固定资源，私有可变目录单独授权；默认不把宿主 Docker Socket 暴露给 API 容器。
+Use a cached compatible image; `EXOHARNESS_RUNTIME_IMAGE` selects it. Before startup, check ABI compatibility with `--version` and no network access. On failure, the script does not select or download another image. The main service mounts the executable and other fixed assets read-only; private mutable directories are mounted separately. By default, the host Docker socket is not exposed to the API container.
 
-Docker 主服务采用 host network，需要 Linux Docker Engine，或开启 host networking 的 Docker Desktop。容器内外部沙盒执行代理尚待接通；需要 OCI 代码执行能力时采用原生主服务模式。默认容器配置通过独立挂载隔离主服务数据。
+The Docker deployment uses host networking and requires Linux Docker Engine or Docker Desktop with host networking enabled. The sandbox execution bridge from the containerized main service is not yet connected; use the native main-service mode when OCI code execution is required. The default container configuration keeps service data in separate mounts.
 
-## 模型和外部服务
+## Models and external services
 
-在管理页面配置并测试模型，导入 Skill/MCP 后检查授权和就绪。视频、音乐、图片、TTS、ASR 及渲染服务是独立依赖，不包含在主服务二进制中。
+Configure and test models in the management console. After importing a Skill or MCP, verify authorization and readiness. Video, music, image, TTS, ASR, and rendering services are independent dependencies and are not included in the main-service binary.
 
-源码树 `scripts/start-asr-local.py` 复用已有 ASR 项目、镜像和权重。该脚本属于本地开发环境，独立发布包另行配置 ASR 服务。ASR 验收使用已知文本录音核对转写结果。
+The source-tree script `scripts/start-asr-local.py` reuses the existing ASR project, image, and model weights. It is intended for local development; configure ASR separately for a standalone release package. Verify ASR with an audio sample whose transcript is known.
 
-## 更新与回退
+## Updates and rollback
 
-1. 检查运行中任务和未知 invocation，避免通过重启隐藏外部作业。
-2. 校验发布清单和目标 ABI；备份执行文件、数据库及关联私有数据。
-3. 替换发布文件，不覆盖数据目录，重启三端服务。
-4. 检查健康、认证、配置、事件、代表性下载及实际任务。
-5. 回退必须核对数据格式，不因换回二进制而重复提交未知调用。
+1. Review active tasks and invocations with unknown outcomes; do not hide external work by restarting.
+2. Verify the release manifest and target ABI. Back up the executable, database, and associated private data.
+3. Replace release files without overwriting the data directory, then restart the three services.
+4. Check health, authentication, configuration, events, representative downloads, and a real task.
+5. Before rollback, verify data-format compatibility. Replacing the binary must not resubmit an invocation with an unknown outcome.
 
-更新时保留执行日志和结果未知的调用记录，按现有恢复策略继续处理。测试命令见 [测试](TESTING.md)。
+Keep execution logs and unknown-outcome invocation records during updates, then follow the existing recovery policy. See [Testing](TESTING.md) for test commands.

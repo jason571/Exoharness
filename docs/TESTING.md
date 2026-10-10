@@ -1,77 +1,79 @@
-# 测试与验收
+# Testing and Acceptance
 
-测试覆盖工具提交、参数与回执、产物可用性及失败停止行为。验收按单元、协议、集成、浏览器、真实任务和部署分别记录。
+[English](TESTING.md) | [简体中文](TESTING.zh-CN.md)
 
-## 基础门禁
+Tests cover tool submission, arguments and receipts, artifact availability, and safe stopping on failure. Acceptance evidence is tracked separately for unit, protocol, integration, browser, real-task, and deployment checks.
+
+## Baseline gates
 
 ```sh
-# 契约/Core/Coding、静态和脚本门禁；排除 PostgreSQL 集成
+# Contract/Core/Coding, static, and script gates; excludes PostgreSQL integration
 export EXOHARNESS_PRO_TEST_SANDBOX_IMAGE='<prepared-sandbox-image>'
 bash scripts/test.sh --unit-only
-# 完整源码门禁，需独立可丢弃测试数据库
+# Full source gate; requires a dedicated disposable test database
 EXOHARNESS_PRO_TEST_DATABASE_URL='<private-test-connection>' bash scripts/test.sh
-# 已通过本地脚本准备测试库时
+# Use when the local test database has already been prepared
 python3 scripts/test-local.py
 ```
 
-默认入口包含 workspace Rust 测试、fmt、all-target Clippy 和 Python 脚本测试，Cargo 使用锁文件及离线缓存。数据库集成用例使用独立可丢弃数据库。`--unit-only` 包括单元、静态和 Python 检查；脚本测试中的真实隔离文档解析需要 Docker 和预置沙盒镜像，环境缺失时明确失败。
+The default gate runs workspace Rust tests, formatting, all-target Clippy, and Python script tests. Cargo uses the lockfile and offline cache. Database integration tests use a dedicated disposable database. `--unit-only` runs unit, static, and Python checks; tests that verify isolated document parsing require Docker and a prepared sandbox image and fail explicitly when the environment is unavailable.
 
-OCI 用例要求预置镜像和 Docker 执行权限，测试镜像通过 `EXOHARNESS_PRO_TEST_SANDBOX_IMAGE` 指定。报告分别记录通过、失败、忽略及环境缺失的用例。
+OCI tests require a prepared image and Docker execution permission. Set `EXOHARNESS_PRO_TEST_SANDBOX_IMAGE` to select the test image. Reports distinguish passed, failed, skipped, and environment-blocked cases.
 
-## 覆盖层级
+## Coverage levels
 
-| 层级 | 检查内容 |
+| Level | Coverage |
 | --- | --- |
-| 纯单元 | 图依赖、状态、Schema、JSON、调用配对、Skill 去重、预算和补丁 |
-| PostgreSQL | CAS、事务回滚、owner、invocation 领取、重启、并发队列和未知结果 |
-| 调度 | 默认/持久化配置、revision 冲突、跨用户全局上限、单用户上限、进程竞争、池关联变化与未知调用占位 |
-| 模型/MCP 协议 | 分片工具参数、完成标记、实时 Schema、进度、后台句柄与取消 |
-| OCI | 禁网、路径、资源限制、OOM、超时、取消、持久文件和执行回执 |
-| 浏览器 | 登录/设置、上传、SSE、真实媒体、Trace、手机布局与多文件预览 |
-| 真实模型任务 | 各任务正确交付、步骤、输入/输出/缓存、失败和质量 |
-| 部署 | 发布摘要、ABI、健康、认证域名、原有数据和实际文件下载 |
+| Unit | Dependency graphs, state, schemas, JSON, call/result pairing, Skill deduplication, budgets, and patches |
+| PostgreSQL | CAS, transaction rollback, ownership, invocation claims, restart recovery, queue concurrency, and unknown outcomes |
+| Scheduler | Default/persisted settings, revision conflicts, global and per-user limits, process races, pool reassignment, and unknown-call reservations |
+| Model/MCP protocols | Streaming tool arguments, completion markers, live schemas, progress, background handles, and cancellation |
+| OCI | Network denial, paths, resource limits, OOM, timeouts, cancellation, persistent files, and execution receipts |
+| Browser | Login/settings, uploads, SSE, real media, Trace, mobile layout, and multi-file previews |
+| Real-model tasks | Correct delivery, steps, input/output/cache usage, failures, and quality for each task type |
+| Deployment | Release digest, ABI, health, authenticated domains, existing data, and actual file downloads |
 
-Rust 用例在 `modules/*/tests/`；私有实现测试使用显式 cfg 路径引入，不为测试扩张公共接口。脚本和浏览器用例在 `scripts/tests/`，需要已有服务时按其说明串行执行，不在运行用户任务时运行会重启服务的脚本。
+Rust tests are in `modules/*/tests/`. Private implementation tests are included through explicit cfg paths rather than expanding public interfaces for testing. Script and browser tests are in `scripts/tests/`. Tests that require a running service must be run serially as documented; do not run scripts that restart services while user tasks are active.
 
-## 关键回归
+## Critical regressions
 
-- 正常文本与普通解释不误触发工具；已授予 Skill/MCP 可被发现，未授权能力不连接。
-- 多服务与 68 工具目录按服务选择，不遍历全部工具；批量精确名称覆盖缺失、重名和授权边界。跨查询分页从第一页恢复，下一页游标绑定查询范围和版本。
-- 选择后的旧目录从模型窗口退休，日志不变；未选、失败选择、新查询、Skill 说明和业务 JSON 保持完整，调用/结果无悬空。
-- MCP 调用和结果始终成对；有效 checkpoint 可精简且完整日志不变，失效声明安全回退。
-- 重复同工具同参数最多三次；搜索/读取/后台等待不能造成无限模型循环。
-- 同 MCP limit=1 时第二个调用提交前排队；等待取消不计尝试，未知结果不释放容量。
-- 取消提交与进度写入竞争时，拒绝晚到进度不会丢弃执行适配器；先完成取消并保存可信回执，再释放容量。
-- TTS/ASR 实际音频与转写；图片/歌曲/视频展示、下载与 Range，网页相对资源。
-- 编码检查失败仅局部修复，陈旧版本不写入；DOCX/PDF 与表格不因截断破坏结构。
-- 成功、错误、取消、断线和晚到回执保留一致状态，不重投未知副作用。
+- Ordinary conversation must not trigger tools. Authorized Skills/MCPs are discoverable; unauthorized capabilities are not contacted.
+- With multiple services and a 68-tool catalog, selection is service-scoped rather than a full traversal. Exact-name batches cover missing names, duplicates, and authorization boundaries. A changed query restarts pagination; continuation cursors are bound to query scope and version.
+- After selection, the old catalog is retired from model context without changing the journal. Unselected or failed selections, new queries, Skill instructions, and business JSON remain intact; tool calls and results stay paired.
+- Every MCP call has its corresponding result. A valid checkpoint can be compacted without changing the full journal; invalid checkpoint declarations fall back safely.
+- Repeating the same tool with identical arguments is limited to three consecutive attempts. Search, reads, and background polling must not create an unbounded model loop.
+- With an MCP limit of one, a second call queues before submission. Cancelling while queued does not count as an attempt; unknown outcomes continue to hold capacity.
+- If cancellation races with progress updates, rejecting late progress must not discard the execution adapter. Persist a trusted cancellation receipt before releasing capacity.
+- Verify real TTS/ASR output; image, song, and video rendering, downloads and Range requests; and relative web assets.
+- A failed coding check should trigger only a local repair; stale revisions must not be written. DOCX/PDF and table structures must not be corrupted by truncation.
+- Success, error, cancellation, disconnect, and late receipts retain consistent state and never resubmit an invocation with an unknown side effect.
 
-## 成本验收
+## Cost acceptance
 
-使用可比较输入记录每 Run 的成功交付、模型请求、能力调用、参数修正、输入/输出/缓存 usage、等待和执行时间。区分会话累计与本轮成本；未知 usage 单独标注。
+For comparable inputs, record successful delivery, model requests, capability calls, argument repairs, input/output/cached usage, waiting time, and execution time per Run. Distinguish session totals from per-turn costs and mark unknown usage separately.
 
-Mock LLM 用于协议回归，真实模型任务用于质量和成本验收。GPU 与付费调用在已授权、具备取消和预算控制的环境执行。公开报告采用脱敏汇总数据。
+Use a mock LLM for protocol regression and real-model tasks for quality and cost acceptance. GPU and paid calls must run in an authorized environment with cancellation and budget controls. Public reports should use redacted aggregate data.
 
-## 界面语言回归
+## Interface language regression
 
 ```sh
 npm --prefix web-console run build
 node scripts/tests/browser_i18n.mjs
 ```
 
-用例使用真实页面结构和编译资源，覆盖 15 个页面的中文/英文切换、刷新后偏好保存、动态状态更新、表单值、点击事件和手机侧入口。聊天内容、MCP 消息、Trace 原始数据与用户会话标题保持原文。
+These tests use the actual page structure and compiled assets. They cover language switching across 15 pages, preference persistence after refresh, dynamic status updates, form values, click handlers, and mobile navigation. Chat content, MCP messages, raw Trace data, and user conversation titles remain unchanged.
 
-## 调度与管理页面验收（2026-10-09）
+## Scheduler and management-console acceptance (2026-10-09)
 
-| 检查项 | 结果 |
+| Check | Result |
 | --- | --- |
-| 工作区 Rust 回归 | 非忽略用例通过；最终对话与工具集成再次验证 45 项 |
-| 调度存储 | 7 项通过，覆盖跨进程竞争、独立能力限制、共享池、取消、未知回执和关联调整 |
-| 格式与静态检查 | `cargo fmt --all -- --check`、Clippy 全模块和全部 target 通过 |
-| 发布与脚本 | 45 项通过，使用已缓存 OCI 镜像验证 DOCX/PDF 解析 |
-| 浏览器 | 管理端 10 页、双语言、6 种宽度、折叠菜单、主题、顶部布局、Trace 和配置错误保护通过 |
-| 本机与线上进程 | 登录后核验内嵌资源、统一页面宽度、配置读取、原值保存、陈旧 revision 拒绝及总览数据 |
+| Workspace Rust regression | All non-ignored cases passed; a final 45-case conversation/tool integration run passed |
+| Scheduler storage | 7 cases passed, covering cross-process races, independent capability limits, shared pools, cancellation, unknown receipts, and reassignment |
+| Formatting and static analysis | `cargo fmt --all -- --check` and Clippy for all modules and targets passed |
+| Release and scripts | 45 cases passed, including DOCX/PDF parsing with the cached OCI image |
+| Browser | Passed across 10 management pages, both languages, 6 viewport widths, collapsed navigation, themes, header layout, Trace, and configuration-error handling |
+| Local and production processes | Authenticated checks verified embedded assets, consistent page widths, configuration reads, unchanged-value saves, stale-revision rejection, and overview data |
 
-Run 和 MCP 排队用例通过 Mock LLM 与持久化账本验证：等待期间模型请求数、工具提交数和尝试次数均不增加。取消竞争用例先提交数据库终态，再接收晚到进度，确认适配器仍完成取消并持久化回执。
+Run and MCP queue behavior was verified with a mock LLM and persistent ledger: while queued, model-request, tool-submission, and attempt counts did not increase. The cancellation-race test committed the terminal database state before receiving late progress and confirmed that the adapter still completed cancellation and persisted its receipt.
 
-线上更新前备份运行文件和执行 schema，更新后核验进程 SHA-256、三个监听端口及认证后的接口。验收保持原有并发上限和能力授权，未提交新的 GPU 生成任务。
+Before the production update, back up runtime files and the execution schema. After updating, verify the process SHA-256, all three listeners, and authenticated endpoints. Acceptance preserved the existing concurrency limit and capability grants and did not submit a new GPU-generation task.

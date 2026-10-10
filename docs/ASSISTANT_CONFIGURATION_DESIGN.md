@@ -1,21 +1,23 @@
-# 智能助理配置
+# Assistant configuration
 
-助理定义身份、头像、系统提示词、默认模型以及能力范围；用户由管理员分配助理，普通聊天页面不自行选择其他助理。
+English | [简体中文](ASSISTANT_CONFIGURATION_DESIGN.zh-CN.md)
 
-## 配置内容
+An assistant defines its identity, avatar, system prompt, default model and capability scope. Administrators assign assistants to users; the regular chat page does not let a user switch to another assistant.
 
-- 身份、名称和 System Prompt：描述角色与交互风格，不宣称所有执行能力均已可用。
-- 头像：保存为内容寻址资源，通过固定引用显示；上传后保存当前助理，不自动创建另一位助理。
-- Skill、MCP、Tool 和模型能力分别授权。Skill 依赖的 MCP 仍需单独授权。
-- 默认 LLM 与语音模型：分别配置；类型默认值和执行授权分别检查。
-- 启用与默认状态：管理员用户分配时只选择有效助理；删除受当前默认值与引用约束。
+## Configuration
 
-## 更新与执行
+- Identity, name and system prompt describe the role and interaction style. They do not claim that every execution capability is available.
+- An avatar is stored as a content-addressed asset and displayed through a stable reference. Uploading an avatar updates the selected assistant; it does not create another assistant.
+- Skill, MCP, Tool and model-backed capabilities are authorized separately. Selecting a Skill does not grant the MCP services it may depend on.
+- The default LLM and speech model are configured separately. Type defaults and execution authorization are checked independently.
+- Only enabled assistants are selectable for user assignment. Deletion is constrained by the current default and existing references.
 
-更新同一个助理的当前配置会保存新的内部不可变 generation/revision，不新增一个助理身份。旧执行快照仍引用原 revision，管理页面显示当前配置，不把历史 revision 当作重复助理。
+## Updates and execution
 
-一次新会话固定分配的助理公开快照；一次 Run 进一步固定助理版本和执行能力快照。使用快照不绕过当前授权撤销、能力启停或运行环境检查。
+Updating an assistant's current configuration creates an internal immutable generation/revision without creating a new assistant identity. Existing execution snapshots continue to reference their original revision; the management UI shows the current assistant rather than presenting old revisions as duplicate assistants.
 
-工具发现从授权能力目录读取实时 Schema。角色提示词定义身份和沟通方式；实际可调用范围由能力目录确定。未授权、未登记、运行环境缺失及服务执行失败使用独立错误类别。
+A new session fixes the public snapshot of its assigned assistant. Each Run further fixes the assistant revision and execution-capability snapshot. A snapshot does not bypass current authorization revocation, capability enablement or runtime-readiness checks.
 
-管理接口见 [API](INTERFACES.md)；实现位于 `configuration/src/profiles/`、`api/src/configuration/` 和 `identity` 用户分配服务。
+Tool discovery reads live schemas from the authorized capability catalog. The role prompt defines identity and communication style; the capability catalog defines what can actually be called. Missing authorization, missing registration, missing runtime dependencies and service execution errors use separate error categories.
+
+See the [management API](INTERFACES.md). Implementation is in `configuration/src/profiles/`, `api/src/configuration/` and the `identity` user-assignment service.

@@ -1,25 +1,27 @@
 # MCP
 
-`exoharness-mcp` 提供远程 MCP 服务的导入、连接、工具发现和调用。当前执行传输使用标准 SDK 的 Streamable HTTP，服务返回的 Schema、进度和结果交由上层执行链处理。
+English | [简体中文](README.zh-CN.md)
 
-## 主要接口
+`exoharness-mcp` imports, connects to, discovers tools from, and calls remote MCP services. Runtime transport currently uses the standard SDK's Streamable HTTP. Schemas, progress, and results returned by a service are handled by the higher-level execution pipeline.
 
-- [imports/](src/imports/)：`ImportRequest` 与 `parse_import` 解析配置并拆分敏感 Header。
-- [service.rs](src/service.rs)：`Mcp` 连接能力登记和 Secret Store，提供导入与服务验证。
-- [client/](src/client/)：`Connection` 管理初始化、工具发现、调用和关闭；`ConnectionOptions` 配置启动、发现、无进度超时及结果体积限制。
-- [progress.rs](src/progress.rs)：`Progress` 传递服务报告的进度。
-- [secret_management.rs](src/secret_management.rs)：更新登记服务使用的凭据引用。
+## Main interfaces
 
-认证值保存在独立 Secret Store，配置与页面使用引用和配置状态。执行授权、稳定 invocation 和并发准入由 Tools 及持久调用账本管理。
+- [imports/](src/imports/): `ImportRequest` and `parse_import` parse configuration and separate sensitive headers.
+- [service.rs](src/service.rs): `Mcp` connects capability registration with Secret Store operations for import and service verification.
+- [client/](src/client/): `Connection` handles initialization, tool discovery, calls, and shutdown. `ConnectionOptions` sets startup/discovery timeouts, no-progress timeout, and result-size limits.
+- [progress.rs](src/progress.rs): `Progress` carries progress reported by the service.
+- [secret_management.rs](src/secret_management.rs): updates credential references used by registered services.
 
-后台任务句柄与 checkpoint 使用明确的 ExoHarness 元数据协议，和 MCP 标准消息分别处理。`stdio` 配置可解析登记，其运行需要独立的受管启动实现；本模块的远程调用路径采用 Streamable HTTP。
+Authentication values are stored in a separate Secret Store; configuration and pages use references and configured status. Tools and the persistent invocation ledger manage execution authorization, stable invocation IDs, and concurrency admission.
 
-## 测试
+Background-task handles and checkpoints use explicit ExoHarness metadata and remain distinct from standard MCP messages. `stdio` configuration can be parsed and registered, but requires a separate managed-launch implementation to run. This module's remote call path uses Streamable HTTP.
 
-[tests/protocol.rs](tests/protocol.rs) 使用本地 MCP 服务验证初始化、Schema、调用和进度。包含登记操作的用例需要独立 PostgreSQL：
+## Tests
+
+[tests/protocol.rs](tests/protocol.rs) verifies initialization, schemas, calls, and progress using a local MCP service. Tests that register capabilities require a dedicated PostgreSQL database:
 
 ```sh
 cargo test --locked -p exoharness-mcp
 ```
 
-相关说明：[能力接入](../../docs/CAPABILITIES.md)、[安全](../../docs/SECURITY.md)。
+Related documentation: [Capabilities](../../docs/CAPABILITIES.md), [Security](../../docs/SECURITY.md).

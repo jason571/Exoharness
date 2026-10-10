@@ -1,42 +1,44 @@
-# 上下文与 Token 管理
+# Context and Token management
 
-执行日志保存完整事实，模型请求只携带当前步骤所需的投影。优化目标是减少重复说明、历史回执和无关 Schema，不改变创作质量、业务约束或原始工作数据。
+English | [简体中文](CONTEXT_AND_TOKENS.zh-CN.md)
 
-## 两种数据视图
+The execution journal stores complete facts. Model requests receive a projection focused on the current step. The goal is to remove repeated instructions, historical receipts and irrelevant schemas without changing creative quality, business constraints or source work data.
 
-日志保存输入、模型响应、工具调用原参数、精确回执、文件及变换证据。模型窗口由日志重建；精简窗口不覆盖日志。结构化参数始终保留 JSON 类型，不能通过摘要或字符截断破坏代码、数组或表格。
+## Two data views
 
-普通文字历史按最新优先选择完整的用户/回复对；当前实现最多读取八轮，在约 32 KiB 的历史选择边界内保留完整对，不裁切半条消息。工具历史必须保留调用/结果配对；不能留下悬空 `tool_call_id`。
+The journal stores inputs, model responses, original tool arguments, exact receipts, files and transformation evidence. The model window is rebuilt from that journal; compacting the window does not overwrite the journal. Structured arguments retain JSON types and are never damaged by summaries or character truncation of code, arrays or tables.
 
-源码入口：`modules/core/src/context.rs`、`modules/agent/src/{context,projection,workflow,catalog_context}.rs`。
+Ordinary text history selects complete user/assistant pairs, newest first. The current implementation reads at most eight turns within an approximately 32 KiB history-selection boundary and does not cut a message in half. Tool history must retain call/result pairs; it cannot leave an unmatched `tool_call_id`.
 
-## 按需能力和 Skill
+Source entry points: `modules/core/src/context.rs`, `modules/agent/src/{context,projection,workflow,catalog_context}.rs`.
 
-初始提供通用发现、读取和激活入口，以及分页的已授权服务摘要。模型先选择相关能力，再查询所选服务的工具，最后通过 `activate_tools` 加载当前阶段需要的实时 Schema。服务摘要只包含名称、说明、版本和工具数量，不包含参数 Schema。
+## On-demand capabilities and Skills
 
-`search_capabilities` 支持三个查询层次：
+The initial prompt provides general discovery, read and activation entry points, plus a paginated summary of authorized services. The model selects a relevant capability, queries that service's tools, then calls `activate_tools` to load live schemas required by the current stage. Service summaries include names, descriptions, versions and tool counts, not parameter schemas.
 
-- `kind=capability`：查找已授权的执行服务；未指定服务的空工具查询也返回这一层。
-- `kind=tool`、`capability_id`：只查询选定服务内的工具摘要。
-- `kind=tool`、`names`：批量查找 Skill 已声明的原生名称或激活名称，报告缺失项，不依赖文字关键词排序。
+`search_capabilities` supports three query levels:
 
-`kind=skill` 继续用于 Skill 说明发现。工具名称存在多个已授权提供者时，返回各自身份；加载使用精确名称，原生名称只能在唯一匹配时激活。能力查询、加载和实际执行是独立步骤，不扩大授权，也不自动运行工具。
+- `kind=capability`: find authorized execution services. An empty tool search without a service scope also returns this level.
+- `kind=tool` with `capability_id`: search tool summaries within the selected service.
+- `kind=tool` with `names`: batch-match exact native names or activation names declared by a Skill and report missing entries. It does not depend on keyword ranking.
 
-服务索引的 ID 用作查询范围，不是工具加载名称。模型误将已授权的多工具服务 ID 或重名工具传给加载接口时，加载集合保持原样，返回精确查询指引，使用现有局部纠正预算处理。未知身份和未授权身份仍按权限边界停止，不自动加载整组服务。
+`kind=skill` remains for Skill-instruction discovery. If a tool name has multiple authorized providers, the response retains each provider identity; activation uses exact names, and a native name activates only when the match is unique. Discovery, loading and execution are separate operations; none expands authorization or runs a tool automatically.
 
-模型省略公开工具名称的身份摘要后缀时，框架只从固定授权目录生成精确纠正建议。完整身份及原生名称的解析规则不变；残缺名称不直接作为可执行别名。一个列表含多个残缺名称时一次返回整份纠正建议，保留 add/replace 模式，原列表不部分生效。多个提供者或名称归一化导致歧义时先要求精确查询；未知名称、拼写错误及失效完整 ID 不作模糊猜测。局部纠正复用既有 Run 预算，不新增无限重试。
+Service-index IDs define a search scope; they are not tool-loading names. If the model passes an authorized multi-tool service ID or an ambiguous duplicate tool to the loader, the loaded set remains unchanged and the response gives exact search guidance through the existing bounded correction budget. Unknown or unauthorized identities still stop at the permission boundary rather than loading a whole service.
 
-同一 Skill revision 的根说明保留一个规范副本。目录查询、参考文件和根说明分别处理，重复读取按内容身份去重。发现分页通过 `next_page` 传递查询条件及绑定游标；查询词、服务范围、名称集合或固定版本发生变化时从第一页重新查询。旧 `offset` 调用仍可用于同一查询，更换条件后不沿用此前的偏移。
+If a model omits the public identity suffix from a tool name, the framework constructs a precise correction suggestion from the fixed authorized catalog. Resolution rules for full identity and native names remain unchanged; a partial name is never directly executable. A list of partial names is corrected as one complete list, preserving add/replace mode; no partial activation occurs. Ambiguous providers or normalized names require an exact lookup. Unknown names, typos and invalid full IDs are not guessed. One response supplies all corrections for a list and reuses the Run's existing bounded repair budget.
 
-成功加载工具后，当前轮之前的目录查询转换为紧凑选择回执，只保留该查询中已选工具的身份。完整发现页面和原始调用留在执行日志；新增阶段所需工具仍可重新发现。未完成选择、选择失败、较新查询和错误回执保持可见。工具调用与结果继续成对投影；业务参数、分镜、代码和 MCP 业务结果不适用目录精简规则。
+Each Skill revision's root instructions have one canonical copy. Directory lookups, reference files and root instructions are tracked separately and deduplicated by content identity. Discovery pagination passes the query and bound cursor through `next_page`; changing the query, service scope, name set or pinned revision restarts at page one. The old `offset` form remains valid within an unchanged query; an offset is not reused after query conditions change.
 
-目录摘要用于能力发现；实时 Schema、已选 Skill 的执行规范和用户要求分别保留并用于执行校验。
+After successful activation, preceding catalog queries in model context are replaced by compact selection receipts, retaining the identity of selected tools. Full discovery pages and original calls remain in the journal; new stages can discover additional tools. Incomplete selections, failures, newer queries and error receipts remain visible. Business parameters, storyboards, code and MCP results do not use catalog-compaction rules.
 
-## 持久 checkpoint
+Catalog summaries support discovery; live schemas, selected Skill execution instructions and user requirements remain available for execution and validation.
 
-完整调用回执提交日志后，框架接受服务显式声明的 checkpoint。checkpoint 以工具返回的协议元数据为依据，包含可定位的持久化引用。
+## Persistent checkpoints
 
-MCP 扩展使用 `_meta.exoharness`：
+After the complete call receipt is committed to the journal, the framework accepts a checkpoint explicitly declared by the service. It is based on protocol metadata returned by the tool and includes a locatable persistent reference.
+
+The MCP extension uses `_meta.exoharness`:
 
 ```json
 {
@@ -53,28 +55,28 @@ MCP 扩展使用 `_meta.exoharness`：
 }
 ```
 
-上述结构用于声明 checkpoint 元数据。指针指向结果或 structuredContent 中的真实值；下一步工具从固定授权目录中唯一解析，参数按实时 Schema 校验。`prerequisite_tools` 声明前置依赖，其调用仍使用现有权限。
+This structure declares checkpoint metadata. Pointers resolve to actual values in the result or `structuredContent`; the next tool is resolved uniquely from the fixed authorized catalog and its arguments are checked against the live schema. `prerequisite_tools` declares prerequisites, which remain subject to existing authorization.
 
-有效投影用紧凑引用替换已持久化的参数/结果，并原样保留指定 JSON 值。阶段请求仅加载下一步及其必要前置工具 Schema；待执行流程的 Skill 规则仍有效。完成后保留交付事实，不再重发已消费的过程数据。独立未完成流程不能被某个子流程的 complete 清除。
+The valid projection replaces persisted arguments/results with compact references and preserves declared JSON values as-is. A stage request loads only the next tool schema and required prerequisites; rules from the active workflow Skill remain in context. After completion, delivery facts remain while consumed process data is not resent. A completed sub-workflow cannot clear an independent unfinished workflow.
 
-缺少字段、指针失效、权限不足或名称歧义时回退安全视图，不猜数据、不把有效调用改为失败。显式新用户消息或重新激活工具恢复相应普通视图。实现入口：`api/src/chat/checkpoint.rs`、`tools/src/workflow.rs`、`agent/src/workflow.rs`。
+If a field is missing, a pointer is invalid, permission is insufficient or the tool name is ambiguous, the framework falls back to a safe view; it does not guess data or turn a valid call into a failure. An explicit new user message or tool reactivation restores the corresponding ordinary view. Implementation entry points: `api/src/chat/checkpoint.rs`, `tools/src/workflow.rs`, `agent/src/workflow.rs`.
 
-## 参数错误和停止
+## Argument errors and stopping
 
-实时 JSON Schema 在提交前检查对象、数组、required、enum、范围和组合约束。明确且有效的编码 JSON 容器可以本地恢复类型；框架不猜缺失字段或业务默认值。语法修正、Schema 通过、授权通过和工具真正执行是不同事实。
+Live JSON Schema validation checks objects, arrays, required fields, enums, ranges and combined constraints before submission. Clearly valid encoded JSON containers may have their local type restored; the framework does not guess missing fields or business defaults. Syntax repair, schema validation, authorization and actual execution are distinct facts.
 
-局部修正保留候选和诊断，使用 Run 级预算。连续相同工具与参数默认最多三次，该限制按连续调用计算。队列等待和后台状态查询由执行后端处理，与模型请求和生成提交分别计数。
+Local repair retains the candidate and diagnostics and uses the Run-level budget. The default repeated-call limit is three consecutive calls with the same tool and arguments. Queue waits and background-state reads are handled by the execution backend and counted separately from model requests and generation submissions.
 
-当前工具链预算为 24 次模型请求、48 次工具调用、300,000 个已报告输入/输出 Token 和 1 MiB 模型上下文字节。单次输出上限读取模型配置，默认 4,096。预算用于执行保护，任务成本按实际用量统计。停止或结果未知时，恢复操作保留原计数；全局统一成本调度尚待实现。
+Current tool-chain budgets are 24 model requests, 48 tool calls, 300,000 reported input/output Tokens and 1 MiB of model-context bytes. The per-response output limit comes from model configuration and defaults to 4,096. Budgets protect execution; task cost is calculated from actual usage. Resuming or stopping with an unknown outcome preserves existing counters. Unified global cost scheduling remains pending.
 
-## 进度和附件
+## Progress and attachments
 
-MCP progress 和显式后台任务查询转换为界面事件，后台轮询在执行后端完成。普通模型请求使用附件引用、元信息和工具事实，二进制文件保存在独立存储中。
+MCP progress and explicit background-task polling become UI events; polling is handled by the execution backend. Ordinary model requests receive attachment references and metadata. Binary files remain in separate storage.
 
-## 统计口径
+## Accounting
 
-实际 Token 以 provider usage 为准，分别统计输入、输出和缓存字段。输入缓存是输入组成，不再加一次总 Token。失败请求如果 provider 返回 usage，也计入；未返回时标记未知，不以 0 冒充真实消耗。
+Provider usage is the source of actual Token counts; input, output and cache fields are recorded separately. Cached input is part of input and is not added again to total Tokens. Failed requests count when the provider returns usage; otherwise usage is marked unknown rather than reported as zero.
 
-上下文字节、估算 Token、Schema 数量和缓存占比用于定位冗余，不能当成计费账单。会话累计量包含多轮及多次执行，不应当作单个 Run 的成本。Trace 应结合模型请求数、每次输入/输出、修正次数和实际能力调用看问题。
+Context bytes, estimated Tokens, schema count and cache ratio help identify redundancy but are not billing records. Session totals include multiple turns and Runs, so they are not the cost of one Run. Trace analysis should include model-request count, each request's input/output, repair count and actual capability calls.
 
-评估优化时比较同任务类型、模型、输入、执行成功与交付质量，记录过程和分项用量；不承诺固定节省比例。安全 HTTP Resume 的实际支持范围见 [功能状态](STATUS.md)。
+Evaluate changes using comparable task types, models, inputs, successful delivery and output quality, recording process and usage breakdowns. No fixed savings percentage is promised. See [Feature status](STATUS.md) for the actual scope of safe HTTP Resume.

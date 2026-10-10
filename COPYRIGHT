@@ -1,0 +1,10 @@
+ExoHarness
+Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+
+Core source code is offered under GNU Affero General Public License v3.0 only
+(AGPL-3.0-only). See LICENSE. An alternative commercial license is available
+for organizations that need to use the core code without complying with the
+AGPL obligations; contact flyangqn@gmail.com.
+
+Third-party components, Skills, MCP services, runtime images, model weights,
+and other bundled resources may have separate copyright holders and licenses.

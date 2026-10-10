@@ -1,42 +1,66 @@
-ExoHarness 发布包
+ExoHarness Release Package
 
-目录：bin/exoharness、web/、scripts/、build-manifest.json。
-构建清单保存文件 SHA-256；包不包含源码、数据库、用户资料或密钥。
+Language: English | Chinese: RELEASE.zh-CN.txt
+Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+Core license: GNU AGPL version 3.0 only (AGPL-3.0-only); see ../LICENSE.
 
-原生方式：
+Contents: bin/exoharness, web/, scripts/, and build-manifest.json.
+The manifest records SHA-256 digests. The package excludes source code,
+databases, user data, and credentials.
+
+Native operation:
   bash scripts/start-native.sh prepare-db
   bash scripts/start-native.sh start
   bash scripts/start-native.sh status
   bash scripts/start-native.sh restart
   bash scripts/start-native.sh stop
 
-prepare-db 使用已缓存 PostgreSQL 镜像；首次部署先获取 postgres:18.6-alpine3.23。
-已有 PostgreSQL 可通过环境变量直接配置二进制，步骤见源码 README。
-查看本地访问凭据：bash scripts/start-native.sh access（勿公开输出）。
-修改管理员密码：bash scripts/start-native.sh set-admin-password。
-查看实际私有数据位置：bash scripts/start-native.sh data-path。
+prepare-db uses a cached PostgreSQL image. For a first deployment, obtain
+postgres:18.6-alpine3.23 before running the command. An existing PostgreSQL
+server can be configured through environment variables instead.
 
-容器方式（先停止原生方式）：
+Display local access credentials with:
+  bash scripts/start-native.sh access
+Do not share this command's output.
+
+Set the administrator password with:
+  bash scripts/start-native.sh set-admin-password
+
+Show the private data directory with:
+  bash scripts/start-native.sh data-path
+
+Container operation (stop native mode first):
   bash scripts/start-docker.sh start
   bash scripts/start-docker.sh status
   bash scripts/start-docker.sh restart
   bash scripts/start-docker.sh stop
-使用已缓存兼容镜像，先校验 ABI，不自动构建/拉取镜像。
-容器启动使用 host network；不向 API 容器暴露宿主 Docker Socket。
-当前容器模式支持聊天、管理和远程 MCP；完整 OCI 代码执行采用原生主服务模式。
-Python、Shell、JavaScript 和 TypeScript 任务使用独立 OCI 执行镜像。
-镜像构建方式见源码 README 和 runtime/sandbox/Dockerfile。
-OCI 后端需要 Docker Engine 和服务账号的 Docker 使用权限。
 
-默认入口：管理9797、用户9798、文件9790，均为 loopback。
-EXOHARNESS_BIND、EXOHARNESS_PORTAL_BIND、EXOHARNESS_MEDIA_BIND 可调整端口。
-EXOHARNESS_MEDIA_PUBLIC_BASE_URL 配置下载/预览公开地址。
-已有 PostgreSQL 使用 EXOHARNESS_DATABASE_URL 与独立密码文件。
-部署时配置能力包、模型连接、凭据、运行依赖及相应外部服务。
+Use a cached compatible image. Startup checks ABI compatibility and does not
+automatically build or pull an image. Container mode uses host networking and
+does not expose the host Docker socket to the API container. Chat, management,
+and remote MCP are supported; full OCI code execution currently requires the
+native main-service mode. Python, Shell, JavaScript, and TypeScript tasks run
+in a separate OCI execution image. See the source README and
+runtime/sandbox/Dockerfile for building that image. Docker Engine access is
+required for the OCI backend.
 
-原生服务日志在实际私有数据目录的 service.log。
-前端资源编入二进制，页面改动应重新构建发布并重启。
-恢复、用户自助安装及跨 MCP 共享资源池的支持范围见源码 docs/STATUS.md。
-公网代理需遵守 Host/Origin 与 Cookie 安全边界，不直接暴露本机验证端口。
+Default loopback listeners: management 9797, user portal 9798, and file service
+9790. Configure EXOHARNESS_BIND, EXOHARNESS_PORTAL_BIND, and
+EXOHARNESS_MEDIA_BIND to change them. Set EXOHARNESS_MEDIA_PUBLIC_BASE_URL for
+public download and preview links. Configure an existing PostgreSQL server
+with EXOHARNESS_DATABASE_URL and a separate password file.
 
-完整文档位于源码仓库 docs/；源码编译不依赖 Docker。
+Register capability packages, model connections, credentials, runtime
+dependencies, and external services as required by the deployment.
+
+Native service logs are written to service.log in the private data directory.
+Frontend assets are embedded in the executable. Rebuild the release and
+restart the service after changing pages. Recovery, self-installation, and
+cross-MCP shared resource pool status is documented in docs/STATUS.md.
+
+For public deployment, use a correctly configured HTTPS proxy and observe
+Host/Origin and Cookie security boundaries. Do not expose local validation
+ports directly to the Internet.
+
+The source build does not require Docker. See docs/DEPLOYMENT.md for the full
+build and deployment guide.

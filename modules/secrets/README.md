@@ -1,21 +1,23 @@
 # Secrets
 
-`exoharness-secrets` 提供本机文件凭据存储。MCP 导入等操作将敏感值保存为私有文件，登记配置使用引用，调用适配器按引用取得实际值。
+English | [简体中文](README.zh-CN.md)
 
-## 主要接口
+`exoharness-secrets` provides local file-based credential storage. Operations such as MCP import save sensitive values in private files; registered configuration stores references, and call adapters resolve the actual values when needed.
 
-- [store.rs](src/store.rs)：`SecretStore::open` 打开私有目录，`put` 创建引用，`get` 读取值，`configured` 查询配置状态，`rotate` 更新值，`delete` 删除引用。
-- [value.rs](src/value.rs)：`SecretValue` 封装敏感内容，`expose` 供受信任适配器在发送请求时使用。
-- [filesystem.rs](src/filesystem.rs)：校验目录、文件权限及安全写入条件。
+## Main interfaces
 
-凭据文件使用 `0600`，目录使用 `0700`。更新采用受控文件写入，配置与页面仅公开引用或配置状态。本模块采用文件系统权限保护存储内容；磁盘加密与备份保护由部署环境承担。
+- [store.rs](src/store.rs): `SecretStore::open` opens the private directory; `put` creates a reference; `get` reads a value; `configured` checks status; `rotate` updates a value; and `delete` removes a reference.
+- [value.rs](src/value.rs): `SecretValue` wraps sensitive content; `expose` makes it available to trusted adapters when sending a request.
+- [filesystem.rs](src/filesystem.rs): validates directory and file permissions and safe-write conditions.
 
-## 测试
+Credential files use mode `0600` and directories use `0700`. Updates use controlled file writes; configuration and pages expose only references or configured status. This module relies on filesystem permissions to protect stored values; disk encryption and backup protection are deployment responsibilities.
 
-[tests/store.rs](tests/store.rs) 使用临时目录覆盖写入、读取、轮换、删除及文件权限：
+## Tests
+
+[tests/store.rs](tests/store.rs) uses a temporary directory to cover writes, reads, rotation, deletion, and file permissions:
 
 ```sh
 cargo test --locked -p exoharness-secrets
 ```
 
-相关说明：[安全](../../docs/SECURITY.md)。
+Related documentation: [Security](../../docs/SECURITY.md).

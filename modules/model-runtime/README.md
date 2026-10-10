@@ -1,24 +1,26 @@
 # Model Runtime
 
-`exoharness-model-runtime` 将模型配置转换为运行请求，提供 LLM 流式调用、TTS 合成、ASR 转写和连接诊断。模型选择及凭据来自 Configuration，供应商协议处理集中在适配器中。
+English | [简体中文](README.zh-CN.md)
 
-## 主要接口
+`exoharness-model-runtime` turns model configuration into runtime requests and provides streaming LLM calls, TTS synthesis, ASR transcription, and connection diagnostics. Model selection and credentials come from Configuration; provider-specific protocols are handled by adapters.
 
-- [service.rs](src/service.rs)：`ModelRuntime` 提供 `complete`、固定 revision 的完成请求、流式请求、模型测试和关闭；`RuntimePolicy` 管理运行策略。
-- [types.rs](src/types.rs)：模型请求、工具选择、完成状态和用量类型。
-- [streaming/](src/streaming/)：SSE 与协议分片解析，通过 `TextSink` 输出增量文本。
-- [adapters/](src/adapters/)：OpenAI 兼容和 Anthropic 请求适配。
-- [synthesis.rs](src/synthesis.rs)、[transcription.rs](src/transcription.rs)：语音合成、音频输出和转写。
-- [diagnostics/](src/diagnostics/)：按协议类型生成连接测试报告。
+## Main interfaces
 
-请求绑定配置版本和对应凭据。流式响应同时处理文本、工具参数和完成标记；连接中断、输出截断、HTTP 错误与完整响应分别分类。用量按服务返回值记录，测试报告采用脱敏连接信息。
+- [service.rs](src/service.rs): `ModelRuntime` provides `complete`, revision-pinned completion, streaming requests, model tests, and shutdown; `RuntimePolicy` manages runtime policy.
+- [types.rs](src/types.rs): model requests, tool selection, completion states, and usage types.
+- [streaming/](src/streaming/): SSE and protocol-chunk parsing with incremental text output through `TextSink`.
+- [adapters/](src/adapters/): OpenAI-compatible and Anthropic request adapters.
+- [synthesis.rs](src/synthesis.rs), [transcription.rs](src/transcription.rs): speech synthesis, audio output, and transcription.
+- [diagnostics/](src/diagnostics/): protocol-specific connection-test reports.
 
-## 测试
+Requests are pinned to a configuration revision and its credentials. Streaming handles text, tool arguments, and completion markers; interrupted connections, truncated output, HTTP errors, and complete responses are classified separately. Usage is recorded from provider responses, and diagnostic reports redact connection details.
 
-[tests/](tests/) 使用本地 HTTP/SSE 服务覆盖协议解析、流式输出、诊断、语音适配和生命周期：
+## Tests
+
+[tests/](tests/) uses local HTTP/SSE services to cover protocol parsing, streaming output, diagnostics, speech adapters, and lifecycle:
 
 ```sh
 cargo test --locked -p exoharness-model-runtime
 ```
 
-真实模型与语音服务另做连接及成品验收。配置说明见 [模型配置](../../docs/MODEL_CONFIGURATION_DESIGN.md)。
+Real model and speech services require separate connectivity and deliverable acceptance. See [Model configuration](../../docs/MODEL_CONFIGURATION_DESIGN.md).

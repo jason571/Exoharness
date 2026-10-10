@@ -1,32 +1,34 @@
-# 开源发布检查
+# Open-source release checklist
 
-公开发行使用经过审查的源码与资源清单。发布负责人确认以下检查结果，并将构建版本、测试记录和许可证清单随版本归档。
+English | [简体中文](OPEN_SOURCE_CHECKLIST.zh-CN.md)
 
-## 私有内容
+Public releases use a reviewed source and asset manifest. The release owner records these checks together with the build version, test results and license inventory.
 
-- 排除 `.env`、私有配置 generation、访问凭据、Secret Store、数据库导出、用户资料、任务/产物文件、备份、真实 Trace 和日志。
-- 检查 `mcp/*.json` 及附带子项目配置中是否存在真实 Authorization/API Key；只发布占位模板，不公开可用 Header。
-- 排除 target、node_modules、缓存、截图里的用户数据和本地大镜像/模型权重。
-- 不把测试夹具中的真实用户、会话、歌词、歌曲、图片或签名地址公开；真实回放改用合成/脱敏夹具。
-- 同时检查 Git 历史。曾公开的凭据应轮换，删除当前文件不足以解决历史泄漏。
+## Private content
 
-对暂存区和发行压缩包分别执行凭据扫描，核对文件清单。截图、演示文件和日志按用户数据同样审查。
+- Exclude `.env`, private configuration generations, credentials, Secret Store data, database exports, user materials, task/artifact files, backups, real Trace data and logs.
+- Inspect `mcp/*.json` and subproject configurations for real Authorization/API keys. Publish placeholder templates only; never expose usable headers.
+- Exclude `target`, `node_modules`, caches, user data in screenshots, and local large images or model weights.
+- Do not publish real users, sessions, lyrics, songs, images or signed URLs from test fixtures. Replace production replays with synthetic or redacted fixtures.
+- Inspect Git history too. Rotate any credential that was ever public; deleting the current file does not remove historical exposure.
 
-## 许可证
+Scan the staging area and release archive independently for credentials and verify their file manifests. Review screenshots, demonstrations and logs as user data.
 
-核心代码采用 MIT，根 `LICENSE` 提供许可证正文。第三方依赖和资源按其原始许可证分发。
+## Licensing
 
-逐项检查随附 Skill、MCP、字体、图片、前端库和运行镜像的许可，保留其 LICENSE / NOTICE。第三方 Skill 并不自动改为 MIT；模型权重、服务 API 和生成内容也有独立许可或使用条件。
+Core code is offered under AGPL-3.0-only, with an alternative commercial license for organizations that need to use it without complying with AGPL obligations. Copyright and licensing contact: Jason Yang, `flyangqn@gmail.com`. See the root `LICENSE` and `COMMERCIAL-LICENSE.md`. Third-party dependencies and resources keep their own licenses.
 
-资源保留要求分发的 LICENSE、NOTICE 和归属说明。许可不明确的资源取得授权后再纳入发行包。根目录的 `skills/` 和 `mcp/` 是独立维护的能力项目，不进入本仓库；框架中的 `modules/skills` 和 `modules/mcp` 正常发布。
+Review the licenses for each included Skill, MCP, font, image, frontend library and runtime image. Preserve their `LICENSE`/`NOTICE` files. Third-party capabilities do not automatically inherit the core license; model weights, service APIs and generated content also have separate terms.
 
-## 仓库与版本
+Retain any license, notice and attribution required for redistributed resources. Obtain permission before including resources with unclear terms. Root-level `skills/` and `mcp/` are maintained as separate capability projects and are not included in this repository; the framework modules `modules/skills` and `modules/mcp` are part of the core release. Technical documentation is available in English by default, with Chinese versions linked from each document.
 
-1. 完善现有 `.gitignore` / 打包排除清单，验证私有目录不会进入暂存区。
-2. 保留锁文件、必要源码/测试、示例占位配置、文档与构建/启动脚本。
-3. 在干净环境复现原生构建，检查 release manifest 和 ABI，不依赖开发机私有绝对路径。
-4. 跑基础、数据库、协议、OCI 和浏览器门禁；标注未覆盖的真实模型场景。
-5. 建立私密安全报告渠道和贡献规则；发布 release 时附校验清单及准确限制。
-6. 确认贡献约定，生成版本号、发布记录与公开发行清单。
+## Repository and version
 
-当前限制见 [功能状态](STATUS.md)，贡献规则见 [CONTRIBUTING](../CONTRIBUTING.md)。
+1. Review `.gitignore` and packaging exclusions; verify private directories do not enter the staging area.
+2. Keep lockfiles, required source/tests, placeholder examples, documentation and build/start scripts.
+3. Reproduce a native build in a clean environment; inspect the release manifest and ABI without relying on private developer paths.
+4. Run unit, database, protocol, OCI and browser gates, and identify real-model scenarios not covered.
+5. Establish a private security-reporting channel and contribution rules; publish accurate limitations with each release.
+6. Confirm contribution terms and produce a version, release record and public distribution manifest.
+
+Current limitations are listed in [Feature status](STATUS.md). Contribution rules are in [CONTRIBUTING](../CONTRIBUTING.md).

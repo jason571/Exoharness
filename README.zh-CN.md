@@ -4,6 +4,8 @@
 
 **基于 Rust 的可扩展 Agent Harness 框架，提供可自行部署的完整 Web 控制台。**
 
+版权所有 © 2026 Jason Yang · [联系作者](mailto:flyangqn@gmail.com)
+
 ExoHarness 为智能体提供通用运行基础：模型接入、上下文管理、能力发现、授权、工具执行、进度、持久化和追踪。开发者与管理员通过接入 Skill、MCP 服务和模型，为助理组合不同的业务能力。
 
 框架可用于研究分析、软件工程、业务操作、内容创作等不同领域。多用户 Web 应用为这些智能体提供统一的聊天入口、管理控制台和文件服务；每个助理的实际能力由接入服务及授权范围决定。
@@ -52,7 +54,7 @@ ExoHarness 为智能体提供通用运行基础：模型接入、上下文管理
 
 <img src="docs/assets/wechat-group.jpg" alt="ExoHarness 技术交流微信二维码" width="300" />
 
-GitHub 默认首页为英文，可通过顶部入口切换到本中文说明。完整英文技术文档将陆续补充。
+GitHub 默认首页为英文，可通过顶部入口切换到本中文说明。完整技术文档默认提供英文版，并可在各文档页切换到中文。
 
 ## 功能
 
@@ -326,4 +328,6 @@ node scripts/tests/browser_i18n.mjs
 - [部署](docs/DEPLOYMENT.md) / [安全](docs/SECURITY.md) / [测试](docs/TESTING.md) / [完整索引](docs/README.md)
 - [贡献约定](CONTRIBUTING.md) / [开源检查清单](docs/OPEN_SOURCE_CHECKLIST.md)
 
-核心代码采用 [MIT License](LICENSE)。外部 Skill、MCP、运行镜像和模型权重按各自许可证使用；第三方依赖及资源保留原有许可。
+核心代码采用 [GNU Affero 通用公共许可证第 3 版](LICENSE)（`AGPL-3.0-only`）。遵循 AGPL 条款（包括修改后的网络服务向用户提供对应源码）即可免费使用。企业若需要在不履行 AGPL 义务的情况下使用代码，例如集成到闭源商业产品，应另行购买商业授权。联系邮箱：[flyangqn@gmail.com](mailto:flyangqn@gmail.com)。
+
+外部 Skill、MCP、运行镜像、模型权重和第三方依赖仍遵循各自许可证。详见[双授权说明](COMMERCIAL-LICENSE.md)。

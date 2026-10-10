@@ -1,0 +1,46 @@
+ExoHarness 发布包
+
+English version: RELEASE.txt
+版权所有 © 2026 Jason Yang <flyangqn@gmail.com>
+核心代码许可证：GNU AGPL 第 3 版（仅此版本，AGPL-3.0-only），见 ../LICENSE。
+
+目录：bin/exoharness、web/、scripts/、build-manifest.json。
+构建清单保存文件 SHA-256；包不包含源码、数据库、用户资料或密钥。
+
+原生方式：
+  bash scripts/start-native.sh prepare-db
+  bash scripts/start-native.sh start
+  bash scripts/start-native.sh status
+  bash scripts/start-native.sh restart
+  bash scripts/start-native.sh stop
+
+prepare-db 使用已缓存 PostgreSQL 镜像；首次部署先获取 postgres:18.6-alpine3.23。
+已有 PostgreSQL 可通过环境变量直接配置二进制，步骤见源码 README。
+查看本地访问凭据：bash scripts/start-native.sh access（勿公开输出）。
+修改管理员密码：bash scripts/start-native.sh set-admin-password。
+查看实际私有数据位置：bash scripts/start-native.sh data-path。
+
+容器方式（先停止原生方式）：
+  bash scripts/start-docker.sh start
+  bash scripts/start-docker.sh status
+  bash scripts/start-docker.sh restart
+  bash scripts/start-docker.sh stop
+使用已缓存兼容镜像，先校验 ABI，不自动构建/拉取镜像。
+容器启动使用 host network；不向 API 容器暴露宿主 Docker Socket。
+当前容器模式支持聊天、管理和远程 MCP；完整 OCI 代码执行采用原生主服务模式。
+Python、Shell、JavaScript 和 TypeScript 任务使用独立 OCI 执行镜像。
+镜像构建方式见源码 README 和 runtime/sandbox/Dockerfile。
+OCI 后端需要 Docker Engine 和服务账号的 Docker 使用权限。
+
+默认入口：管理9797、用户9798、文件9790，均为 loopback。
+EXOHARNESS_BIND、EXOHARNESS_PORTAL_BIND、EXOHARNESS_MEDIA_BIND 可调整端口。
+EXOHARNESS_MEDIA_PUBLIC_BASE_URL 配置下载/预览公开地址。
+已有 PostgreSQL 使用 EXOHARNESS_DATABASE_URL 与独立密码文件。
+部署时配置能力包、模型连接、凭据、运行依赖及相应外部服务。
+
+原生服务日志在实际私有数据目录的 service.log。
+前端资源编入二进制，页面改动应重新构建发布并重启。
+恢复、用户自助安装及跨 MCP 共享资源池的支持范围见源码 docs/STATUS.md。
+公网代理需遵守 Host/Origin 与 Cookie 安全边界，不直接暴露本机验证端口。
+
+完整文档位于源码仓库 docs/；源码编译不依赖 Docker。

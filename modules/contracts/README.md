@@ -1,24 +1,26 @@
 # Contracts
 
-`exoharness-contracts` 定义各模块共享的执行协议和数据类型。该模块只包含数据结构与校验逻辑，适用于模型适配器、工具派发器和持久化层。
+English | [简体中文](README.zh-CN.md)
 
-## 协议组成
+`exoharness-contracts` defines shared execution protocols and data types. It contains data structures and validation logic only, for use by model adapters, tool dispatchers and persistence layers.
 
-- [model.rs](src/model.rs)：`ChatRequest`、`Message`、`ToolCall`、`Completion` 和 `Usage`，统一模型输入、工具调用与用量记录。
-- [execution.rs](src/execution.rs)：Session、Run、执行快照、事件及状态转换规则。
-- [invocation.rs](src/invocation.rs)：外部调用状态及提交资格。
-- [capability/](src/capability/)：能力登记、版本、权限和公开视图。
-- [strict_json.rs](src/strict_json.rs)、[json_syntax_repair.rs](src/json_syntax_repair.rs)：严格 JSON 解析及带修改记录的有限语法修正。
-- [retry.rs](src/retry.rs)：按工具名称与参数判断连续重复调用。
+## Protocols
 
-语法修正返回修改证据，实时 Schema 校验和执行授权由 Tools 完成。调用状态与 Run 状态分别记录，便于区分任务终态和外部操作结果。
+- [model.rs](src/model.rs): `ChatRequest`, `Message`, `ToolCall`, `Completion` and `Usage` unify model inputs, tool calls and usage records.
+- [execution.rs](src/execution.rs): Session, Run, execution snapshots, events and state-transition rules.
+- [invocation.rs](src/invocation.rs): external-call states and submission eligibility.
+- [capability/](src/capability/): capability registration, revisions, permissions and public views.
+- [strict_json.rs](src/strict_json.rs), [json_syntax_repair.rs](src/json_syntax_repair.rs): strict JSON parsing and bounded syntax repair with a modification record.
+- [retry.rs](src/retry.rs): detects consecutive repeated calls by tool name and arguments.
 
-## 测试
+Syntax repair returns evidence of its changes. Tools handles live-schema validation and execution authorization. Invocation state and Run state are recorded separately so terminal task state is distinguishable from the result of an external operation.
 
-[tests/](tests/) 覆盖状态转换、重复调用策略、JSON 解析与修正。以下命令在仓库根目录执行：
+## Tests
+
+[tests/](tests/) covers state transitions, repeated-call policy, JSON parsing and repair. Run from the repository root:
 
 ```sh
 cargo test --locked -p exoharness-contracts
 ```
 
-相关设计：[架构](../../docs/ARCHITECTURE.md)、[上下文与 Token](../../docs/CONTEXT_AND_TOKENS.md)。
+See [Architecture](../../docs/ARCHITECTURE.md) and [Context and Tokens](../../docs/CONTEXT_AND_TOKENS.md).

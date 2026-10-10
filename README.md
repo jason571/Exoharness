@@ -4,6 +4,8 @@ English | [简体中文](README.zh-CN.md) · [Live demo](https://agent.clhh.tech
 
 **An extensible Agent Harness in Rust, with a ready-to-use, self-hosted web console.**
 
+Copyright © 2026 Jason Yang · [Contact](mailto:flyangqn@gmail.com)
+
 ExoHarness provides the common runtime for AI agents: model connections, context management, capability discovery, authorization, tool execution, progress, persistence, and tracing. Developers and operators compose applications by adding Skills and MCP services, configuring models, and assigning capabilities to assistants.
 
 The framework supports applications across different domains, from research and software engineering to business operations and content creation. Its multi-user web application gives these agents a shared chat interface, administration console, and file delivery service. The connected capabilities define each assistant's actual scope.
@@ -202,7 +204,7 @@ docker save exoharness-server:0.1 exoharness-sandbox:0.1 -o exoharness-images.ta
 docker load -i exoharness-images.tar
 ```
 
-For code/page updates, rebuild `release/` and restart. The launcher mounts the current executable, so it can reuse the runtime image; rebuild images when runtime dependencies change. The target host must match the binary's architecture and ABI. See the [complete Chinese deployment guide](README.zh-CN.md#准备数据库) and [deployment reference](docs/DEPLOYMENT.md) for direct binary startup and existing PostgreSQL configuration.
+For code/page updates, rebuild `release/` and restart. The launcher mounts the current executable, so it can reuse the runtime image; rebuild images when runtime dependencies change. The target host must match the binary's architecture and ABI. See the [deployment guide](docs/DEPLOYMENT.md) for direct binary startup and existing PostgreSQL configuration.
 
 Default local endpoints:
 
@@ -218,7 +220,7 @@ Visit the [live demo](https://agent.clhh.tech/) and register or sign in to use t
 
 ## Documentation and current scope
 
-Full technical documentation is currently in Chinese; English documentation will be added later.
+Technical documentation is available in English by default, with Chinese versions linked from each document.
 
 - [Architecture](docs/ARCHITECTURE.md), [API](docs/INTERFACES.md), [Database](docs/DATABASE.md)
 - [Context and Token management](docs/CONTEXT_AND_TOKENS.md), [Capabilities](docs/CAPABILITIES.md), [Coding](docs/CODING_WORKFLOW.md)
@@ -231,4 +233,6 @@ This repository contains the core framework, frontend, tests, build/deployment s
 
 ## License
 
-Core code is licensed under the [MIT License](LICENSE). External Skills, MCP services, runtime images, model weights, and third-party dependencies retain their own licenses.
+Core code is available under the [GNU Affero General Public License v3.0](LICENSE) (`AGPL-3.0-only`). Use under AGPL is free when its terms are followed, including source-code access requirements for modified network services. Organizations that need to use the code without complying with AGPL obligations must obtain a separate commercial license. Contact [flyangqn@gmail.com](mailto:flyangqn@gmail.com).
+
+External Skills, MCP services, runtime images, model weights, and third-party dependencies retain their own licenses. See [Commercial License](COMMERCIAL-LICENSE.md) for the dual-license policy.

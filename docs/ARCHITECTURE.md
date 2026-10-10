@@ -1,73 +1,76 @@
-# 架构设计
+# Architecture
 
-ExoHarness 使用一个应用组合入口、一个扩展宿主和一条 Agent 主循环。管理端、用户端和文件端共享执行事实，但使用不同的路由及授权边界。
+English | [简体中文](ARCHITECTURE.zh-CN.md)
+
+ExoHarness has one application-composition entry point, one extension host and one Agent loop. The management, user and file endpoints share execution facts while retaining separate routes and authorization boundaries.
 
 ```text
-管理端 / 用户端          文件端
-        │                  │
-       API ───────────── Artifacts
-        │
+Management / User             File service
+       │                           │
+      API ─────────────────── Artifacts
+       │
  Agent + Tools ── ModelRuntime / MCP / Skills / Sandbox
-        │                                  │
-   Contracts + Core                  Coding 工作区
-        │
- PostgreSQL、配置 generation、Secret Store、私有文件
+       │                                  │
+ Contracts + Core                  Coding workspace
+       │
+ PostgreSQL, configuration generations, Secret Store, private files
 
-App 负责配置、扩展注册、依赖注入、监听与关闭，不承载第二套业务循环。
+App owns configuration, extension registration, dependency injection,
+listeners and shutdown; it does not host a second business loop.
 ```
 
-## 模块职责
+## Module responsibilities
 
-| 目录 | 职责 |
+| Directory | Responsibility |
 | --- | --- |
-| `modules/contracts` | 原生模型/工具协议、执行状态、快照、调用身份、校验和重复调用策略 |
-| `modules/core` | 扩展依赖图、类型化服务、资源所有权、生命周期和上下文投影 |
-| `modules/agent` | 模型请求、待办调用、预算、有限修正、阶段投影和停止决策 |
-| `modules/tools` | 授权目录、能力发现/激活、实时 Schema、执行适配与工作流依赖解析 |
-| `modules/api` | HTTP、身份适配、两端业务路由、SSE、Trace 和文件读取 |
-| `modules/app` | 组装服务、三端监听、后台任务与优雅关闭 |
-| `modules/registry` | 能力版本、权限、健康、发现证据和审计 |
-| `modules/configuration` | 模型与助理 generation、校验、私有配置和头像 |
-| `modules/model-runtime` | LLM 流式协议、模型测试、语音合成/识别适配 |
-| `modules/identity` | 用户、注册、登录会话、密码、安装政策和助理分配 |
-| `modules/skills` / `skill-runtime` | 不可变包、说明与资源读取、版本固定的运行环境核验 |
-| `modules/mcp` / `secrets` | 标准 MCP、Schema、真实进度、后台句柄、私有凭据 |
-| `modules/sandbox` | 独立 OCI 执行、持久工作区、限制、取消和回执 |
-| `modules/coding` | 路径、精确编辑、补丁和聚焦检索的纯策略 |
-| `modules/artifacts` | 文件持久化、来源、摘要、签名和项目发布 |
-| `modules/storage/postgres` | 持久执行/登记/资料事务；同步操作经 blocking 边界运行 |
-| `modules/storage/sql-compat` | 身份等模块使用的 PostgreSQL SQL 兼容访问层 |
-| `web-console` / `web` | 前端源码与构建资源 |
+| `modules/contracts` | Native model/tool protocols, execution states, snapshots, invocation identity, validation and repeated-call policy |
+| `modules/core` | Extension dependency graph, typed services, resource ownership, lifecycle and context projection |
+| `modules/agent` | Model requests, pending calls, budgets, bounded repair, stage projection and stop decisions |
+| `modules/tools` | Authorized catalog, capability discovery/activation, live schemas, execution adapters and workflow dependency resolution |
+| `modules/api` | HTTP, identity adapters, management/user routes, SSE, Trace and file reads |
+| `modules/app` | Service composition, three listeners, background tasks and graceful shutdown |
+| `modules/registry` | Capability versions, permissions, health, discovery evidence and audit |
+| `modules/configuration` | Model/assistant generations, validation, private config and avatars |
+| `modules/model-runtime` | Streaming LLM protocols and speech synthesis/recognition adapters |
+| `modules/identity` | Users, registration, login sessions, passwords, installation policy and assistant assignment |
+| `modules/skills` / `skill-runtime` | Immutable packages, instruction/resource reads and pinned runtime checks |
+| `modules/mcp` / `secrets` | Standard MCP, schemas, real progress, background handles and private credentials |
+| `modules/sandbox` | Isolated OCI execution, persistent workspaces, limits, cancellation and receipts |
+| `modules/coding` | Pure policies for paths, precise edits, patches and focused search |
+| `modules/artifacts` | File persistence, provenance, digests, signatures and project publication |
+| `modules/storage/postgres` | Persistent execution/registry/knowledge transactions; blocking boundary for synchronous operations |
+| `modules/storage/sql-compat` | PostgreSQL-compatible access used by identity and related modules |
+| `web-console` / `web` | Frontend source and built assets |
 
-Contracts 不依赖 HTTP、存储或供应商；Core 不反向依赖业务模块。Agent 通过窄端口调用模型和派发器。HTTP 适配器不复制业务状态机，业务代码不得通过访问整个 API 状态容器绕过模块接口。
+Contracts do not depend on HTTP, storage or vendors; Core does not depend on business modules. Agent calls models and dispatchers through narrow ports. HTTP adapters do not duplicate state machines, and business modules must not bypass module interfaces through a global API-state container.
 
-## 扩展与生命周期
+## Extensions and lifecycle
 
-扩展声明 `ExtensionSpec { id, provides, requires }`，宿主在启动任何扩展前检查重复、缺失、循环和多提供者歧义。类型化 `Service::KEY` 限定发布/解析范围，扩展只能访问声明的依赖。
+An extension declares `ExtensionSpec { id, provides, requires }`. Before starting any extension, the host checks duplicate, missing, cyclic and ambiguous providers. Typed `Service::KEY` limits service publication and lookup; an extension can access only declared dependencies.
 
-初始化资源登记所有权，关闭按逆依赖顺序等待释放。部分启动失败也要清理，失败的释放不能被当作成功删除。宿主提供静态注册及生命周期管理，不提供任意动态代码加载、热替换或完整在途代际租约。
+Resource ownership is registered at initialization and released in reverse dependency order. Partial startup failure also triggers cleanup; a failed release is not treated as successful removal. The host provides static registration and lifecycle management, not arbitrary dynamic code loading, hot replacement or full in-flight generation leases.
 
-## 一次执行
+## One execution
 
-1. 认证后取得用户会话及分配的助理，保存 Turn、Run 和固定模型/能力快照。
-2. Agent 根据当前任务发现授权能力，按需读取 Skill 和激活实时工具 Schema。
-3. 调用前检查版本、授权、就绪和原生 JSON；准备稳定 invocation。
-4. 事务内领取调用资格、更新提交状态和事件；提交事务后才访问外部服务。
-5. 可信适配器保存精确回执；MCP 进度直接进入事件流，后台查询不调用模型。
-6. 成功产物进入统一文件服务；模型依据交付事实回答，完整调用数据留在日志。
+1. After authentication, load the user Session and assigned assistant, then save the Turn, Run and pinned model/capability snapshot.
+2. Agent discovers capabilities authorized for the current task, reads Skills as needed and activates live tool schemas.
+3. Before invocation, check revision, authorization, readiness and native JSON, then prepare a stable invocation.
+4. Claim invocation admission and commit state/events in a transaction. Only then call the external service.
+5. Trusted adapters persist exact receipts. MCP progress flows directly into the event stream; background polling does not call the model.
+6. Successful artifacts enter the shared file service. The model answers from delivery facts, while complete invocation data stays in the journal.
 
-Run admission 在首次模型请求前检查全局和当前用户容量。默认全局 4、每用户 2，同会话仍串行；超额 Run 保持 queued，通过持久事件显示排队，不调用模型。管理员修改配置后，等待任务采用最新上限，已运行任务不中断。
+Run admission checks global and per-user capacity before the first model request. Defaults are 1,000 globally and 2 per user; a Session remains serial. Excess Runs stay `queued`, with a durable queue event, and make no model call. Waiting Runs use current limits after an admin change; running Runs are not interrupted.
 
-MCP admission 使用持久 invocation 账本，在短事务内同时检查能力 `limits.max_concurrency` 和关联共享资源池。不同 MCP 可关联同一 GPU 池；未关联能力保留自身限制。等待和取消未提交调用不消耗尝试次数。已提交或结果未知的调用保持占用，直到可信终态回执确认。池关联调整不会释放已领取的在途占位。
+MCP admission checks capability `limits.max_concurrency` and its assigned shared resource pool together in a short transaction using a persistent invocation ledger. Different MCP services may share one GPU pool; unassigned services retain their own limit. Waiting and cancelled pre-submit calls do not consume attempts. Submitted or unknown-outcome calls hold their reservation until a trusted terminal receipt arrives. Changing pool assignments does not release in-flight reservations.
 
-## 核心不变量
+## Core invariants
 
-- 能力导入、运行依赖准备、权限授权和实际执行分别校验。
-- 执行日志持久保存调用事实；模型上下文根据日志与当前步骤构建。
-- 工具调用/结果按身份成对处理，不截断 JSON、代码或关键工作数据。
-- 持久 checkpoint 可以精简模型输入，但不能扩大授权或证明未知调用已经成功。
-- 已完成副作用不重复提交；传输断开不能直接判断业务失败。
-- 模型请求、参数修正、工具重试分别计数，原样继续不重置预算。
-- 取消后晚到回执可以保存，但不能重新启动已结束的 Run。
+- Capability import, runtime preparation, permission grants and actual execution are checked independently.
+- The execution journal persists facts; model context is rebuilt for the current step.
+- Tool calls and results are projected as pairs. JSON, code and essential work data are not truncated.
+- Persistent checkpoints can compact model input but cannot broaden authorization or prove an unknown call succeeded.
+- Completed side effects are not resubmitted; a transport disconnect alone does not establish business failure.
+- Model requests, argument repairs and tool retries have separate counters; continuing unchanged does not reset budgets.
+- Late receipts may be saved after cancellation but cannot restart a finished Run.
 
-安全恢复和历史格式兼容的当前边界见 [功能状态](STATUS.md)；数据设计见 [数据库](DATABASE.md)。
+See [Feature status](STATUS.md) for recovery and historical-format limitations, and [Database](DATABASE.md) for persistence design.
