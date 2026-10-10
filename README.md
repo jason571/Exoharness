@@ -2,17 +2,30 @@
 
 English | [简体中文](README.zh-CN.md) · [Live demo](https://agent.clhh.tech/) · [Documentation](docs/README.md)
 
-**A self-hosted Agent platform for turning conversations into real work and deliverable files.**
+**An extensible Agent Harness in Rust, with a ready-to-use, self-hosted web console.**
 
-ExoHarness connects language models, Skills, MCP services, and isolated code execution behind a multi-user web application. Users describe what they want; an authorized assistant discovers the relevant capabilities, calls tools, reports execution progress, and delivers the resulting documents, websites, images, audio, or videos in the conversation.
+ExoHarness provides the common runtime for AI agents: model connections, context management, capability discovery, authorization, tool execution, progress, persistence, and tracing. Developers and operators compose applications by adding Skills and MCP services, configuring models, and assigning capabilities to assistants.
 
-The platform is written in Rust. It provides the execution runtime, administration, access control, PostgreSQL persistence, and file delivery. The models and specialized services that perform creative or business tasks are configured separately.
+The framework supports applications across different domains, from research and software engineering to business operations and content creation. Its multi-user web application gives these agents a shared chat interface, administration console, and file delivery service. The connected capabilities define each assistant's actual scope.
 
-## What can you use it for?
+## Build your own agents and workflows
 
-ExoHarness is useful when you want to provide several assistants through one application, connect your own tools and models, and inspect how a task was actually executed.
+The core framework and domain capabilities have separate responsibilities:
 
-| Task | Example request | Deliverable and capabilities |
+- **Skills** supply reusable procedures, task instructions, reference material, and optional scripts.
+- **MCP services** expose tools and connect agents to APIs, applications, data sources, and specialized execution services.
+- **Model connections** provide reasoning and supported speech or other model-backed capabilities.
+- **The Harness** handles discovery, context, permissions, invocation records, execution guards, progress, and result delivery across those capabilities.
+
+To extend an assistant, import a compatible Skill or register an MCP service, prepare its execution dependencies, and grant access. Compatible additions use the existing discovery and execution path without changing the core Agent loop. Transport and model protocol support is documented in [Capabilities](docs/CAPABILITIES.md) and [Model configuration](docs/MODEL_CONFIGURATION_DESIGN.md).
+
+An organization can use the same deployment for assistants with different responsibilities and tool permissions. Developers can connect their own services and compose new workflows around the framework's execution and API contracts.
+
+## Application examples
+
+The following examples illustrate what a configured deployment can do. They are starting points for capability composition, rather than a fixed list of supported applications.
+
+| Example scenario | Example request | Possible deliverable and capabilities |
 | --- | --- | --- |
 | Research and data analysis | “Find recent US GDP figures and chart the trend.” | Search results, a chart, or a spreadsheet; uses authorized search tools and sandbox execution. |
 | Office documents | “Create an entertainment industry report as a presentation.” | Downloadable PPTX, DOCX, or PDF; uses the corresponding Skills and document libraries in the sandbox. |
@@ -21,7 +34,7 @@ ExoHarness is useful when you want to provide several assistants through one app
 | Music and video | “Make a narrated promotional video” or “Create an MV from this song.” | Audio/video files and a final combined output when the configured workflow supports it; uses generation and media-processing services. |
 | Educational content | “Explain this question to a primary-school student with an animation.” | Narration and an explanatory video; uses a teaching Skill, TTS, and an animation renderer. |
 
-These are examples of workflows enabled by configured capabilities, not models bundled with the core. The standalone `skills/` and `mcp/` projects are distributed separately. Import and authorize the required capabilities before using them.
+Each example depends on its installed and authorized capabilities. Additional Skills and MCP services can enable other applications through the same framework. Standalone `skills/` and `mcp/` projects are distributed separately from the core repository.
 
 ## From a request to a result
 
@@ -29,7 +42,7 @@ These are examples of workflows enabled by configured capabilities, not models b
 2. A user sends a request, optionally with reference files, through streaming chat.
 3. The assistant discovers authorized capabilities and loads the tool schemas needed for the current step.
 4. MCP services or isolated sandbox tools perform the work. Progress and execution records are persisted.
-5. The user receives previews and downloads. Administrators can inspect the request, tool calls, errors, usage, and files in Trace.
+5. The user receives the task's response or resulting files, with previews and downloads where applicable. Administrators can inspect the request, tool calls, errors, usage, and files in Trace.
 
 ## Core features
 
@@ -126,9 +139,9 @@ Public deployments should use an HTTPS reverse proxy and follow the current [Hos
 
 Visit the [live demo](https://agent.clhh.tech/) and register or sign in to use the configured assistants. Avoid uploading sensitive information to the public demo.
 
-Scan the QR code to join the ExoHarness WeChat technical discussion group. Its expiry date is shown in the image; the image will be updated when needed.
+Scan the QR code to add the WeChat contact for technical discussion or to request access to the community group.
 
-<img src="docs/assets/wechat-group.jpg" alt="ExoHarness WeChat community QR code" width="300" />
+<img src="docs/assets/wechat-group.jpg" alt="WeChat contact for ExoHarness technical discussion" width="300" />
 
 ## Documentation and current scope
 

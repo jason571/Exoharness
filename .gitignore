@@ -55,7 +55,7 @@ __pycache__/
 /.idea/
 /.vscode/
 /ui/
-/微信图片_20261010095823_213_150.jpg
+/微信图片_*.jpg
 *.bak
 *.tmp
 *.swp
