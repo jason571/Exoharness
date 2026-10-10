@@ -1,7 +1,3 @@
-// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
-// SPDX-License-Identifier: AGPL-3.0-only
-// Commercial licensing: contact flyangqn@gmail.com.
-
 "use strict";
 (() => {
   var __create = Object.create;
@@ -11052,32 +11048,14 @@ Please report this to https://github.com/markedjs/marked.`, e) {
       return null;
     }
   }
-  function videoArtifactsFromRichText(target) {
-    const artifacts = [];
-    target.querySelectorAll("a[href]").forEach((link) => {
-      const url = safeArtifactUrl(link.href);
-      if (!url || !url.pathname.toLowerCase().endsWith(".mp4")) return;
-      const encodedName = url.pathname.split("/").pop() || "result.mp4";
-      let filename = "result.mp4";
-      try {
-        filename = decodeURIComponent(encodedName);
-      } catch {
-        filename = encodedName;
-      }
-      artifacts.push({
-        kind: "video",
-        filename,
-        content_type: "video/mp4",
-        download_url: url.href,
-        source_tool: "assistant-link"
-      });
-    });
-    return artifacts;
-  }
   function answerWithoutArtifactDownloadDetails(content, artifacts) {
     const mediaArtifacts = artifacts.filter((artifact) => ["video", "audio", "image"].includes(artifact.kind));
     if (!content.trim() || !mediaArtifacts.length) return content;
     const urls = mediaArtifacts.flatMap((artifact) => [artifact.download_url, artifact.original_download_url || ""]).map((url) => url ? safeArtifactUrl(url)?.href : null).filter((url) => Boolean(url));
+    const mediaLocations = new Set(urls.map((value) => {
+      const url = new URL(value);
+      return `${url.origin}${url.pathname}`;
+    }));
     const filenames = mediaArtifacts.map((artifact) => artifact.filename.trim()).filter(Boolean);
     const lines = content.split(/\r?\n/);
     const removed = /* @__PURE__ */ new Set();
@@ -11086,7 +11064,10 @@ Please report this to https://github.com/markedjs/marked.`, e) {
     const expiryLabel = /链接有效期|有效期|到期|过期|expires?|expiry|expiration/i;
     const artifactLines = [];
     lines.forEach((line, index) => {
-      const mentionsUrl = urls.some((url) => line.includes(url));
+      const mentionsUrl = urls.some((url) => line.includes(url)) || Array.from(line.matchAll(/\]\((https?:\/\/[^\s)]+)\)/g)).some((match) => {
+        const url = safeArtifactUrl(match[1]);
+        return url !== null && mediaLocations.has(`${url.origin}${url.pathname}`);
+      });
       const mentionsFile = filenames.some((filename) => line.includes(filename)) && fileLabel.test(line);
       if (mentionsUrl || mentionsFile) artifactLines.push(index);
     });
@@ -11415,10 +11396,7 @@ Please report this to https://github.com/markedjs/marked.`, e) {
     streaming.content.classList.toggle("hidden", !displayAnswer);
     if (displayAnswer) renderRichText(streaming.content, displayAnswer);
     else streaming.content.replaceChildren();
-    renderArtifacts(streaming.artifacts, [
-      ...result.artifacts || [],
-      ...displayAnswer ? videoArtifactsFromRichText(streaming.content) : []
-    ]);
+    renderArtifacts(streaming.artifacts, result.artifacts || []);
     streaming.meta.textContent = resultMeta(result);
     if (streaming.runId) {
       streaming.actions.replaceChildren(createResponseActions(streaming.runId, displayAnswer));
@@ -11529,10 +11507,7 @@ Please report this to https://github.com/markedjs/marked.`, e) {
     }
     if (role === "assistant") {
       const artifactGallery = element("div", "chat-artifact-gallery hidden");
-      renderArtifacts(artifactGallery, [
-        ...artifacts,
-        ...rich ? videoArtifactsFromRichText(rich) : []
-      ]);
+      renderArtifacts(artifactGallery, artifacts);
       if (artifactGallery.childElementCount) body.append(artifactGallery);
     }
     if (meta || runId && role === "assistant") {

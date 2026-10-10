@@ -528,25 +528,6 @@ function safeArtifactUrl(value: string): URL | null {
   }
 }
 
-function videoArtifactsFromRichText(target: HTMLElement): ChatArtifact[] {
-  const artifacts: ChatArtifact[] = [];
-  target.querySelectorAll<HTMLAnchorElement>("a[href]").forEach((link) => {
-    const url = safeArtifactUrl(link.href);
-    if (!url || !url.pathname.toLowerCase().endsWith(".mp4")) return;
-    const encodedName = url.pathname.split("/").pop() || "result.mp4";
-    let filename = "result.mp4";
-    try { filename = decodeURIComponent(encodedName); } catch { filename = encodedName; }
-    artifacts.push({
-      kind: "video",
-      filename,
-      content_type: "video/mp4",
-      download_url: url.href,
-      source_tool: "assistant-link",
-    });
-  });
-  return artifacts;
-}
-
 function answerWithoutArtifactDownloadDetails(content: string, artifacts: ChatArtifact[]): string {
   const mediaArtifacts = artifacts.filter((artifact) => ["video", "audio", "image"].includes(artifact.kind));
   if (!content.trim() || !mediaArtifacts.length) return content;
@@ -555,6 +536,10 @@ function answerWithoutArtifactDownloadDetails(content: string, artifacts: ChatAr
     .flatMap((artifact) => [artifact.download_url, artifact.original_download_url || ""])
     .map((url) => url ? safeArtifactUrl(url)?.href : null)
     .filter((url): url is string => Boolean(url));
+  const mediaLocations = new Set(urls.map((value) => {
+    const url = new URL(value);
+    return `${url.origin}${url.pathname}`;
+  }));
   const filenames = mediaArtifacts
     .map((artifact) => artifact.filename.trim())
     .filter(Boolean);
@@ -566,7 +551,13 @@ function answerWithoutArtifactDownloadDetails(content: string, artifacts: ChatAr
   const artifactLines: number[] = [];
 
   lines.forEach((line, index) => {
-    const mentionsUrl = urls.some((url) => line.includes(url));
+    // A model may omit or alter a signed query when repeating a file link.
+    // Hide that redundant Markdown link; keep the receipt's exact URL in its card.
+    const mentionsUrl = urls.some((url) => line.includes(url))
+      || Array.from(line.matchAll(/\]\((https?:\/\/[^\s)]+)\)/g)).some((match) => {
+        const url = safeArtifactUrl(match[1]);
+        return url !== null && mediaLocations.has(`${url.origin}${url.pathname}`);
+      });
     const mentionsFile = filenames.some((filename) => line.includes(filename)) && fileLabel.test(line);
     if (mentionsUrl || mentionsFile) artifactLines.push(index);
   });
@@ -923,10 +914,8 @@ function finalizeStreamingMessage(streaming: StreamingMessage, result: ChatResul
   streaming.content.classList.toggle("hidden", !displayAnswer);
   if (displayAnswer) renderRichText(streaming.content, displayAnswer);
   else streaming.content.replaceChildren();
-  renderArtifacts(streaming.artifacts, [
-    ...(result.artifacts || []),
-    ...(displayAnswer ? videoArtifactsFromRichText(streaming.content) : []),
-  ]);
+  // Only execution receipts declare deliverables. Prose URLs are not files.
+  renderArtifacts(streaming.artifacts, result.artifacts || []);
   streaming.meta.textContent = resultMeta(result);
   if (streaming.runId) {
     streaming.actions.replaceChildren(createResponseActions(streaming.runId, displayAnswer));
@@ -1033,10 +1022,7 @@ function renderChatMessage(
   }
   if (role === "assistant") {
     const artifactGallery = element("div", "chat-artifact-gallery hidden");
-    renderArtifacts(artifactGallery, [
-      ...artifacts,
-      ...(rich ? videoArtifactsFromRichText(rich) : []),
-    ]);
+    renderArtifacts(artifactGallery, artifacts);
     if (artifactGallery.childElementCount) body.append(artifactGallery);
   }
   if (meta || (runId && role === "assistant")) {
