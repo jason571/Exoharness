@@ -1,6 +1,6 @@
 # 构建与部署
 
-ExoHarness 支持原生二进制和挂载发布包的容器启动。源码编译使用本机 Rust、Python 和 Node.js 工具链；OCI 沙盒和容器托管数据库使用 Docker Engine。代码及页面更新重新发布二进制，运行依赖变化时更新镜像。首次部署的完整步骤见 [README](../README.md)。
+ExoHarness 支持原生二进制和挂载发布包的容器启动。源码编译使用本机 Rust、Python 和 Node.js 工具链；OCI 沙盒和容器托管数据库使用 Docker Engine。代码及页面更新重新发布二进制，运行依赖变化时更新镜像。首次部署步骤见 [英文首页](../README.md) 和 [中文指南](../README.zh-CN.md)。
 
 ## 构建
 
@@ -66,6 +66,16 @@ bash release/scripts/start-native.sh stop
 App 使用三个独立 IPv4 loopback 端口。通过生产代理部署为 8787 / 8788 / 8790 时，设置对应监听变量。配置项以本表和启动代码为准；公网接入条件见 [安全](SECURITY.md)。
 
 ## 容器启动
+
+从源码原生编译 release 后，构建主服务运行镜像：
+
+```sh
+docker build -f runtime/server/Dockerfile -t exoharness-server:0.1 .
+docker run --rm --network none --read-only exoharness-server:0.1 --version
+export EXOHARNESS_RUNTIME_IMAGE=exoharness-server:0.1
+```
+
+`runtime/server/Dockerfile.dockerignore` 限制构建上下文，只允许执行文件及构建元数据。主服务镜像与 `runtime/sandbox/Dockerfile` 的任务执行镜像独立。任务沙盒镜像的构建、登记和离线传输见 [沙盒准备](../README.zh-CN.md#准备沙盒执行镜像)。
 
 先停原生监听，再启动容器方式：
 

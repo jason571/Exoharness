@@ -1,0 +1,8 @@
+# Explicit allowlist: exclude private configuration, data and credentials.
+**
+!runtime/
+!runtime/server/
+!runtime/server/Dockerfile
+!release/
+!release/bin/
+!release/bin/exoharness

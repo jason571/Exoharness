@@ -90,6 +90,17 @@ File service :9790 ── downloads, media playback, static site previews
 
 The listeners bind to `127.0.0.1` by default and are configurable. Source modules live in `modules/`; Rust tests live in module `tests/` directories, with script and browser tests in `scripts/tests/`.
 
+## Technology stack
+
+| Layer | Implementation | Source location |
+| --- | --- | --- |
+| Core Harness and backend | Rust: Agent loop, extensions, context, tools, permissions, database access, HTTP/SSE APIs, and file service. | `modules/` |
+| Management and chat interfaces | TypeScript compiled to JavaScript, alongside HTML/CSS and existing JavaScript page code. Both interfaces run in the browser; their backend is Rust. | `web-console/src/`, `web/` |
+| Build, deployment, and migration | Python scripts wrapped by Shell entrypoints. | `scripts/` |
+| Tests | Rust unit/protocol/integration tests, Python scenario and script tests, and Node.js browser/interface tests. | `modules/*/tests/`, `scripts/tests/`, `web-console/tests/` |
+| Task sandbox | Docker OCI containers with Python, Bash, Node.js, document libraries, and media utilities. | `modules/sandbox/`, `runtime/sandbox/` |
+| Database | PostgreSQL, hosted independently or in Docker. | `modules/storage/` |
+
 ## Which environments are needed?
 
 | Component | Purpose | When it is needed |
@@ -125,7 +136,73 @@ docker build -t exoharness-sandbox:0.1 runtime/sandbox
 export EXOHARNESS_SANDBOX_IMAGE=exoharness-sandbox:0.1
 ```
 
-The complete database and startup procedures are in the [Chinese deployment guide](README.zh-CN.md#准备数据库). The platform supports a native main service or a container-hosted main service. Currently, full OCI code execution uses the native main-service mode; an external sandbox execution proxy for the container-hosted mode is not yet connected.
+The main-service image and task sandbox image are separate. The main service runs the Harness and APIs; task containers execute code with isolation and resource limits. Images do not install the separately maintained Skill/MCP projects or model weights.
+
+### Choose a deployment mode
+
+| Mode | Recommended use |
+| --- | --- |
+| Native main service + Docker PostgreSQL and task sandbox | Current full-feature deployment, including Coding, Python/Shell execution, and sandbox document workflows. |
+| Docker main service + Docker PostgreSQL | Containerized chat, administration, and remote MCP use. Task sandbox execution from the main-service container is not yet connected. |
+
+Docker is recommended for PostgreSQL and task isolation. Review the sandbox limitation before choosing a fully containerized main service. The API container does not receive the host Docker socket.
+
+### Prepare PostgreSQL
+
+Run after creating `release/`:
+
+```sh
+docker pull postgres:18.6-alpine3.23
+bash release/scripts/start-native.sh prepare-db
+bash release/scripts/start-native.sh set-admin-password
+```
+
+This prepares a dedicated PostgreSQL container and persistent volume, plus private connection and access credentials. PostgreSQL listens on `127.0.0.1:9799`. Use `bash release/scripts/start-native.sh data-path` to locate the private data directory; keep it outside images and the source repository.
+
+### Start the native main service with Docker sandbox execution
+
+After building the sandbox image above, register it with the launch configuration:
+
+```sh
+bash release/scripts/start-native.sh set-runtime-image --image exoharness-sandbox:0.1
+bash release/scripts/start-native.sh start
+bash release/scripts/start-native.sh status
+```
+
+`set-runtime-image` records the cached image's SHA-256. The service starts isolated task containers on demand; the sandbox is not a permanently running application container.
+
+### Build and start the Docker main-service image
+
+Build the native release first, then run from the repository root:
+
+```sh
+docker build -f runtime/server/Dockerfile -t exoharness-server:0.1 .
+docker run --rm --network none --read-only exoharness-server:0.1 --version
+export EXOHARNESS_RUNTIME_IMAGE=exoharness-server:0.1
+
+# Stop the native main service before switching modes.
+bash release/scripts/start-native.sh stop
+bash release/scripts/start-docker.sh start
+bash release/scripts/start-docker.sh status
+```
+
+The Dockerfile-specific context allowlist includes the compiled executable and build metadata, excluding credentials, user data, capability packages, and caches. The image installs runtime libraries; Rust compilation remains a native build step. The launcher checks binary/image ABI compatibility and mounts the selected release and private configuration. Startup does not automatically pull or build images.
+
+The launcher uses host networking: use Linux Docker Engine, or Docker Desktop with host networking enabled. HTTP endpoints remain on loopback; use a correctly configured HTTPS proxy for public access.
+
+### Logs, restart, and image transfer
+
+```sh
+docker logs --tail 100 exoharness-pro-local-service
+bash release/scripts/start-docker.sh restart
+bash release/scripts/start-docker.sh stop
+
+docker save exoharness-server:0.1 exoharness-sandbox:0.1 -o exoharness-images.tar
+# On the target machine:
+docker load -i exoharness-images.tar
+```
+
+For code/page updates, rebuild `release/` and restart. The launcher mounts the current executable, so it can reuse the runtime image; rebuild images when runtime dependencies change. The target host must match the binary's architecture and ABI. See the [complete Chinese deployment guide](README.zh-CN.md#准备数据库) and [deployment reference](docs/DEPLOYMENT.md) for direct binary startup and existing PostgreSQL configuration.
 
 Default local endpoints:
 
@@ -135,13 +212,9 @@ Default local endpoints:
 
 Public deployments should use an HTTPS reverse proxy and follow the current [Host/Origin, credential, and database security boundaries](docs/SECURITY.md).
 
-## Try it and join the community
+## Try ExoHarness
 
 Visit the [live demo](https://agent.clhh.tech/) and register or sign in to use the configured assistants. Avoid uploading sensitive information to the public demo.
-
-Scan the QR code to add the WeChat contact for technical discussion or to request access to the community group.
-
-<img src="docs/assets/wechat-group.jpg" alt="WeChat contact for ExoHarness technical discussion" width="300" />
 
 ## Documentation and current scope
 

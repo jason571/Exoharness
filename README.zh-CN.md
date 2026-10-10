@@ -84,6 +84,17 @@ GitHub 默认首页为英文，可通过顶部入口切换到本中文说明。�
 
 三个 HTTP 监听默认绑定 `127.0.0.1`，端口可配置为 8787、8788、8790。源码按模块组织于 `modules/`；模块测试位于各模块的 `tests/`，脚本和浏览器测试位于 `scripts/tests/`。
 
+## 技术栈与实现
+
+| 层级 | 实现 | 源码位置 |
+| --- | --- | --- |
+| 核心框架与服务端 | Rust：Agent 循环、扩展、上下文、工具、权限、数据库访问、HTTP/SSE API 和文件服务 | `modules/` |
+| 管理端与聊天页面 | TypeScript 编译为 JavaScript，配合 HTML、CSS 及已有 JavaScript 页面代码；页面在浏览器运行，后端仍是 Rust | `web-console/src/`、`web/` |
+| 构建、部署与迁移 | Python 脚本，Shell 入口 | `scripts/` |
+| 测试 | Rust 单元/协议/集成测试、Python 场景及脚本测试、Node.js 浏览器和界面测试 | `modules/*/tests/`、`scripts/tests/`、`web-console/tests/` |
+| 任务沙盒 | Docker OCI 容器，包含 Python、Bash、Node.js、文档库及媒体工具 | `modules/sandbox/`、`runtime/sandbox/` |
+| 数据库 | PostgreSQL，可独立运行或使用 Docker | `modules/storage/` |
+
 ## 环境要求
 
 Python 不只是测试依赖，需要区分宿主机工具环境与任务沙盒：
@@ -157,6 +168,8 @@ release/
 发布包包含执行文件、页面资源、启动脚本和校验清单。数据库、配置、凭据、用户文件及 Skill 包通过独立数据目录保存。跨主机发布时，目标系统的 CPU 架构、动态库和 glibc ABI 需与编译产物兼容。
 
 ## 准备数据库
+
+建议使用 Docker 托管 PostgreSQL 和任务沙盒。当前完整能力部署采用“原生主服务＋Docker 数据库与沙盒”；主服务也可容器化运行，适合聊天、管理和远程 MCP，容器内启动任务沙盒的执行代理尚未接通。
 
 本地启动脚本使用 Docker 管理独立 PostgreSQL 容器和数据卷。先显式获取脚本使用的镜像：
 
@@ -247,10 +260,13 @@ export EXOHARNESS_SANDBOX_IMAGE=exoharness-sandbox:0.1
 
 ## Docker 运行
 
-主服务容器通过挂载发布文件运行，基础镜像需事先缓存：
+主服务运行镜像与任务沙盒镜像分开。前者运行 Rust 框架及 API，后者隔离执行用户任务。先完成源码编译和 `prepare-db`，再从仓库根目录构建主服务镜像：
 
 ```sh
-docker pull ubuntu:24.04
+docker build -f runtime/server/Dockerfile -t exoharness-server:0.1 .
+docker run --rm --network none --read-only exoharness-server:0.1 --version
+export EXOHARNESS_RUNTIME_IMAGE=exoharness-server:0.1
+
 bash release/scripts/start-native.sh stop
 bash release/scripts/start-docker.sh start
 bash release/scripts/start-docker.sh status
@@ -258,9 +274,27 @@ bash release/scripts/start-docker.sh restart
 bash release/scripts/start-docker.sh stop
 ```
 
-脚本复用 `prepare-db` 生成的数据目录，`EXOHARNESS_RUNTIME_IMAGE` 可指定兼容基础镜像。启动前检查二进制 ABI；容器使用 host network、非 root、只读根目录和受限挂载。需要 Linux Docker Engine，或启用 host networking 的 Docker Desktop。
+`runtime/server/Dockerfile` 将已编译的二进制装入 Ubuntu 运行镜像。专用 Docker context 白名单只允许二进制及构建元数据，私有配置、密钥、用户数据和能力包不进入构建上下文。源码编译仍使用本机工具链。
+
+启动脚本复用 `prepare-db` 生成的数据目录，挂载当前 release 和独立私有配置，不自动构建或拉取镜像。启动前检查二进制 ABI；容器使用 host network、非 root、只读根目录和受限挂载。需要 Linux Docker Engine，或启用 host networking 的 Docker Desktop。
 
 当前主服务容器支持聊天、管理及远程 MCP 接入。OCI 任务执行后端依赖宿主 Docker CLI，容器模式的外部沙盒执行代理待接通。需要完整 Python、Shell 和 Coding 执行能力时采用原生主服务。主服务容器与任务沙盒具有独立执行边界。
+
+查看主服务容器日志：
+
+```sh
+docker logs --tail 100 exoharness-pro-local-service
+```
+
+将主服务与沙盒镜像分发到另一台主机：
+
+```sh
+docker save exoharness-server:0.1 exoharness-sandbox:0.1 -o exoharness-images.tar
+# 目标主机执行
+docker load -i exoharness-images.tar
+```
+
+仅修改代码或页面时，重新编译 release 并重启即可，启动脚本会挂载新执行文件，无需重建运行镜像。运行依赖变化时重建对应镜像；跨主机部署需匹配 CPU 架构和系统库 ABI。
 
 ## 模型和能力配置
 
