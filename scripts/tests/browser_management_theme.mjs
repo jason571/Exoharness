@@ -19,6 +19,8 @@ const server = createServer(async (req, res) => {
       res.end(await readFile(resolve(root, 'web', name)));
     } else if (pages[req.url]) {
       let html = (await readFile(resolve(root, 'web', pages[req.url]), 'utf8')).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, tag => ['auth.js', 'i18n.js', 'management-theme.js'].some(name => tag.includes(`/assets/${name}`)) ? tag : '');
+      // Capture the palette while parsing the head, before deferred auth can decorate it.
+      html = html.replace('</head>', '<script>window.paletteBeforeAuth={management:document.documentElement.classList.contains("management-console"),theme:document.documentElement.dataset.managementTheme,background:getComputedStyle(document.documentElement).getPropertyValue("--bg").trim(),authReady:!!window.ExoAuth};</script></head>');
       if (blockStorage) html = html.replace('<head>', '<head><script>Storage.prototype.getItem=()=>{throw new Error("storage disabled")};Storage.prototype.setItem=()=>{throw new Error("storage disabled")};</script>');
       res.setHeader('content-type', 'text/html');
       res.end(html);
@@ -57,6 +59,7 @@ try {
   for (const path of Object.keys(pages)) {
     await open(path);
     assert.equal(await chrome.evaluate('document.documentElement.dataset.managementTheme'), 'light', `${path}: preference persists`);
+    assert.deepEqual(await chrome.evaluate('window.paletteBeforeAuth'), { management: true, theme: 'light', background: '#f4f7f6', authReady: false }, `${path}: light palette applies before authentication and body parsing`);
     const palette = await chrome.evaluate(`(()=>{const header=document.querySelector('.topbar'),nav=document.querySelector('.main-nav'),button=document.querySelector('.management-theme-toggle'),language=document.querySelector('.ui-language-switch');return {header:getComputedStyle(header).backgroundColor,sidebar:getComputedStyle(nav).backgroundColor,foreground:getComputedStyle(document.documentElement).color,scheme:getComputedStyle(document.documentElement).colorScheme,pressed:button.getAttribute('aria-pressed'),position:button.getBoundingClientRect().right<=language.getBoundingClientRect().x,width:document.querySelector('main.page').getBoundingClientRect().width};})()`);
     assert.equal(palette.header, 'rgb(255, 255, 255)');
     assert.equal(palette.sidebar, 'rgb(255, 255, 255)');

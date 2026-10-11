@@ -6,6 +6,8 @@
 
 // Apply the saved palette before styles are loaded. Management and chat use separate preferences.
 (() => {
+  // Palette selectors must match before the first paint, without waiting for auth.
+  document.documentElement.classList.add("management-console");
   const key = "exoharness.management.theme";
   let value = "dark";
   let button;
