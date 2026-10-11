@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Commercial licensing: contact flyangqn@gmail.com.
 
-import { english } from './i18n-catalog';
+import { english, companionCatalog } from './i18n-catalog';
 
 type Language = 'zh-CN' | 'en';
 const storageKey = 'exoharness.ui-language';
@@ -30,17 +30,17 @@ const selectors = new Set<HTMLSelectElement>();
 let language: Language = 'zh-CN';
 try { if (localStorage.getItem(storageKey) === 'en') language = 'en'; } catch { /* Private browsing may disable storage. */ }
 
-function render(source: string): string {
+function render(source: string, companion = false): string {
   if (language === 'zh-CN') return source;
   const core = source.trim();
-  return core ? source.replace(core, english(core)) : source;
+  return core ? source.replace(core, companion ? companionCatalog.get(core) || english(core) : english(core)) : source;
 }
 
 function translateText(node: Text): void {
   if (!node.parentElement || node.parentElement.closest(protectedContent)) return;
   const previous = textSources.get(node);
   const source = previous && node.data === previous.rendered ? previous.source : node.data;
-  const rendered = render(source);
+  const rendered = render(source, Boolean(node.parentElement.closest('.chat-pet-card, .chat-pet-gallery-group > h2')));
   textSources.set(node, { source, rendered });
   if (node.data !== rendered) node.data = rendered;
 }
@@ -138,7 +138,7 @@ function installSwitcher(): void {
   style.dataset.i18n = 'off';
   // Account and delivery actions can mount asynchronously after this control.
   // Visual order must not depend on their response/load timing.
-  style.textContent = `.ui-language-switch{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;order:100;margin-left:auto;padding:5px 8px;border:1px solid var(--border,#7775);border-radius:10px;color:inherit;background:var(--surface,#20222b);font:13px/1.4 system-ui}.ui-language-switch svg{width:17px;height:17px;flex-shrink:0}.ui-language-switch select{min-width:70px;max-width:100px;width:auto;padding:2px;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer}.ui-language-switch select option{color:#20222b;background:#fff}.ui-language-switch select:focus-visible{outline:2px solid #7189ed;outline-offset:3px}.ui-language-corner{position:fixed;top:18px;right:18px;z-index:30}.ui-language-switch:not(.ui-language-corner){align-self:center}@media(max-width:600px){.ui-language-switch{gap:3px;padding:4px 5px;font-size:12px}.ui-language-switch select{min-width:62px}.ui-language-corner{top:12px;right:12px}}`;
+  style.textContent = `.ui-language-switch{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;order:100;margin-left:auto;padding:5px 8px;border:1px solid var(--portal-line,var(--border,var(--line,#7775)));border-radius:10px;color:inherit;background:var(--portal-panel,var(--surface,#20222b));font:13px/1.4 system-ui}.ui-language-switch svg{width:17px;height:17px;flex-shrink:0}.ui-language-switch select{min-width:70px;max-width:100px;width:auto;padding:2px;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer}.ui-language-switch select option{color:var(--portal-text,var(--text,#20222b));background:var(--portal-panel,var(--surface-strong,#fff))}.ui-language-switch select:focus-visible{outline:2px solid #7189ed;outline-offset:3px}.ui-language-corner{position:fixed;top:18px;right:18px;z-index:30}.ui-language-switch:not(.ui-language-corner){align-self:center}@media(max-width:600px){.ui-language-switch{gap:3px;padding:4px 5px;font-size:12px}.ui-language-switch select{min-width:62px}.ui-language-corner{top:12px;right:12px}}`;
   document.head.append(style);
 }
 
@@ -152,5 +152,7 @@ window.addEventListener('storage', event => {
   if (event.key === storageKey) setLanguage(event.newValue === 'en' ? 'en' : 'zh-CN', false);
 });
 function start(): void { installSwitcher(); setLanguage(language, false); }
+// Translate parser-created loading text before deferred settings code is ready.
+setLanguage(language, false);
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
 else start();

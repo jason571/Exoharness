@@ -1791,7 +1791,7 @@ html[data-portal-theme="light"] :is(.portal-page, .portal-access-page) {
 }
 html[data-portal-theme="light"] :is(.portal-sidebar, .portal-session-list) { background: #f7f7f8; }
 html[data-portal-theme="light"] :is(.portal-new-chat, .portal-history-toggle, .portal-route-status, .portal-chat-form, .portal-account-details div, .portal-access-form input, .portal-settings-card input) { color: var(--portal-text); background: #fff; border-color: var(--portal-line); }
-html[data-portal-theme="light"] .portal-settings-card textarea { color: var(--portal-text); background: #fff; border-color: var(--portal-line); }
+html[data-portal-theme="light"] .portal-settings-card :is(textarea, select) { color: var(--portal-text); background: #fff; border-color: var(--portal-line); }
 html[data-portal-theme="light"] :is(.portal-new-chat:hover, .portal-history-toggle:hover, .portal-session-list .session-item:hover, .portal-session-list .session-item.active) { color: var(--portal-text); background: #eaecef; }
 html[data-portal-theme="light"] .portal-session-list .session-item { color: #4a505b; }
 html[data-portal-theme="light"] .portal-history-search { background: #f3f4f6; }

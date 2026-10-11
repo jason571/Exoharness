@@ -61,6 +61,11 @@ try {
   await until(() => chrome.evaluate('document.querySelector("#dynamic-label").textContent === "Completed"'), 'dynamic status update');
   assert.equal(await chrome.evaluate('window.fixtureClicks'), 1);
   const dynamicCopy = [
+    ['还没有资料。上传后，助理可在你的对话中检索并使用相关内容；这里用于查看和管理。', 'No documents yet. After uploading, your assistant can find and use relevant content in your conversations. View and manage your documents here.'],
+    ['助理可在对话中检索并使用相关资料。', 'Your assistant can find and use relevant documents during chat.'],
+    ['还没有记忆。只会保存你主动填写的内容。', 'No memories yet. Only content you explicitly enter is saved.'],
+    ['管理你主动确认的长期偏好。', 'Manage long-term preferences you explicitly confirm.'],
+    ['正在打开设置…', 'Opening settings…'],
     ['活跃任务', 'Active tasks'],
     ['全部用户 · 更新于 21:38 · 当前任务按最新执行计数，用量包含历史重试 · 执行资源与能力检查为全局 · 每 30 秒更新', 'All users · Updated at 21:38 · Tasks count the latest run; usage includes retries · Resources and capability checks are global · Refreshes every 30 seconds'],
     ['第 2 轮 · 第 3 次执行', 'Turn 2 · Attempt 3'],
@@ -98,10 +103,14 @@ try {
   await until(() => chrome.evaluate('document.querySelector("#dynamic-management-copy span")?.textContent === "Active tasks"'), 'asynchronously loaded management labels');
   assert.deepEqual(await chrome.evaluate('[...document.querySelectorAll("#dynamic-management-copy span")].map(e=>e.textContent)'), dynamicCopy.map(([, expected])=>expected));
   assert.deepEqual(await chrome.evaluate('["task-data","assistant-description","model-name"].map(id=>document.getElementById(id).textContent)'), ['活跃任务','测试 API 连接','配置已保存'], 'UI words inside user-defined content remain untouched');
+  await chrome.evaluate(`document.querySelector('#language-fixture').insertAdjacentHTML('beforeend','<div class="chat-pet-gallery-group"><h2 id="companion-group">团子</h2><button class="chat-pet-card"><strong id="companion-name">芽芽</strong><small id="companion-hint">头顶小芽的绿团子</small></button></div><span id="other-name">芽芽</span>');`);
+  await until(() => chrome.evaluate('document.querySelector("#companion-name").textContent === "Sprout"'), 'built-in companion names');
+  assert.deepEqual(await chrome.evaluate('["companion-group","companion-name","companion-hint","other-name"].map(id=>document.getElementById(id).textContent)'), ['Blob companions','Sprout','Green companion with a little sprout','芽芽'], 'companion names translate only inside the gallery');
   await chrome.evaluate(`document.querySelector('#language-fixture').insertAdjacentHTML('beforeend','<div class="agent-list-copy"><span class="agent-list-heading"><strong>小澜</strong><small id="assistant-badge">默认</small></span></div><p class="trace-step-text" data-i18n="off" id="trace-evidence">运行状态 · 排队中</p>');`);
   await until(() => chrome.evaluate('document.querySelector("#assistant-badge").textContent === "Default"'), 'assistant badges are interface text, unlike names');
   assert.equal(await chrome.evaluate('document.querySelector("#trace-evidence").textContent'), '运行状态 · 排队中', 'raw event content remains unchanged');
   await change('zh-CN');
+  assert.equal(await chrome.evaluate('document.querySelector("#companion-name").textContent'), '芽芽');
   assert.equal(await chrome.evaluate('document.querySelector("#dynamic-label").textContent'), '已完成');
   assert.deepEqual(await chrome.evaluate('[...document.querySelectorAll("#dynamic-management-copy span")].map(e=>e.textContent)'), dynamicCopy.map(([source])=>source), 'dynamic templates reverse without changing names or values');
   await chrome.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
@@ -111,6 +120,14 @@ try {
     const rect = await chrome.evaluate('(()=>{const r=document.querySelector(".ui-language-switch select").getBoundingClientRect();return {x:r.x,right:r.right,width:r.width,height:r.height};})()');
     assert.ok(rect.width >= 50 && rect.height >= 16 && rect.x >= 0 && rect.right <= 390, `${page}: mobile language control is visible: ${JSON.stringify(rect)}`);
   }
+  await chrome.send('Page.navigate', { url: `${base}/portal-settings.html` });
+  await until(() => chrome.evaluate('!!document.querySelector(".ui-language-switch")'), 'settings language control');
+  await chrome.evaluate('document.documentElement.dataset.portalTheme="light"');
+  assert.equal(await chrome.evaluate('getComputedStyle(document.querySelector(".ui-language-switch")).backgroundColor'), 'rgb(255, 255, 255)', 'light portal language control');
+  assert.equal(await chrome.evaluate('getComputedStyle(document.querySelector("#settings-document-category")).backgroundColor'), 'rgb(255, 255, 255)', 'light document category selector');
+  assert.equal(await chrome.evaluate('getComputedStyle(document.querySelector("#settings-category-parent")).backgroundColor'), 'rgb(255, 255, 255)', 'light parent category selector');
+  await chrome.evaluate('document.documentElement.dataset.portalTheme="dark"');
+  assert.equal(await chrome.evaluate('getComputedStyle(document.querySelector(".ui-language-switch")).backgroundColor'), 'rgb(18, 18, 20)', 'dark portal language control');
   assert.deepEqual(chrome.errors, []);
   console.log(`PASS: ${pages.length} pages; language persistence/reversal; dynamic labels; protected content; form values; click handlers; mobile controls.`);
   console.log(`UNTRANSLATED_STATIC: ${JSON.stringify([...missing])}`);

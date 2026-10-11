@@ -1,7 +1,3 @@
-// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
-// SPDX-License-Identifier: AGPL-3.0-only
-// Commercial licensing: contact flyangqn@gmail.com.
-
 "use strict";
 (() => {
   // src/i18n-catalog.ts
@@ -757,6 +753,51 @@ MCP \u5730\u5740\u3001mcpServers JSON \u6216 GitHub \u9879\u76EE|MCP URL, mcpSer
 \u7BA1\u7406\u5458\u6388\u6743\u540E\uFF0C\u53EF\u8FDE\u63A5\u8FDC\u7A0B MCP \u5730\u5740\u3001\u7C98\u8D34\u5730\u5740\u578B mcpServers JSON\uFF0C\u6216\u4ECE\u516C\u5F00 GitHub \u9879\u76EE\u5B89\u88C5\u672C\u5730 MCP\u3002Skill \u53EA\u4ECE\u516C\u5F00 GitHub \u9879\u76EE\u5B89\u88C5\uFF1B\u7528\u6237\u5B89\u88C5 Skill/MCP \u4E0D\u63A5\u53D7\u4E0A\u4F20\u6587\u4EF6\u3002\u8FDC\u7A0B MCP \u6240\u9700\u7684\u8BA4\u8BC1\u4FE1\u606F\u5728\u5BF9\u5E94\u80FD\u529B\u4E0B\u586B\u5199\uFF0C\u9875\u9762\u53EA\u663E\u793A\u201C\u5DF2\u914D\u7F6E\u201D\u3002|With administrator permission, connect a remote MCP URL, paste URL-based mcpServers JSON, or install a local MCP from public GitHub. Skills can be installed from public GitHub only. User installations do not accept uploaded files. Enter credentials in the capability settings; only configuration status is displayed.
 \u5B89\u88C5 MCP|Install MCP
 \u6DFB\u52A0\u4E0E\u7BA1\u7406\u8D44\u6599|Manage documents
+\u5C1A\u65E0\u5206\u7C7B\u3002|No categories yet.
+\u7F16\u8F91|Edit
+\u518D\u70B9\u4E00\u6B21\u786E\u8BA4\u5220\u9664|Click again to confirm deletion
+\u8FD8\u6CA1\u6709\u8D44\u6599\u3002\u4E0A\u4F20\u540E\uFF0C\u52A9\u7406\u53EF\u5728\u4F60\u7684\u5BF9\u8BDD\u4E2D\u68C0\u7D22\u5E76\u4F7F\u7528\u76F8\u5173\u5185\u5BB9\uFF1B\u8FD9\u91CC\u7528\u4E8E\u67E5\u770B\u548C\u7BA1\u7406\u3002|No documents yet. After uploading, your assistant can find and use relevant content in your conversations. View and manage your documents here.
+\u8D44\u6599\u5DF2\u5220\u9664|Document deleted
+\u8FD8\u6CA1\u6709\u8BB0\u5FC6\u3002\u53EA\u4F1A\u4FDD\u5B58\u4F60\u4E3B\u52A8\u586B\u5199\u7684\u5185\u5BB9\u3002|No memories yet. Only content you explicitly enter is saved.
+\u8BB0\u5FC6\u5DF2\u5220\u9664|Memory deleted
+\u52A9\u7406\u53EF\u5728\u5BF9\u8BDD\u4E2D\u68C0\u7D22\u5E76\u4F7F\u7528\u76F8\u5173\u8D44\u6599\u3002|Your assistant can find and use relevant documents during chat.
+\u7BA1\u7406\u4F60\u4E3B\u52A8\u786E\u8BA4\u7684\u957F\u671F\u504F\u597D\u3002|Manage long-term preferences you explicitly confirm.
+\u4FDD\u62A4\u4F60\u7684\u8D26\u53F7\u5B89\u5168\u3002|Protect your account.
+\u7BA1\u7406\u4F60\u7684\u663E\u793A\u540D\u79F0\u3002|Manage your display name.
+\u67E5\u770B\u5B89\u88C5\u8FDB\u5EA6\uFF0C\u7BA1\u7406\u81EA\u5DF1\u7684 MCP \u8BA4\u8BC1\u4FE1\u606F\u3002|View installation progress and manage your MCP credentials.
+\u5206\u7C7B\u5DF2\u4FDD\u5B58|Category saved
+\u8D44\u6599\u5DF2\u4FDD\u5B58|Document saved
+\u6BCF\u6B21\u6700\u591A\u5BFC\u5165 10 \u4E2A\u6587\u4EF6\u3002|Import up to 10 files at a time.
+\u6CA1\u6709\u627E\u5230\u5339\u914D\u8D44\u6599\u3002|No matching documents found.
+\u8BB0\u5FC6\u5DF2\u4FDD\u5B58|Memory saved
+\u4E2A\u4EBA\u8D44\u6599\u5DF2\u4FDD\u5B58|Profile saved
+\u4E24\u6B21\u8F93\u5165\u7684\u65B0\u5BC6\u7801\u4E0D\u4E00\u81F4|The new passwords do not match
+\u5BC6\u7801\u5DF2\u66F4\u65B0\uFF0C\u8BF7\u91CD\u65B0\u767B\u5F55|Password updated. Please sign in again.
+\u8BF7\u6C42\u5931\u8D25|Request failed
+\u5DF2\u5173\u95ED|Disabled
+\u68C0\u67E5\u4E2D|Checking
+\u72B6\u6001\u6682\u4E0D\u53EF\u7528|Status currently unavailable
+\u91CD\u65B0\u68C0\u67E5|Check again
+Authorization \u5DF2\u914D\u7F6E \xB7 \u66F4\u65B0|Authorization configured \xB7 Update
+\u586B\u5199 Authorization|Enter Authorization
+Authorization \u503C|Authorization value
+\u586B\u5199\u670D\u52A1\u63D0\u4F9B\u7684\u5B8C\u6574 Header \u503C|Enter the complete header value provided by the service
+\u4FDD\u5B58\u5E76\u91CD\u65B0\u68C0\u67E5|Save and check again
+\u8BA4\u8BC1\u4FE1\u606F\u5DF2\u4FDD\u5B58\uFF0C\u6B63\u5728\u91CD\u65B0\u68C0\u67E5\u8FDE\u63A5\u3002|Credentials saved. Checking the connection again.
+\u5220\u9664\u8BA4\u8BC1\u4FE1\u606F|Delete credentials
+\u8BA4\u8BC1\u4FE1\u606F\u5DF2\u5220\u9664\uFF0CMCP \u5DF2\u505C\u7528\uFF1B\u5982\u670D\u52A1\u652F\u6301\u514D\u8BA4\u8BC1\uFF0C\u53EF\u91CD\u65B0\u68C0\u67E5\u8FDE\u63A5\u3002|Credentials deleted and MCP disabled. If the service supports access without authentication, check the connection again.
+\u5DF2\u914D\u7F6E\uFF0C\u53EF\u66F4\u65B0|Configured; can be updated
+\u5F85\u914D\u7F6E|Not configured
+\u4EC5\u5728\u6B64\u5904\u586B\u5199\uFF0C\u4E0D\u8981\u53D1\u9001\u5230\u5BF9\u8BDD|Enter credentials here only, not in chat
+\u6B63\u5728\u68C0\u67E5 MCP\uFF0C\u5B8C\u6210\u540E\u5373\u53EF\u586B\u5199\u5BC6\u94A5|Checking MCP. Enter credentials after the check completes.
+\u516C\u5F00 GitHub \u6765\u6E90 \xB7 \u56FA\u5B9A\u63D0\u4EA4\u5B89\u88C5|Public GitHub source \xB7 Installed from a pinned commit
+\u5B89\u88C5\u4E2D|Installing
+\u53D6\u6D88\u4E0B\u8F7D|Cancel download
+\u5F53\u524D\u53EF\u67E5\u770B\u5DF2\u767B\u8BB0\u7684\u4E2A\u4EBA\u80FD\u529B\uFF1B\u65B0\u7248\u81EA\u52A9\u5B89\u88C5\u529F\u80FD\u5C1A\u672A\u63A5\u5165\uFF0C\u4E0D\u80FD\u5728\u6B64\u63D0\u4EA4\u5B89\u88C5\u3002|View your registered capabilities here. Self-service installation is not connected in this version.
+\u7BA1\u7406\u5458\u5C1A\u672A\u5F00\u653E\u80FD\u529B\u5B89\u88C5\u6743\u9650\uFF1B\u5DF2\u5B89\u88C5\u80FD\u529B\u4ECD\u6309\u4F7F\u7528\u6743\u9650\u548C\u52A9\u7406\u6388\u6743\u68C0\u67E5\u3002|Your administrator has not enabled capability installation. Installed capabilities still follow user and assistant permissions.
+\u5C1A\u672A\u5B89\u88C5\u79C1\u6709\u80FD\u529B\u3002|No private capabilities installed yet.
+\u5B89\u88C5\u4EFB\u52A1|Installation tasks
+MCP \u5DF2\u767B\u8BB0\uFF0C\u6B63\u5728\u68C0\u67E5\u6765\u6E90\u3001\u8FD0\u884C\u73AF\u5883\u4E0E\u5DE5\u5177\uFF1B\u68C0\u67E5\u901A\u8FC7\u540E\u624D\u4F1A\u542F\u7528\u3002|MCP registered. Its source, runtime and tools are being checked. It will be enabled after the checks pass.
 \u52A9\u7406\u53EF\u5728\u4F60\u7684\u5BF9\u8BDD\u4E2D\u68C0\u7D22\u5E76\u4F7F\u7528\u76F8\u5173\u8D44\u6599\uFF1B\u8D44\u6599\u53EA\u5C5E\u4E8E\u5F53\u524D\u8D26\u53F7\uFF0C\u4E0D\u4F1A\u81EA\u52A8\u5206\u4EAB\u7ED9\u5176\u4ED6\u7528\u6237\u3002|Your assistant can retrieve relevant documents during chat. Documents are private to your account.
 \u7BA1\u7406\u6211\u7684\u8D44\u6599|Manage my documents
 \u68C0\u7D22\u6211\u7684\u8D44\u6599|Search my documents
@@ -1004,6 +1045,34 @@ ExoHarness \u5BF9\u8BDD|ExoHarness chat
 \u5173\u95ED\u83DC\u5355|Close menu
 \u6253\u5F00\u83DC\u5355|Open menu
 `.trim().split("\n").map((line) => line.split("|"));
+  var companionCatalog = new Map(`
+\u56E2\u5B50|Blob companions
+\u5C0F\u5973\u5B69|Girl companions
+\u82BD\u82BD|Sprout
+\u7130\u7130|Flame
+\u58A8\u58A8|Ink
+\u6CE2\u6CE2|Bubble
+\u6838\u6838|Core
+\u56E2\u56E2|Bun
+\u5C0F\u82BD|Mint
+\u5C0F\u6A59|Ember
+\u5C0F\u591C|Night
+\u5C0F\u6C50|Tide
+\u5C0F\u82AF|Chip
+\u5C0F\u68C9|Cotton
+\u5934\u9876\u5C0F\u82BD\u7684\u7EFF\u56E2\u5B50|Green companion with a little sprout
+\u84EC\u5C3E\u5C0F\u72D0|Fluffy-tailed fox
+\u591C\u8272\u5C0F\u732B|Night-colored cat
+\u4F1A\u53D1\u5149\u7684\u6C34\u6EF4|Glowing water droplet
+\u5E26\u5929\u7EBF\u7684\u5C0F\u673A\u5668\u4EBA|Little robot with an antenna
+\u5782\u8033\u5C0F\u5154|Floppy-eared bunny
+\u8584\u8377\u7EFF\u77ED\u53D1\uFF0C\u5143\u6C14\u6821\u670D|Short mint hair and a lively school uniform
+\u6A59\u53D1\u72D0\u8033\uFF0C\u6D3B\u6CFC\u6821\u670D|Orange hair, fox ears and a lively school uniform
+\u7D2B\u53D1\u732B\u8033\uFF0C\u5B89\u9759\u6821\u670D|Purple hair, cat ears and a quiet school uniform
+\u84DD\u53D1\u6C34\u6EF4\uFF0C\u6E05\u723D\u6821\u670D|Blue hair, droplet accent and a fresh school uniform
+\u94F6\u53D1\u661F\u6807\uFF0C\u79D1\u6280\u6821\u670D|Silver hair, star accent and a tech-inspired school uniform
+\u7C89\u53D1\u5154\u5939\uFF0C\u751C\u7F8E\u6821\u670D|Pink hair, bunny clip and a sweet school uniform
+`.trim().split("\n").map((line) => line.split("|")));
   var catalog = new Map(entries);
   function english(source) {
     const direct = catalog.get(source);
@@ -1139,16 +1208,16 @@ ExoHarness \u5BF9\u8BDD|ExoHarness chat
     if (localStorage.getItem(storageKey) === "en") language = "en";
   } catch {
   }
-  function render(source) {
+  function render(source, companion = false) {
     if (language === "zh-CN") return source;
     const core = source.trim();
-    return core ? source.replace(core, english(core)) : source;
+    return core ? source.replace(core, companion ? companionCatalog.get(core) || english(core) : english(core)) : source;
   }
   function translateText(node) {
     if (!node.parentElement || node.parentElement.closest(protectedContent)) return;
     const previous = textSources.get(node);
     const source = previous && node.data === previous.rendered ? previous.source : node.data;
-    const rendered = render(source);
+    const rendered = render(source, Boolean(node.parentElement.closest(".chat-pet-card, .chat-pet-gallery-group > h2")));
     textSources.set(node, { source, rendered });
     if (node.data !== rendered) node.data = rendered;
   }
@@ -1254,7 +1323,7 @@ ExoHarness \u5BF9\u8BDD|ExoHarness chat
     if (!anchor || anchor.matches(".portal-access-shell,.login-shell")) label.classList.add("ui-language-corner");
     const style = document.createElement("style");
     style.dataset.i18n = "off";
-    style.textContent = `.ui-language-switch{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;order:100;margin-left:auto;padding:5px 8px;border:1px solid var(--border,#7775);border-radius:10px;color:inherit;background:var(--surface,#20222b);font:13px/1.4 system-ui}.ui-language-switch svg{width:17px;height:17px;flex-shrink:0}.ui-language-switch select{min-width:70px;max-width:100px;width:auto;padding:2px;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer}.ui-language-switch select option{color:#20222b;background:#fff}.ui-language-switch select:focus-visible{outline:2px solid #7189ed;outline-offset:3px}.ui-language-corner{position:fixed;top:18px;right:18px;z-index:30}.ui-language-switch:not(.ui-language-corner){align-self:center}@media(max-width:600px){.ui-language-switch{gap:3px;padding:4px 5px;font-size:12px}.ui-language-switch select{min-width:62px}.ui-language-corner{top:12px;right:12px}}`;
+    style.textContent = `.ui-language-switch{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;order:100;margin-left:auto;padding:5px 8px;border:1px solid var(--portal-line,var(--border,var(--line,#7775)));border-radius:10px;color:inherit;background:var(--portal-panel,var(--surface,#20222b));font:13px/1.4 system-ui}.ui-language-switch svg{width:17px;height:17px;flex-shrink:0}.ui-language-switch select{min-width:70px;max-width:100px;width:auto;padding:2px;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer}.ui-language-switch select option{color:var(--portal-text,var(--text,#20222b));background:var(--portal-panel,var(--surface-strong,#fff))}.ui-language-switch select:focus-visible{outline:2px solid #7189ed;outline-offset:3px}.ui-language-corner{position:fixed;top:18px;right:18px;z-index:30}.ui-language-switch:not(.ui-language-corner){align-self:center}@media(max-width:600px){.ui-language-switch{gap:3px;padding:4px 5px;font-size:12px}.ui-language-switch select{min-width:62px}.ui-language-corner{top:12px;right:12px}}`;
     document.head.append(style);
   }
   var nativeConfirm = window.confirm.bind(window);
@@ -1268,6 +1337,7 @@ ExoHarness \u5BF9\u8BDD|ExoHarness chat
     installSwitcher();
     setLanguage(language, false);
   }
+  setLanguage(language, false);
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
   else start();
 })();

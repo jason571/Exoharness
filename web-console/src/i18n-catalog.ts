@@ -755,6 +755,51 @@ MCP 地址、mcpServers JSON 或 GitHub 项目|MCP URL, mcpServers JSON or GitHu
 管理员授权后，可连接远程 MCP 地址、粘贴地址型 mcpServers JSON，或从公开 GitHub 项目安装本地 MCP。Skill 只从公开 GitHub 项目安装；用户安装 Skill/MCP 不接受上传文件。远程 MCP 所需的认证信息在对应能力下填写，页面只显示“已配置”。|With administrator permission, connect a remote MCP URL, paste URL-based mcpServers JSON, or install a local MCP from public GitHub. Skills can be installed from public GitHub only. User installations do not accept uploaded files. Enter credentials in the capability settings; only configuration status is displayed.
 安装 MCP|Install MCP
 添加与管理资料|Manage documents
+尚无分类。|No categories yet.
+编辑|Edit
+再点一次确认删除|Click again to confirm deletion
+还没有资料。上传后，助理可在你的对话中检索并使用相关内容；这里用于查看和管理。|No documents yet. After uploading, your assistant can find and use relevant content in your conversations. View and manage your documents here.
+资料已删除|Document deleted
+还没有记忆。只会保存你主动填写的内容。|No memories yet. Only content you explicitly enter is saved.
+记忆已删除|Memory deleted
+助理可在对话中检索并使用相关资料。|Your assistant can find and use relevant documents during chat.
+管理你主动确认的长期偏好。|Manage long-term preferences you explicitly confirm.
+保护你的账号安全。|Protect your account.
+管理你的显示名称。|Manage your display name.
+查看安装进度，管理自己的 MCP 认证信息。|View installation progress and manage your MCP credentials.
+分类已保存|Category saved
+资料已保存|Document saved
+每次最多导入 10 个文件。|Import up to 10 files at a time.
+没有找到匹配资料。|No matching documents found.
+记忆已保存|Memory saved
+个人资料已保存|Profile saved
+两次输入的新密码不一致|The new passwords do not match
+密码已更新，请重新登录|Password updated. Please sign in again.
+请求失败|Request failed
+已关闭|Disabled
+检查中|Checking
+状态暂不可用|Status currently unavailable
+重新检查|Check again
+Authorization 已配置 · 更新|Authorization configured · Update
+填写 Authorization|Enter Authorization
+Authorization 值|Authorization value
+填写服务提供的完整 Header 值|Enter the complete header value provided by the service
+保存并重新检查|Save and check again
+认证信息已保存，正在重新检查连接。|Credentials saved. Checking the connection again.
+删除认证信息|Delete credentials
+认证信息已删除，MCP 已停用；如服务支持免认证，可重新检查连接。|Credentials deleted and MCP disabled. If the service supports access without authentication, check the connection again.
+已配置，可更新|Configured; can be updated
+待配置|Not configured
+仅在此处填写，不要发送到对话|Enter credentials here only, not in chat
+正在检查 MCP，完成后即可填写密钥|Checking MCP. Enter credentials after the check completes.
+公开 GitHub 来源 · 固定提交安装|Public GitHub source · Installed from a pinned commit
+安装中|Installing
+取消下载|Cancel download
+当前可查看已登记的个人能力；新版自助安装功能尚未接入，不能在此提交安装。|View your registered capabilities here. Self-service installation is not connected in this version.
+管理员尚未开放能力安装权限；已安装能力仍按使用权限和助理授权检查。|Your administrator has not enabled capability installation. Installed capabilities still follow user and assistant permissions.
+尚未安装私有能力。|No private capabilities installed yet.
+安装任务|Installation tasks
+MCP 已登记，正在检查来源、运行环境与工具；检查通过后才会启用。|MCP registered. Its source, runtime and tools are being checked. It will be enabled after the checks pass.
 助理可在你的对话中检索并使用相关资料；资料只属于当前账号，不会自动分享给其他用户。|Your assistant can retrieve relevant documents during chat. Documents are private to your account.
 管理我的资料|Manage my documents
 检索我的资料|Search my documents
@@ -1003,6 +1048,36 @@ ExoHarness 对话|ExoHarness chat
 打开菜单|Open menu
 `
   .trim().split('\n').map(line => line.split('|') as [string, string]);
+
+// Built-in companion copy is scoped to the gallery, never user-owned names.
+export const companionCatalog: ReadonlyMap<string, string> = new Map(`
+团子|Blob companions
+小女孩|Girl companions
+芽芽|Sprout
+焰焰|Flame
+墨墨|Ink
+波波|Bubble
+核核|Core
+团团|Bun
+小芽|Mint
+小橙|Ember
+小夜|Night
+小汐|Tide
+小芯|Chip
+小棉|Cotton
+头顶小芽的绿团子|Green companion with a little sprout
+蓬尾小狐|Fluffy-tailed fox
+夜色小猫|Night-colored cat
+会发光的水滴|Glowing water droplet
+带天线的小机器人|Little robot with an antenna
+垂耳小兔|Floppy-eared bunny
+薄荷绿短发，元气校服|Short mint hair and a lively school uniform
+橙发狐耳，活泼校服|Orange hair, fox ears and a lively school uniform
+紫发猫耳，安静校服|Purple hair, cat ears and a quiet school uniform
+蓝发水滴，清爽校服|Blue hair, droplet accent and a fresh school uniform
+银发星标，科技校服|Silver hair, star accent and a tech-inspired school uniform
+粉发兔夹，甜美校服|Pink hair, bunny clip and a sweet school uniform
+`.trim().split('\n').map(line => line.split('|') as [string, string]));
 
 export const catalog: ReadonlyMap<string, string> = new Map(entries);
 
