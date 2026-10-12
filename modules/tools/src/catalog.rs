@@ -208,6 +208,14 @@ impl Catalog {
     /// Preserve historical replace semantics; explicit add avoids unloading
     /// an already selected dependency while adding a related stage tool.
     pub fn activate_with_mode(&mut self, names: &[String], mode: &str) -> Result<Value> {
+        // Known native operations absent from the authorized bindings are a
+        // permission/readiness denial, not a typo that model retries can fix.
+        let native_tools = native::sandbox_tools();
+        if names.iter().any(|name| {
+            !self.bindings.contains_key(name) && native_tools.iter().any(|tool| &tool.name == name)
+        }) {
+            return Err(ToolError::Authorization);
+        }
         if !matches!(mode, "add" | "replace") {
             return Err(ToolError::Input(
                 "mode 必须为 add 或 replace；未改变加载集合".into(),

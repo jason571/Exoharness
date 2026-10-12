@@ -105,9 +105,17 @@ pub(super) async fn launch(state: ChatState, work: Work) -> Result<(), TaskAdmis
             .await;
             let error = match outcome {
                 RunOutcome::Finished(_) => None,
-                RunOutcome::Stopped(exoharness_agent::StopReason::RepeatedCall) => Some("执行已停止：相同工具与参数连续重复调用达到限制；已有结果已保留，没有再次提交"),
+                RunOutcome::Stopped(exoharness_agent::StopReason::ToolFailed) if engine.sandbox_corrections > 0 => Some("代码处理经自动纠正后仍未完成。已生成的文件和工作区已保留；请简化未完成的处理要求后继续，无需重新生成已有文件"),
+                RunOutcome::Stopped(exoharness_agent::StopReason::ContextBudget) if !driver.artifacts.is_empty() => Some("文件已生成并保留，但暂时无法完成后续说明。你可以查看或下载下面的文件，无需重复生成"),
+                RunOutcome::Stopped(exoharness_agent::StopReason::ContextBudget) => Some("本次任务的数据量过大，暂时无法继续处理。已完成内容已保留；请缩小未完成部分的范围后继续"),
+                RunOutcome::Stopped(exoharness_agent::StopReason::RepeatedCall) => Some("暂时无法确认这项任务的最终结果。已取得的结果和任务记录已保留；请稍后查询现有任务状态，避免重复提交"),
+                RunOutcome::Stopped(exoharness_agent::StopReason::MissingExecution) if engine.service_recoveries > 0 => Some("目前没有可用的技能或能力完成这项任务，暂时无法交付结果。如果你需要这项能力，请联系管理员为你开放相应的技能或能力。已完成内容已保留"),
                 RunOutcome::Stopped(exoharness_agent::StopReason::MissingExecution) => Some("任务未完成：尚未取得实际执行或交付结果；输入与过程记录已保留"),
-                RunOutcome::Stopped(exoharness_agent::StopReason::InputRejected) => Some(driver.failure.unwrap_or("工具参数未通过执行前校验，已停止纠正；具体字段错误与原始输入已保留在追踪记录中，没有提交该次执行")),
+                RunOutcome::Stopped(exoharness_agent::StopReason::InputRejected) => Some(driver.failure.unwrap_or(if engine.entries.last().is_some_and(|entry| matches!(entry, exoharness_core::context::JournalEntry::ToolExchange{result,..} if result["_host_service_unavailable"] == 1)) {
+                    "所需能力暂时不可用，暂时无法完成这项任务。已完成内容已保留，请稍后重试未完成的部分"
+                } else {
+                    "工具输入暂时无法处理，自动纠正次数已用尽。已完成内容已保留；请调整未完成步骤的输入后继续"
+                })),
                 RunOutcome::Stopped(_) => Some(
                     driver
                         .failure

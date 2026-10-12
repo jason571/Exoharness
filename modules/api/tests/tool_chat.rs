@@ -59,6 +59,8 @@ mod model_tools;
 mod publication_recovery;
 #[path = "unit/run_admission.rs"]
 mod run_admission;
+#[path = "unit/sandbox_failure_recovery.rs"]
+mod sandbox_failure_recovery;
 #[path = "../../model-runtime/tests/support/speech.rs"]
 #[allow(dead_code)]
 mod speech_fixture;
@@ -103,6 +105,25 @@ async fn reply(State(state): State<Upstream>, body: Bytes) -> axum::Json<Value> 
                 args["expected_revision"] = json!(revision);
             }
             return axum::Json(tool(action, args));
+        }
+        if action == "workspace_import" {
+            let artifact = request["messages"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .rev()
+                .find_map(|message| {
+                    let value: Value = serde_json::from_str(message["content"].as_str()?).ok()?;
+                    value
+                        .pointer("/_host_delivered_artifacts/0/id")
+                        .and_then(Value::as_str)
+                        .map(str::to_owned)
+                })
+                .expect("owned MCP artifact required");
+            return axum::Json(tool(
+                "workspace_import",
+                json!({"workspace_id":id,"expected_revision":revision,"inputs":[{"artifact_id":artifact,"path":"source.bin"}]}),
+            ));
         }
         let args = match action {
             "workspace_edit" => {

@@ -106,7 +106,10 @@ async fn empty_overview_is_successful_native_data_not_a_missing_route() {
     }
     assert_eq!(value["counts"], json!({}));
     assert_eq!(value["scheduler"]["ready"], true);
-    assert_eq!(value["scheduler"]["global_limit"], 4);
+    assert_eq!(
+        value["scheduler"]["global_limit"],
+        exoharness_contracts::scheduler::SchedulerConfiguration::default().max_global_agent_runs
+    );
     assert_eq!(value["scheduler"]["per_user_limit"], 2);
     assert_eq!(value["scheduler"]["active"], 0);
     assert_eq!(

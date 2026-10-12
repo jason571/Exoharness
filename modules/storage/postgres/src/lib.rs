@@ -123,7 +123,12 @@ impl PostgresStore {
     pub fn migrate(&self) -> Result<()> {
         let mut connection = self.connection()?;
         let mut tx = connection.transaction()?;
-        tx.query_one("SELECT pg_advisory_xact_lock(4271072001)", &[])?;
+        // Migrations in one namespace serialize; independent installations
+        // must not contend on a database-wide lock and exhaust lock_timeout.
+        tx.query_one(
+            "SELECT pg_advisory_xact_lock(hashtextextended(current_schema(),4271072001))",
+            &[],
+        )?;
         tx.batch_execute(include_str!("../migrations/0001_legacy_execution.sql"))?;
         tx.batch_execute(include_str!("../migrations/0002_knowledge.sql"))?;
         tx.batch_execute(include_str!("../migrations/0003_document_import.sql"))?;

@@ -25,8 +25,8 @@ This documentation describes the ExoHarness architecture, APIs, persistence, exe
 | [Feature status](STATUS.md) | Connected functionality and current limitations |
 | [Open-source checklist](OPEN_SOURCE_CHECKLIST.md) | Private data, licenses, publication and review steps |
 | [Release notes template](RELEASE.txt) | Standalone release startup instructions |
-| [Delivery validation](DELIVERABLES_VALIDATION.md) | Artifact card repair and acceptance record |
-| [File/concurrency validation](LINKS_AND_CONCURRENCY_VALIDATION.md) | Signed-link policy and admission limits acceptance |
-| [Tool discovery validation](TOOL_DISCOVERY_VALIDATION.md) | On-demand discovery design and acceptance record |
+| [Delivery testing](TESTING.md#critical-regressions) | Artifact delivery and failure recovery coverage |
+| [File/concurrency testing](TESTING.md#coverage-levels) | Signed-link policy and admission test layers |
+| [Tool discovery testing](TESTING.md#execution-and-file-delivery-regressions) | Discovery and authorization regression gates |
 
 `legacy-api-inventory.json` records routes from a historical version for migration review. Current route behavior is documented in the [API reference](INTERFACES.md), with implementation under `modules/api/src/`.

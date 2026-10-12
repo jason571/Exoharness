@@ -35,7 +35,11 @@ try{
   chrome=await browser();
   for(let iteration=0;iteration<2;iteration++){
     if(iteration===0)await chrome.send('Page.navigate',{url:origin+'/chat?session=fixture-session'});
-    else await chrome.send('Page.reload');
+    else {
+      const before=await chrome.evaluate('performance.timeOrigin');
+      await chrome.send('Page.reload');
+      await until(()=>chrome.evaluate(`performance.timeOrigin!==${before} && document.readyState==='complete'`),'new document after reload');
+    }
     await until(()=>chrome.evaluate('document.querySelectorAll(".chat-message.assistant").length===2'),'persisted answers');
     const state=await chrome.evaluate('({videos:document.querySelectorAll("video").length,src:document.querySelector("video")?.src,download:document.querySelector(".chat-video-artifact .video-download-link")?.href,links:[...document.querySelectorAll(".rich-content a")].map(a=>a.href)})');
     assert.equal(state.videos,1);assert.equal(state.src,origin+'/final.mp4?signature=fixture');assert.equal(state.download,state.src);

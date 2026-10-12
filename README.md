@@ -30,8 +30,8 @@ The first public preview targets **Linux x86_64 with glibc 2.39+**, such as Ubun
 
 ```bash
 sha256sum --check SHA256SUMS --ignore-missing
-tar -xzf exoharness-v0.1.0-linux-x86_64-gnu.tar.gz
-cd exoharness-v0.1.0-linux-x86_64-gnu
+tar -xzf exoharness-v0.1.1-linux-x86_64-gnu.tar.gz
+cd exoharness-v0.1.1-linux-x86_64-gnu
 docker pull postgres:18.6-alpine3.23
 bash scripts/start-native.sh prepare-db
 bash scripts/start-native.sh start

@@ -30,8 +30,8 @@ ExoHarness 为智能体提供通用运行基础：模型接入、上下文管理
 
 ```bash
 sha256sum --check SHA256SUMS --ignore-missing
-tar -xzf exoharness-v0.1.0-linux-x86_64-gnu.tar.gz
-cd exoharness-v0.1.0-linux-x86_64-gnu
+tar -xzf exoharness-v0.1.1-linux-x86_64-gnu.tar.gz
+cd exoharness-v0.1.1-linux-x86_64-gnu
 docker pull postgres:18.6-alpine3.23
 bash scripts/start-native.sh prepare-db
 bash scripts/start-native.sh start

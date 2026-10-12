@@ -67,11 +67,20 @@ Live JSON Schema validation checks objects, arrays, required fields, enums, rang
 
 Local repair retains the candidate and diagnostics and uses the Run-level budget. The default repeated-call limit is three consecutive calls with the same tool and arguments. Queue waits and background-state reads are handled by the execution backend and counted separately from model requests and generation submissions.
 
+The repeat-control cursor stores a canonical native-JSON SHA-256 fingerprint,
+with tool name and count. Original arguments remain in the durable journal.
+Restoring or saving a legacy cursor preserves its accumulated repeat count;
+the cursor does not duplicate large authored source files.
+
 Current tool-chain budgets are 24 model requests, 48 tool calls, 300,000 reported input/output Tokens and 1 MiB of model-context bytes. The per-response output limit comes from model configuration and defaults to 4,096. Budgets protect execution; task cost is calculated from actual usage. Resuming or stopping with an unknown outcome preserves existing counters. Unified global cost scheduling remains pending.
 
 ## Progress and attachments
 
 MCP progress and explicit background-task polling become UI events; polling is handled by the execution backend. Ordinary model requests receive attachment references and metadata. Binary files remain in separate storage.
+
+Standard inline MCP image and audio blocks are retained in the original tool receipt. In the current text-only request contract, their Base64 payloads are projected as references containing the invocation ID, content index, MIME type and encoded size. Business JSON, authored text, resource links and call/result identity remain intact; the original receipt is not rewritten. This applies to ordinary exchanges and checkpoint views.
+
+A media reference is not visual or audio input. Delivery uses the existing file link; inspection requires an authorized media-capable tool. Retrieving an inline result does not justify regenerating a completed file. File cards from multiple receipts are deduplicated by stable artifact identity, with URL and filename as a fallback.
 
 ## Accounting
 

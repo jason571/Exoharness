@@ -77,3 +77,32 @@ fn cancellation_releases_only_an_explicit_terminal_receipt_for_the_owned_job() {
         confirmed_terminal(json!({"accepted":true,"status":"cancelled"}), "owned-task").is_none()
     );
 }
+
+#[test]
+fn only_declared_read_only_status_transport_failures_allow_retry() {
+    let action = Action {
+        tool: "status".into(),
+        arguments: json!({"id":"owned-task"}),
+    };
+    let tools = vec![json!({"name":"status","annotations":{"readOnlyHint":true}})];
+    assert!(retryable_poll(&tools, &action, &McpError::Connection));
+    assert!(retryable_poll(&tools, &action, &McpError::OutcomeUnknown));
+    for error in [
+        McpError::Cancelled,
+        McpError::Protocol,
+        McpError::Permission,
+        McpError::Rejected(-32602),
+    ] {
+        assert!(!retryable_poll(&tools, &action, &error));
+    }
+    assert!(!retryable_poll(
+        &[json!({"name":"status"})],
+        &action,
+        &McpError::OutcomeUnknown
+    ));
+    assert!(!retryable_poll(
+        &[json!({"name":"generate","annotations":{"readOnlyHint":true}})],
+        &action,
+        &McpError::Connection
+    ));
+}

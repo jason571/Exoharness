@@ -127,6 +127,120 @@ fn input_rejection(id: &str) -> Receipt {
     r
 }
 
+fn unavailable_service(id: &str) -> Receipt {
+    let mut r = receipt(id, ReceiptState::RejectedBeforeExecution);
+    r.performed_execution = false;
+    r.result = json!({"isError":true,"_host_service_unavailable":1,"code_executed":false,"message":"MCP initialization unavailable"});
+    r
+}
+
+#[tokio::test]
+async fn unavailable_service_replans_without_replaying_successful_or_unsubmitted_calls() {
+    let mut driver = Fixture::new(
+        vec![
+            completion(vec![proposal("saved")]),
+            completion(vec![proposal("unavailable"), proposal("dependent")]),
+            completion(vec![proposal("fallback")]),
+            completion(vec![]),
+        ],
+        vec![
+            receipt("saved", ReceiptState::Completed),
+            unavailable_service("unavailable"),
+            receipt("fallback", ReceiptState::Completed),
+        ],
+    );
+    let mut state = state();
+    assert_eq!(
+        run(
+            &mut driver,
+            &mut state,
+            &policy(),
+            "system",
+            &BTreeSet::new(),
+            &tools()
+        )
+        .await,
+        RunOutcome::Finished("done".into())
+    );
+    assert_eq!(
+        driver.calls,
+        vec!["model-1-tool-0", "model-2-tool-0", "model-3-tool-0"]
+    );
+    assert_eq!(state.service_recoveries, 1);
+    assert_eq!(state.input_corrections, 0);
+    assert_eq!(state.successful_executions, 2);
+    let request = serde_json::to_string(&driver.requests[2]).unwrap();
+    assert!(request.contains("MCP initialization unavailable"));
+    assert!(request.contains("saved"));
+}
+
+#[tokio::test]
+async fn service_recovery_budget_survives_serialization_and_never_admits_unknown_or_submitted_work()
+{
+    let mut driver = Fixture::new(
+        (0..3)
+            .map(|n| completion(vec![proposal(&format!("failed-{n}"))]))
+            .collect(),
+        (0..3)
+            .map(|n| unavailable_service(&format!("failed-{n}")))
+            .collect(),
+    );
+    let mut state = state();
+    assert_eq!(
+        run(
+            &mut driver,
+            &mut state,
+            &policy(),
+            "system",
+            &BTreeSet::new(),
+            &tools()
+        )
+        .await,
+        RunOutcome::Stopped(StopReason::InputRejected)
+    );
+    assert_eq!(state.service_recoveries, 2);
+    let mut restored: EngineState =
+        serde_json::from_str(&serde_json::to_string(&state).unwrap()).unwrap();
+    assert_eq!(
+        run(
+            &mut driver,
+            &mut restored,
+            &policy(),
+            "system",
+            &BTreeSet::new(),
+            &tools()
+        )
+        .await,
+        RunOutcome::Stopped(StopReason::InputRejected)
+    );
+    assert_eq!(driver.requests.len(), 3);
+    for (status, executed) in [
+        (ReceiptState::OutcomeUnknown, false),
+        (ReceiptState::FailedAfterExecution, false),
+        (ReceiptState::RejectedBeforeExecution, true),
+    ] {
+        let mut r = unavailable_service("unsafe");
+        r.state = status;
+        r.performed_execution = executed;
+        let mut driver = Fixture::new(vec![completion(vec![proposal("unsafe")])], vec![r]);
+        let mut state = super_state();
+        assert!(matches!(
+            run(
+                &mut driver,
+                &mut state,
+                &policy(),
+                "system",
+                &BTreeSet::new(),
+                &tools()
+            )
+            .await,
+            RunOutcome::Stopped(_)
+        ));
+        assert_eq!(state.service_recoveries, 0);
+        assert_eq!(driver.requests.len(), 1);
+    }
+}
+
 #[tokio::test]
 async fn schema_correction_preserves_exact_inputs_discards_unsubmitted_dependents_and_executes_once()
  {
@@ -422,7 +536,7 @@ async fn pending_receipt_recovery_uses_saved_key_without_repeating_budget_admiss
 #[tokio::test]
 async fn identical_consecutive_calls_stop_at_three_and_recovery_does_not_reset_guard() {
     let mut driver = Fixture::new(
-        (0..4)
+        (0..5)
             .map(|i| completion(vec![proposal(&format!("p{i}"))]))
             .collect(),
         (0..3)
@@ -457,7 +571,9 @@ async fn identical_consecutive_calls_stop_at_three_and_recovery_does_not_reset_g
         .await,
         RunOutcome::Stopped(StopReason::RepeatedCall)
     );
-    assert_eq!(driver.requests.len(), 4);
+    assert_eq!(driver.requests.len(), 5);
+    assert!(driver.requests.last().unwrap().tools.is_empty());
+    assert!(restored.repeat_finalization);
 }
 #[tokio::test]
 async fn failed_durable_write_and_uncertain_model_stop_before_new_side_effects() {
@@ -646,4 +762,213 @@ async fn invalid_proposal_missing_execution_cancellation_and_budgets_fail_closed
         RunOutcome::Stopped(StopReason::ContextBudget)
     );
     assert!(driver.requests.is_empty());
+}
+
+#[tokio::test]
+async fn repeated_proposal_gets_one_tool_free_final_response_without_resubmission() {
+    let mut completions: Vec<_> = (0..4)
+        .map(|i| completion(vec![proposal(&format!("p{i}"))]))
+        .collect();
+    let mut final_answer = completion(vec![]);
+    final_answer.text = "The task was submitted; completion has not yet been verified.".into();
+    completions.push(final_answer);
+    let mut driver = Fixture::new(
+        completions,
+        (0..3)
+            .map(|i| receipt(&format!("host-{i}"), ReceiptState::Completed))
+            .collect(),
+    );
+    let mut state = state();
+    assert!(matches!(
+        run(
+            &mut driver,
+            &mut state,
+            &policy(),
+            "system",
+            &BTreeSet::new(),
+            &tools()
+        )
+        .await,
+        RunOutcome::Finished(_)
+    ));
+    assert_eq!(driver.calls.len(), 3);
+    assert_eq!(state.tool_calls, 3);
+    assert!(driver.requests.last().unwrap().tools.is_empty());
+    assert!(state.repeat_finalization);
+    assert!(state.pending.is_empty());
+    assert!(state.entries.iter().any(|entry| matches!(entry,
+        JournalEntry::ToolExchange { result, .. }
+        if result["code"] == "repeated_call_not_submitted" && result["performed_execution"] == false)));
+    let mut restored: EngineState =
+        serde_json::from_value(serde_json::to_value(state).unwrap()).unwrap();
+    assert!(matches!(
+        run(
+            &mut driver,
+            &mut restored,
+            &policy(),
+            "system",
+            &BTreeSet::new(),
+            &tools()
+        )
+        .await,
+        RunOutcome::Finished(_)
+    ));
+    assert_eq!(driver.requests.len(), 5);
+    assert_eq!(driver.calls.len(), 3);
+}
+
+#[tokio::test]
+async fn completed_media_can_be_retrieved_inline_then_finished_under_context_budget() {
+    let mut submit = proposal("submit");
+    submit.arguments = json!({"prompt":"existing fixture"});
+    let mut inspect = proposal("inspect");
+    inspect.arguments = json!({"job_id":"fixture-job","inline":true});
+    let mut generated = receipt("generated", ReceiptState::Completed);
+    generated.result = json!({"isError":false,"content":[{"type":"resource_link","uri":"https://example.test/logo.png","name":"logo.png"}],"structuredContent":{"id":"fixture-job","status":"succeeded"}});
+    let mut inspected = receipt("retrieved", ReceiptState::Completed);
+    inspected.result = generated.result.clone();
+    inspected.result["content"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"type":"image","mimeType":"image/png","data":"A".repeat(3_311_980)}));
+    let mut driver = Fixture::new(
+        vec![
+            completion(vec![submit]),
+            completion(vec![inspect]),
+            completion(vec![]),
+        ],
+        vec![generated, inspected],
+    );
+    let mut state = state();
+    assert!(matches!(
+        run(
+            &mut driver,
+            &mut state,
+            &policy(),
+            "system",
+            &BTreeSet::new(),
+            &tools()
+        )
+        .await,
+        RunOutcome::Finished(_)
+    ));
+    assert_eq!(driver.calls.len(), 2);
+    assert_eq!(driver.requests.len(), 3);
+    assert!(
+        serde_json::to_vec(driver.requests.last().unwrap())
+            .unwrap()
+            .len()
+            < policy().max_context_bytes
+    );
+    assert!(state.entries.iter().any(|entry|matches!(entry,JournalEntry::ToolExchange { result, .. } if result["content"][1]["data"].as_str().is_some_and(|data|data.len()==3_311_980))));
+}
+
+fn terminated_sandbox_failure(id: &str) -> Receipt {
+    let mut r = receipt(id, ReceiptState::FailedAfterExecution);
+    r.result = json!({"isError":true,"_host_sandbox_failure":1,"workspace_id":"saved-workspace","revision":5,"execution":{"status":"failed","cleanup_confirmed":true,"exit_code":1,"stderr":"network is disabled"}});
+    r
+}
+#[tokio::test]
+async fn terminated_sandbox_failure_replans_discards_stale_batch_and_preserves_success() {
+    let mut corrected = proposal("corrected");
+    corrected.arguments = json!({"revision":6,"input":"local.png"});
+    let mut driver = Fixture::new(
+        vec![
+            completion(vec![proposal("generate")]),
+            completion(vec![proposal("bad-code"), proposal("stale-publish")]),
+            completion(vec![corrected]),
+            completion(vec![]),
+        ],
+        vec![
+            receipt("image", ReceiptState::Completed),
+            terminated_sandbox_failure("failed-code"),
+            receipt("fixed-code", ReceiptState::Completed),
+        ],
+    );
+    let mut state = state();
+    assert!(matches!(
+        run(
+            &mut driver,
+            &mut state,
+            &policy(),
+            "system",
+            &BTreeSet::new(),
+            &tools()
+        )
+        .await,
+        RunOutcome::Finished(_)
+    ));
+    assert_eq!(
+        driver.calls,
+        vec!["model-1-tool-0", "model-2-tool-0", "model-3-tool-0"]
+    );
+    assert_eq!(state.sandbox_corrections, 1);
+    assert_eq!(state.input_corrections, 0);
+    assert_eq!(state.successful_executions, 2);
+    let saved: EngineState = serde_json::from_value(serde_json::to_value(state).unwrap()).unwrap();
+    assert_eq!(saved.sandbox_corrections, 1);
+}
+#[tokio::test]
+async fn sandbox_corrections_are_bounded_and_unknown_or_cancelled_work_never_replans() {
+    let mut driver = Fixture::new(
+        (0..3)
+            .map(|i| completion(vec![proposal(&format!("p{i}"))]))
+            .collect(),
+        (0..3)
+            .map(|i| terminated_sandbox_failure(&format!("failed-{i}")))
+            .collect(),
+    );
+    let mut state = super_state();
+    assert_eq!(
+        run(
+            &mut driver,
+            &mut state,
+            &policy(),
+            "system",
+            &BTreeSet::new(),
+            &tools()
+        )
+        .await,
+        RunOutcome::Stopped(StopReason::ToolFailed)
+    );
+    assert_eq!(state.sandbox_corrections, 2);
+    let mut restored: EngineState =
+        serde_json::from_value(serde_json::to_value(state).unwrap()).unwrap();
+    assert_eq!(
+        run(
+            &mut driver,
+            &mut restored,
+            &policy(),
+            "system",
+            &BTreeSet::new(),
+            &tools()
+        )
+        .await,
+        RunOutcome::Stopped(StopReason::ToolFailed)
+    );
+    assert_eq!(driver.requests.len(), 3);
+    for case in ["unknown", "cancelled", "cleanup-unconfirmed"] {
+        let mut r = terminated_sandbox_failure("bad");
+        match case {
+            "unknown" => r.state = ReceiptState::OutcomeUnknown,
+            "cancelled" => r.result["execution"]["status"] = json!("cancelled"),
+            _ => r.result["execution"]["cleanup_confirmed"] = json!(false),
+        }
+        let mut d = Fixture::new(vec![completion(vec![proposal("p")])], vec![r]);
+        let mut st = super_state();
+        assert!(matches!(
+            run(
+                &mut d,
+                &mut st,
+                &policy(),
+                "system",
+                &BTreeSet::new(),
+                &tools()
+            )
+            .await,
+            RunOutcome::Stopped(_)
+        ));
+        assert_eq!(st.sandbox_corrections, 0);
+        assert_eq!(d.requests.len(), 1);
+    }
 }

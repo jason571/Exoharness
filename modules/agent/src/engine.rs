@@ -76,7 +76,26 @@ pub async fn run(
                     .repeated
                     .admit(&pending.call.name, &pending.call.arguments)
                 {
-                    return stop(driver, state, StopReason::RepeatedCall).await;
+                    if state.repeat_finalization {
+                        return stop(driver, state, StopReason::RepeatedCall).await;
+                    }
+                    state.repeat_finalization = true;
+                    state.entries.push(JournalEntry::ToolExchange {
+                        invocation_id: format!("{}:repeat-rejected", pending.key),
+                        tool: pending.call.name,
+                        arguments: pending.call.arguments,
+                        result: serde_json::json!({
+                            "isError": true,
+                            "code": "repeated_call_not_submitted",
+                            "performed_execution": false,
+                            "recovery": "This proposal was not submitted. No further tools are available in this run. Use existing receipts to give a concise, helpful final response in the user's language. Deliver any already confirmed result; if a background task was submitted but not confirmed terminal, say that its completion has not yet been verified and retain its task ID for later status lookup. Do not claim generation failed or succeeded without evidence. Do not recommend resubmitting generation. Explain the remaining limitation without exposing internal guard errors."
+                        }),
+                    });
+                    state.pending.clear();
+                    if !persist(driver, state).await {
+                        return RunOutcome::Stopped(StopReason::PersistenceFailed);
+                    }
+                    continue;
                 }
                 state.tool_calls += 1;
                 pending.admitted = true;
@@ -96,6 +115,8 @@ pub async fn run(
                 return stop(driver,state,StopReason::InvalidProposal).await;
             }
             let correctable = crate::input_correction::admit(state, &receipt);
+            let recoverable = crate::service_recovery::admit(state, &receipt);
+            let sandbox_correctable = crate::sandbox_recovery::admit(state, &receipt);
             state.entries.push(JournalEntry::ToolExchange {
                 invocation_id: receipt.invocation_id.clone(),
                 tool: pending.call.name,
@@ -120,7 +141,7 @@ pub async fn run(
                     }
                 }
                 ReceiptState::RejectedBeforeExecution => {
-                    if !correctable {
+                    if !correctable && !recoverable {
                         return stop(driver, state, StopReason::InputRejected).await;
                     }
                     // The remaining proposals in this batch were never
@@ -129,7 +150,10 @@ pub async fn run(
                     state.pending.clear();
                 }
                 ReceiptState::FailedAfterExecution => {
-                    return stop(driver, state, StopReason::ToolFailed).await;
+                    if !sandbox_correctable {
+                        return stop(driver, state, StopReason::ToolFailed).await;
+                    }
+                    state.pending.clear();
                 }
                 ReceiptState::OutcomeUnknown => unreachable!(),
             }
@@ -141,9 +165,22 @@ pub async fn run(
         if state.model_calls >= policy.max_model_calls {
             return stop(driver, state, StopReason::ModelBudget).await;
         }
-        let active_tools = driver.request_tools(&state.entries, tools);
+        let active_tools = if state.repeat_finalization {
+            vec![]
+        } else {
+            driver.request_tools(&state.entries, tools)
+        };
+        let reminded_system;
+        let request_system = if state.repeated.at_limit() && !state.repeat_finalization {
+            reminded_system = format!(
+                "{system}\nHost execution reminder: You have repeated the same tool with identical arguments. Inspect the latest receipt and choose a different permitted action or finish with confirmed results. Do not repeat generation or other side effects. If an existing background job is pending, retain its ID and do not claim it failed merely because it has not completed yet."
+            );
+            reminded_system.as_str()
+        } else {
+            system
+        };
         let request = match project_request(
-            system,
+            request_system,
             &state.entries,
             selected,
             active_tools.clone(),
@@ -172,10 +209,11 @@ pub async fn run(
             if completion.finish != Finish::Stop || completion.text.trim().is_empty() {
                 return stop(driver, state, StopReason::ModelIncomplete).await;
             }
-            if crate::workflow::workflow_required(&state.entries) {
+            if !state.repeat_finalization && crate::workflow::workflow_required(&state.entries) {
                 return stop(driver, state, StopReason::MissingExecution).await;
             }
-            if driver.requires_execution(policy.requires_execution)
+            if !state.repeat_finalization
+                && driver.requires_execution(policy.requires_execution)
                 && state.successful_executions == 0
             {
                 return stop(driver, state, StopReason::MissingExecution).await;
@@ -199,6 +237,9 @@ pub async fn run(
                     || !active_tools.iter().any(|tool| tool.name == call.name)
             })
         {
+            if state.repeat_finalization {
+                return stop(driver, state, StopReason::RepeatedCall).await;
+            }
             return stop(driver, state, StopReason::InvalidProposal).await;
         }
         state.pending = completion

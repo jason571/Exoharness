@@ -30,6 +30,11 @@ Execution DDL retains some historical tables. Current scheduler settings use the
 
 DDL is under `modules/storage/postgres/migrations/`; identity DDL is in `modules/identity/src/schema.rs`. Incremental migrations cover execution, registration, discovery evidence, knowledge, document structure and titles. Migrations run explicitly, use transaction locks and do not erase existing data when repeated.
 
+PostgreSQL storage migration locks are scoped to the current schema. Concurrent
+migrations of the same namespace serialize; independent namespaces do not share
+that advisory lock. Replace a running version before starting its successor's
+migrations in the same namespace.
+
 Model/assistant configuration uses immutable generations and a current pointer in `modules/configuration`; runtime refreshes configuration while each execution snapshot pins its revision. Credentials are not written into public configuration projections or Run snapshots.
 
 ## Transactions and concurrency

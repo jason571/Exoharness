@@ -19,6 +19,7 @@ use std::{
 use tokio::task::JoinHandle;
 #[derive(Default)]
 pub struct StateData {
+    pub extra_result: Option<Value>,
     pub requests: Mutex<Vec<Value>>,
     pub headers: Mutex<Vec<HeaderMap>>,
     pub repeated_cursor: bool,
@@ -103,6 +104,9 @@ async fn rpc(
             }
         }
         "tools/call" => {
+            if let Some(result) = &state.extra_result {
+                return Json(json!({"jsonrpc":"2.0","id":id,"result":result})).into_response();
+            }
             if state.declared_audio {
                 let host = state.headers.lock().unwrap().last().unwrap()["host"]
                     .to_str()

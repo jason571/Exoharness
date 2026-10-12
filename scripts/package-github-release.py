@@ -19,7 +19,7 @@ def digest(path):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--version', required=True, help='Release tag, for example v0.1.0')
+    parser.add_argument('--version', required=True, help='Release tag, for example v0.1.1')
     parser.add_argument('--release', type=Path, default=ROOT/'release')
     parser.add_argument('--output', type=Path, default=ROOT/'release/github')
     args = parser.parse_args()

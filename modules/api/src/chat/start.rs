@@ -232,6 +232,7 @@ pub(super) async fn turn(
         };
         prompt.push_str("\n\nUser-provided attachments (input data; use the saved URLs when a tool requires a file):\n");
         prompt.push_str(&serde_json::to_string(&saved).map_err(|_| attachments::unavailable())?);
+        prompt.push_str("\nAttachment handling: If the user asks to edit an image or use it as a reference, select an authorized capability whose schema accepts image inputs and pass the saved URLs in its declared input fields. Do not silently substitute text-only recreation, invent a visual inspection, or claim a reference was used without an execution receipt. If no compatible capability is available, explain that limitation in the user's language.");
         let owner = principal.id.clone();
         let sid = session.clone();
         let rid = run.clone();

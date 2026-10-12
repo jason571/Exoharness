@@ -65,6 +65,16 @@ pub struct EngineState {
     /// unchanged Resume. Two corrections allow at most three rejected inputs.
     #[serde(default)]
     pub input_corrections: u8,
+    /// Bounded replans for host-confirmed unavailability before submission.
+    #[serde(default)]
+    pub service_recoveries: u8,
+    /// Run-wide, persisted correction budget for terminated OCI code failures.
+    #[serde(default)]
+    pub sandbox_corrections: u8,
+    /// One tool-free explanation after repeat protection refuses a proposal.
+    /// Persisted so Resume cannot reopen execution or reset the guard.
+    #[serde(default)]
+    pub repeat_finalization: bool,
     pub repeated: ConsecutiveCalls,
     pub blocked: Option<StopReason>,
     pub answer: Option<String>,
@@ -88,6 +98,9 @@ impl EngineState {
             unreported_requests: 0,
             successful_executions: 0,
             input_corrections: 0,
+            service_recoveries: 0,
+            sandbox_corrections: 0,
+            repeat_finalization: false,
             repeated: ConsecutiveCalls::new(repeat_limit)?,
             blocked: None,
             answer: None,

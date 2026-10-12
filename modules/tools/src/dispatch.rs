@@ -146,12 +146,19 @@ impl ToolRuntime {
                     ConnectionOptions::default(),
                 )
                 .await
-                .map_err(|_| ToolError::Input("MCP连接未完成；尚未调用工具".into()))?;
+                .map_err(|error| match error {
+                    McpError::Connection => {
+                        ToolError::UnavailableBeforeExecution("MCP连接暂时不可用；尚未调用工具")
+                    }
+                    _ => ToolError::Input("MCP连接配置或授权不符合要求；尚未调用工具".into()),
+                })?;
                 let operation = async {
-                    let tools = connection
-                        .tools()
-                        .await
-                        .map_err(|_| ToolError::Input("MCP工具发现失败；尚未调用工具".into()))?;
+                    let tools = connection.tools().await.map_err(|error| match error {
+                        McpError::Connection => ToolError::UnavailableBeforeExecution(
+                            "MCP工具发现暂时不可用；尚未调用工具",
+                        ),
+                        _ => ToolError::Input("MCP工具发现协议不符合要求；尚未调用工具".into()),
+                    })?;
                     let live = tools
                         .iter()
                         .find(|v| v["name"] == binding.raw_name)

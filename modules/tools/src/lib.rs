@@ -35,6 +35,8 @@ pub const SANDBOX_ID: &str = "tool:native:sandbox";
 #[derive(Debug, thiserror::Error)]
 pub enum ToolError {
     #[error("{0}")]
+    UnavailableBeforeExecution(&'static str),
+    #[error("{0}")]
     CorrectableInput(String),
     #[error("声明的输出文件不存在：{0}")]
     MissingOutput(String),

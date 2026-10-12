@@ -486,7 +486,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-agent"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "exoharness-contracts",
@@ -499,7 +499,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-api"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "axum",
@@ -536,7 +536,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-app"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "axum",
@@ -561,7 +561,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-artifacts"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "exoharness-coding",
  "exoharness-contracts",
@@ -582,14 +582,14 @@ dependencies = [
 
 [[package]]
 name = "exoharness-coding"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "thiserror",
 ]
 
 [[package]]
 name = "exoharness-configuration"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "exoharness-contracts",
  "exoharness-core",
@@ -604,7 +604,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-contracts"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "http",
  "semver",
@@ -616,7 +616,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "exoharness-contracts",
@@ -628,7 +628,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-database"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "postgres",
  "r2d2",
@@ -639,7 +639,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-identity"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "argon2",
  "base64 0.22.1",
@@ -655,7 +655,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-mcp"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "axum",
  "exoharness-contracts",
@@ -676,7 +676,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-model-runtime"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "axum",
  "base64 0.22.1",
@@ -696,7 +696,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-registry"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "exoharness-contracts",
  "exoharness-core",
@@ -705,7 +705,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-sandbox"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "exoharness-coding",
  "exoharness-core",
@@ -720,7 +720,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-secrets"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "exoharness-core",
  "getrandom 0.4.3",
@@ -730,7 +730,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-skill-runtime"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "base64 0.22.1",
  "exoharness-contracts",
@@ -750,7 +750,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-skills"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "base64 0.22.1",
  "exoharness-contracts",
@@ -767,7 +767,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-storage-postgres"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "exoharness-contracts",
  "postgres",
@@ -781,7 +781,7 @@ dependencies = [
 
 [[package]]
 name = "exoharness-tools"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "exoharness-artifacts",
  "exoharness-coding",

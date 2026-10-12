@@ -1,6 +1,6 @@
 # 成品交付修复与验收
 
-[English](DELIVERABLES_VALIDATION.md) | 简体中文
+[English testing guide](TESTING.md) | 简体中文
 
 日期：2026-10-10
 

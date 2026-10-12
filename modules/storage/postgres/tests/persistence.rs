@@ -685,3 +685,30 @@ fn trace_and_chat_events_share_the_same_progress_payload() {
             .any(|e| e["event_type"] == "pro_run_created")
     );
 }
+
+#[test]
+fn migration_locks_are_namespace_scoped_and_same_namespace_remains_serialized() {
+    let (first, url, namespace) = database();
+    let other_namespace = format!("{namespace}_other");
+    let other = PostgresStore::connect(&url, &other_namespace).unwrap();
+    let mut blocker = postgres::Client::connect(&url, postgres::NoTls).unwrap();
+    let mut guard = blocker.transaction().unwrap();
+    // A legacy/global lock from an independent installation must not stop
+    // initialization of this test's separate namespace.
+    guard
+        .query_one("SELECT pg_advisory_xact_lock(4271072001)", &[])
+        .unwrap();
+    guard
+        .query_one(
+            "SELECT pg_advisory_xact_lock(hashtextextended($1,4271072001))",
+            &[&namespace],
+        )
+        .unwrap();
+    other.migrate().unwrap();
+    // The first namespace is genuinely locked: its competing migration must
+    // respect the existing lock_timeout and leave the transaction rolled back.
+    assert!(matches!(first.migrate(), Err(StoreError::Database)));
+    guard.rollback().unwrap();
+    first.migrate().unwrap();
+    other.health().unwrap();
+}

@@ -5,7 +5,7 @@
 //! Host observes only the background task explicitly declared by this MCP.
 //! Polls never enter the model loop or reset its repeated-call protection.
 use crate::{Catalog, Result, ToolError, ToolRuntime, validate};
-use exoharness_mcp::{Connection, Progress};
+use exoharness_mcp::{Connection, McpError, Progress};
 use exoharness_model_runtime::CancellationToken;
 use serde_json::{Value, json};
 use std::time::Duration;
@@ -107,6 +107,12 @@ fn progress(task: &Task, sender: &watch::Sender<Option<Progress>>) {
         message: data["message"].as_str().map(str::to_owned),
     }));
 }
+fn retryable_poll(tools: &[Value], action: &Action, error: &McpError) -> bool {
+    matches!(error, McpError::Connection | McpError::OutcomeUnknown)
+        && tools
+            .iter()
+            .any(|tool| tool["name"] == action.tool && tool["annotations"]["readOnlyHint"] == true)
+}
 async fn cancel_once(connection: &Connection, task: &Task, tools: &[Value]) -> Option<Value> {
     if let Some(action) = &task.cancel
         && schema(tools, action).is_ok()
@@ -182,6 +188,7 @@ impl ToolRuntime {
         .map_err(|_| ToolError::Unknown)?
         .map_err(|_| ToolError::Unknown)?;
         let mut current = first.clone();
+        let mut poll_retries = 0u8;
         loop {
             progress(&current, sender);
             if matches!(
@@ -215,11 +222,35 @@ impl ToolRuntime {
                 .await
             {
                 Ok(value) => value,
-                Err(_) => {
+                Err(error) => {
                     if cancel.is_cancelled() {
                         return cancel_once(connection, &first, tools)
                             .await
                             .ok_or(ToolError::Unknown);
+                    }
+                    // Retry only the service-declared read-only status action,
+                    // never the generation submission or an ambiguous write.
+                    // The counter is observer-wide, not reset by a good poll.
+                    if poll_retries < 2 && retryable_poll(tools, &first.poll, &error) {
+                        poll_retries += 1;
+                        let store = self.execution.clone();
+                        let (owner_copy, session_copy, run_copy) =
+                            (owner.to_owned(), session.to_owned(), run.to_owned());
+                        let evidence = json!({"type":"mcp_background_retry","tool_call_id":invocation,"capability_id":capability,"task_id":first.id,"attempt":poll_retries,"max_retries":2});
+                        tokio::task::spawn_blocking(move || {
+                            store.chat_event(&owner_copy, &session_copy, &run_copy, evidence)
+                        })
+                        .await
+                        .map_err(|_| ToolError::Unknown)?
+                        .map_err(|_| ToolError::Unknown)?;
+                        sender.send_replace(Some(Progress {
+                            token: json!(first.id),
+                            progress: current.raw["progress"]["progress"].as_f64().unwrap_or(0.0),
+                            total: current.raw["progress"]["total"].as_f64(),
+                            message: Some("正在恢复任务状态查询，已有任务不会重新提交".into()),
+                        }));
+                        current.interval = Duration::from_millis(500u64 << poll_retries);
+                        continue;
                     }
                     return Err(ToolError::Unknown);
                 }

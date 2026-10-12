@@ -226,3 +226,77 @@ fn mixed_size_checkpoints_preserve_create_then_edit_order_without_stale_tail() {
     );
     assert_eq!(entries, original);
 }
+
+#[test]
+fn inline_mcp_media_is_referenced_without_changing_original_receipt_or_file_links() {
+    let raw = json!({"isError":false,"content":[
+        {"type":"text","text":"keep exact business text"},
+        {"type":"resource_link","uri":"https://example.test/image.png","name":"image.png"},
+        {"type":"image","mimeType":"image/png","data":"A".repeat(3_311_980)},
+        {"type":"audio","mimeType":"audio/wav","data":"audio-bytes"}
+    ],"structuredContent":{"id":"job-id","status":"succeeded","result":{"download_url":"https://example.test/image.png","sha256":"digest"}},"business_data":{"data":"exact authored data"}});
+    let entries = vec![JournalEntry::ToolExchange {
+        invocation_id: "media-receipt".into(),
+        tool: "media-tool".into(),
+        arguments: json!({"inline":true}),
+        result: raw.clone(),
+    }];
+    let request = project_request("system", &entries, &BTreeSet::new(), vec![], 2048).unwrap();
+    assert!(serde_json::to_vec(&request).unwrap().len() < 10_000);
+    let Message::ToolResult {
+        content,
+        call_id,
+        is_error,
+    } = &request.messages[2]
+    else {
+        panic!("paired receipt missing")
+    };
+    let projected: serde_json::Value = serde_json::from_str(content).unwrap();
+    assert_eq!(call_id, "media-receipt");
+    assert!(!is_error);
+    assert_eq!(projected["content"][0], raw["content"][0]);
+    assert_eq!(projected["content"][1], raw["content"][1]);
+    assert_eq!(projected["structuredContent"], raw["structuredContent"]);
+    assert_eq!(projected["business_data"], raw["business_data"]);
+    assert!(projected["content"][2].get("data").is_none());
+    assert_eq!(
+        projected["content"][2]["inline_media_reference"]["invocation_id"],
+        "media-receipt"
+    );
+    assert_eq!(
+        projected["content"][2]["inline_media_reference"]["encoded_bytes"],
+        3_311_980
+    );
+    assert!(projected["content"][3].get("data").is_none());
+    let JournalEntry::ToolExchange { result, .. } = &entries[0] else {
+        unreachable!()
+    };
+    assert_eq!(result, &raw);
+}
+
+#[test]
+fn embedded_binary_resource_is_referenced_but_text_resource_is_kept_exact() {
+    let raw = json!({"content":[
+        {"type":"resource","resource":{"uri":"saved://binary","mimeType":"image/png","blob":"B".repeat(2_000_000)}},
+        {"type":"resource","resource":{"uri":"saved://code","mimeType":"text/plain","text":"exact original code"}}
+    ],"isError":false});
+    let entries = vec![JournalEntry::ToolExchange {
+        invocation_id: "embedded-1".into(),
+        tool: "read-resource".into(),
+        arguments: json!({}),
+        result: raw.clone(),
+    }];
+    let request = project_request("system", &entries, &BTreeSet::new(), vec![], 2048).unwrap();
+    assert!(serde_json::to_vec(&request).unwrap().len() < 10000);
+    let Message::ToolResult { content, .. } = &request.messages[2] else {
+        panic!("missing receipt")
+    };
+    let projected: serde_json::Value = serde_json::from_str(content).unwrap();
+    assert_eq!(projected["content"][1], raw["content"][1]);
+    assert_eq!(projected["content"][0]["resource"]["uri"], "saved://binary");
+    assert!(projected["content"][0]["resource"].get("blob").is_none());
+    assert_eq!(
+        projected["content"][0]["resource"]["inline_media_reference"]["encoded_bytes"],
+        2_000_000
+    );
+}

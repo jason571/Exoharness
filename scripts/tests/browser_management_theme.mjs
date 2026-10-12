@@ -21,6 +21,7 @@ const server = createServer(async (req, res) => {
       let html = (await readFile(resolve(root, 'web', pages[req.url]), 'utf8')).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, tag => ['auth.js', 'i18n.js', 'management-theme.js'].some(name => tag.includes(`/assets/${name}`)) ? tag : '');
       // Capture the palette while parsing the head, before deferred auth can decorate it.
       html = html.replace('</head>', '<script>window.paletteBeforeAuth={management:document.documentElement.classList.contains("management-console"),theme:document.documentElement.dataset.managementTheme,background:getComputedStyle(document.documentElement).getPropertyValue("--bg").trim(),authReady:!!window.ExoAuth};</script></head>');
+      html = html.replace('</body>', '<script>window.headerBeforeAuth={header:getComputedStyle(document.querySelector(".topbar")).backgroundColor,sidebar:getComputedStyle(document.querySelector(".main-nav")).backgroundColor,authReady:!!window.ExoAuth};</script></body>');
       if (blockStorage) html = html.replace('<head>', '<head><script>Storage.prototype.getItem=()=>{throw new Error("storage disabled")};Storage.prototype.setItem=()=>{throw new Error("storage disabled")};</script>');
       res.setHeader('content-type', 'text/html');
       res.end(html);
@@ -50,6 +51,17 @@ async function checkConcurrencyFields(theme) {
     assert.equal(field.overflow, false, `${theme}: no clipped field content`);
   }
 }
+async function checkTraceContrast() {
+  await chrome.evaluate(`document.body.insertAdjacentHTML('beforeend', '<section id="trace-theme-fixture" class="panel"><p class="trace-prompt">Prompt</p><div class="trace-metrics"><div><strong>123</strong></div></div><div class="trace-flow"><div class="trace-flow-row"><span class="trace-flow-sequence">01</span><div class="trace-flow-track"><button class="trace-flow-node skill selected"><span class="trace-flow-icon">SK</span><span class="trace-flow-copy"><small>SKILL</small><strong>Example capability</strong><em>Completed</em></span></button></div></div></div><div class="trace-usage-row"><span class="trace-usage-value"><strong>100</strong></span></div><article class="trace-step"><div class="trace-step-copy"><p>Timeline message</p><time>12:00</time><details class="trace-event-data" open><summary>Event data</summary><pre>{}</pre></details></div></article></section><aside id="trace-theme-drawer" class="trace-detail-drawer open"><header class="trace-drawer-header"><h2>Invocation details</h2><span class="trace-detail-kind" data-kind="skill">SKILL</span></header><div class="trace-drawer-toolbar"><span>1 / 2</span></div><div class="trace-detail-tabs"><button class="active">Input</button></div><div class="trace-drawer-body"><dl class="trace-facts"><div><dt>Invocation ID</dt><dd>sample-call</dd></div></dl><section class="trace-json-section"><div><h3>Input</h3><button>Copy</button></div><pre>{}</pre></section></div></aside>');`);
+  try {
+    const samples = await chrome.evaluate(`(()=>{const rgb=c=>c.match(/[\\d.]+/g).slice(0,3).map(Number),lum=c=>rgb(c).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4}).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);return [...document.querySelectorAll('#trace-theme-fixture p,#trace-theme-fixture strong,#trace-theme-fixture small,#trace-theme-fixture em,#trace-theme-fixture time,#trace-theme-fixture summary,#trace-theme-fixture pre,#trace-theme-fixture .trace-flow-icon,#trace-theme-fixture .trace-flow-sequence,#trace-theme-drawer h2,#trace-theme-drawer span,#trace-theme-drawer button,#trace-theme-drawer dt,#trace-theme-drawer dd,#trace-theme-drawer h3,#trace-theme-drawer pre')].map(e=>{let parent=e;while(getComputedStyle(parent).backgroundColor==='rgba(0, 0, 0, 0)')parent=parent.parentElement;const fg=lum(getComputedStyle(e).color),bg=lum(getComputedStyle(parent).backgroundColor);return {text:e.textContent,contrast:(Math.max(fg,bg)+.05)/(Math.min(fg,bg)+.05)};});})()`);
+    for (const sample of samples) assert.ok(sample.contrast >= 4.5, `trace light text contrast: ${sample.text} (${sample.contrast})`);
+    assert.equal(await chrome.evaluate('getComputedStyle(document.querySelector("#trace-theme-drawer")).backgroundColor'), 'rgb(255, 255, 255)', 'actual detail drawer uses a light surface');
+    assert.equal(await chrome.evaluate('getComputedStyle(document.querySelector("#trace-theme-fixture .trace-flow")).backgroundColor'), 'rgb(247, 250, 248)', 'call path uses a light surface');
+  } finally {
+    await chrome.evaluate('document.querySelector("#trace-theme-fixture").remove();document.querySelector("#trace-theme-drawer").remove();');
+  }
+}
 try {
   await chrome.send('Emulation.setDeviceMetricsOverride', { width: 1920, height: 900, deviceScaleFactor: 1, mobile: false });
   await open('/overview');
@@ -60,6 +72,7 @@ try {
     await open(path);
     assert.equal(await chrome.evaluate('document.documentElement.dataset.managementTheme'), 'light', `${path}: preference persists`);
     assert.deepEqual(await chrome.evaluate('window.paletteBeforeAuth'), { management: true, theme: 'light', background: '#f4f7f6', authReady: false }, `${path}: light palette applies before authentication and body parsing`);
+    assert.deepEqual(await chrome.evaluate('window.headerBeforeAuth'), { header: 'rgb(255, 255, 255)', sidebar: 'rgb(255, 255, 255)', authReady: false }, `${path}: header and sidebar use light backgrounds before authentication`);
     const palette = await chrome.evaluate(`(()=>{const header=document.querySelector('.topbar'),nav=document.querySelector('.main-nav'),button=document.querySelector('.management-theme-toggle'),language=document.querySelector('.ui-language-switch');return {header:getComputedStyle(header).backgroundColor,sidebar:getComputedStyle(nav).backgroundColor,foreground:getComputedStyle(document.documentElement).color,scheme:getComputedStyle(document.documentElement).colorScheme,pressed:button.getAttribute('aria-pressed'),position:button.getBoundingClientRect().right<=language.getBoundingClientRect().x,width:document.querySelector('main.page').getBoundingClientRect().width};})()`);
     assert.equal(palette.header, 'rgb(255, 255, 255)');
     assert.equal(palette.sidebar, 'rgb(255, 255, 255)');
@@ -69,7 +82,11 @@ try {
     assert.equal(palette.position, true, 'theme is before the language switch');
     assert.equal(palette.width, 1480, 'shared content width replaces page-specific caps');
     if (path === '/security') await checkConcurrencyFields('light');
+    if (path === '/trace') await checkTraceContrast();
     if (path === '/imports') {
+      const previews = await chrome.evaluate(`[...document.querySelectorAll('.import-page-shell .selected-files,.import-page-shell .file-preview')].map(e=>({background:getComputedStyle(e).backgroundColor,color:getComputedStyle(e).color}))`);
+      assert.ok(previews.length > 0, 'local import file preview panels exist');
+      for (const preview of previews) assert.deepEqual(preview, { background: 'rgb(247, 250, 248)', color: 'rgb(28, 51, 41)' }, 'local project waiting and selected-file previews use the light palette');
       const contrast = await chrome.evaluate(`(()=>{const rgb=color=>color.match(/[\\d.]+/g).slice(0,3).map(Number);const luminance=rgb=>rgb.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4}).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);const ratio=(a,b)=>{a=luminance(a);b=luminance(b);return (Math.max(a,b)+.05)/(Math.min(a,b)+.05)};return [...document.querySelectorAll('.import-kind-tab strong,.import-kind-tab small,.json-guide-copy code')].map(e=>({text:e.textContent,contrast:ratio(rgb(getComputedStyle(e).color),[255,255,255])}));})()`);
       for (const item of contrast) assert.ok(item.contrast >= 4.5, `readable light-theme label: ${item.text} (${item.contrast})`);
       assert.equal(await chrome.evaluate(`getComputedStyle(document.querySelector('.import-kind-tabs')).backgroundColor`), 'rgb(255, 255, 255)', 'import selector uses the light palette');

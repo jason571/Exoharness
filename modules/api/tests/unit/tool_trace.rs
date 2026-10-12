@@ -46,7 +46,12 @@ async fn get(router: &Router, path: &str, token: &str) -> (StatusCode, Value) {
 }
 #[tokio::test]
 async fn failed_run_trace_is_visible_with_exact_arguments_result_usage_and_request() {
-    let f=fixture(vec![tool("activate_tools",json!({"names":["sandbox_run"]})),tool("sandbox_run",json!({"runtime":"python","entrypoint":"main.py","files":{"main.py":"raise RuntimeError('retained failure diagnostic')"},"output_files":[]}))],true).await;
+    let f=fixture(vec![
+        tool("activate_tools",json!({"names":["sandbox_run"]})),
+        tool("sandbox_run",json!({"runtime":"python","entrypoint":"main.py","files":{"main.py":"raise RuntimeError('retained failure diagnostic')"},"output_files":[]})),
+        json!({"fixture_workspace_next":"sandbox_run","fixture_project_arguments":{"runtime":"python","entrypoint":"main.py","output_files":[]}}),
+        json!({"fixture_workspace_next":"sandbox_run","fixture_project_arguments":{"runtime":"python","entrypoint":"main.py","output_files":[]}})
+    ],true).await;
     let (session, run) = start(&f).await;
     assert_eq!(terminal(&f, &run).await, RunState::Failed);
     let router = management(&f, Surface::Management);
@@ -58,7 +63,7 @@ async fn failed_run_trace_is_visible_with_exact_arguments_result_usage_and_reque
     .await;
     assert_eq!(status, StatusCode::OK);
     assert_eq!(sessions[0]["id"], session);
-    assert_eq!(sessions[0]["model_call_count"], 2);
+    assert_eq!(sessions[0]["model_call_count"], 4);
     let (_, runs) = get(
         &router,
         &format!("/v1/trace/runs?session_id={session}"),

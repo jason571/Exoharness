@@ -78,3 +78,34 @@ These tests use the actual page structure and compiled assets. They cover langua
 Run and MCP queue behavior was verified with a mock LLM and persistent ledger: while queued, model-request, tool-submission, and attempt counts did not increase. The cancellation-race test committed the terminal database state before receiving late progress and confirmed that the adapter still completed cancellation and persisted its receipt.
 
 Before the production update, back up runtime files and the execution schema. After updating, verify the process SHA-256, all three listeners, and authenticated endpoints. Acceptance preserved the existing concurrency limit and capability grants and did not submit a new GPU-generation task.
+
+
+## Execution and file-delivery regressions
+
+Run the repeatable gate before releasing changes to the execution adapters:
+
+Prepare Rust dependencies offline, Python 3, Node.js 22+, installed web-console
+dependencies, Docker access, and Google Chrome at `/usr/bin/google-chrome`.
+The test database must be disposable and separate from production. Missing
+database, image, or browser prerequisites fail the gate instead of skipping tests.
+
+```sh
+EXOHARNESS_PRO_TEST_DATABASE_URL='<disposable-test-connection>' \
+EXOHARNESS_PRO_TEST_SANDBOX_IMAGE='<prepared-sandbox-image>' \
+bash scripts/test-execution-regressions.sh
+```
+
+The gate includes large inline image/audio/resource references, large authored
+arguments with bounded repeat-control metadata, legacy repeat-cursor restoration,
+background ownership and cancellation, native authorization denials, terminated
+sandbox failure correction and budget exhaustion, unknown-result refusal,
+MCP-owned file import into offline OCI, and final file publication. Integration
+fixtures use a scripted model and a local mock MCP, including a forged host
+recovery marker that must be discarded. Real model/image quality and production
+URLs remain separate acceptance layers.
+
+The gate also runs the sandbox and Skill runtime suites, all Python script
+tests, frontend type checking and capability-install unit tests, and real Chrome
+checks for video-card authority, failed-run saved outputs, portal language
+switching, and management themes. Browser reload checks wait for a new document
+before asserting its content; an old DOM is not refresh evidence.

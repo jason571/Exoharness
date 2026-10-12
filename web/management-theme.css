@@ -54,3 +54,25 @@ html.management-console[data-management-theme="light"] :is(.overview-task-status
 html.management-console[data-management-theme="light"] :is(.overview-task-status[data-status="failed"], .user-conversation-status[data-status="failed"]) { color: #aa3734; background: #fff0ee; }
 html.management-console[data-management-theme="light"] :is(.overview-task-status[data-status="recoverable"], .overview-task-status[data-status="waiting_authorization"], .user-conversation-status[data-status="recoverable"]) { color: #865d14; background: #fff6df; }
 html.management-console[data-management-theme="light"] :is(.overview-task-status[data-status="running"], .overview-task-status[data-status="queued"], .user-conversation-status[data-status="running"], .user-conversation-status[data-status="queued"]) { color: #276696; background: #e9f3fc; }
+
+/* Trace nodes and detail drawers contain their own dark defaults. */
+html.management-console[data-management-theme="light"] :is(.trace-flow, .trace-metrics > div, .trace-usage-row, .trace-facts > div, .trace-timeline-modes, .trace-detail-tabs, .trace-event-data pre, .trace-json-section pre) { color: var(--text); background: var(--surface-strong); border-color: var(--line); }
+html.management-console[data-management-theme="light"] :is(.trace-flow-node, .trace-detail-drawer, .trace-drawer-toolbar) { color: var(--text); background: var(--surface); border-color: var(--line); }
+html.management-console[data-management-theme="light"] :is(.trace-prompt, .trace-metrics strong, .trace-step p, .trace-facts dd, .trace-flow-copy strong) { color: var(--text); }
+html.management-console[data-management-theme="light"] .trace-prompt { background: var(--surface-strong); border-color: var(--green); }
+html.management-console[data-management-theme="light"] :is(.trace-run-item-meta, .trace-run-item-meta code, .trace-conversation-meta code, .trace-overview-heading code, .trace-flow-legend, .trace-flow-sequence, .trace-flow-copy small, .trace-flow-edge, .trace-flow-edge small, .trace-step time, .trace-step code, .trace-step-meta small, .trace-event-data summary, .trace-json-section button) { color: var(--muted); }
+html.management-console[data-management-theme="light"] .trace-flow-sequence { background: var(--surface-strong); border-color: var(--line); }
+html.management-console[data-management-theme="light"] :is(.trace-flow-node:not(:disabled):hover, .trace-flow-node.selected, .trace-timeline-modes button[aria-pressed="true"], .trace-detail-tabs button.active) { color: var(--text); background: #edf6f0; border-color: var(--green); }
+html.management-console[data-management-theme="light"] :is(.trace-usage-row:hover, .trace-usage-row.selected) { color: var(--text); background: #e9f3fc; border-color: var(--blue); }
+html.management-console[data-management-theme="light"] .trace-flow-edge > span { background: var(--green); }
+html.management-console[data-management-theme="light"] .trace-usage-bar { background: #dce5df; }
+html.management-console[data-management-theme="light"] .trace-step-marker { border-color: var(--surface); }
+html.management-console[data-management-theme="light"] .trace-detail-drawer { box-shadow: -18px 0 60px rgba(29,59,44,.18); }
+html.management-console[data-management-theme="light"] :is(.trace-detail-close, .trace-json-section button) { background: var(--surface-strong); border-color: var(--line); }
+html.management-console[data-management-theme="light"] :is(.trace-detail-close:hover, .trace-drawer-toolbar button:hover:not(:disabled), .trace-detail-tabs button:hover) { color: var(--text); background: #edf6f0; }
+html.management-console[data-management-theme="light"] .trace-detail-kind[data-kind="skill"] { color: #6745a1; background: #f1edfa; border-color: #d7c9ef; }
+html.management-console[data-management-theme="light"] .trace-flow-icon { color: #fff; }
+html.management-console[data-management-theme="light"] .trace-flow-node.model .trace-flow-icon { background: var(--blue); }
+html.management-console[data-management-theme="light"] .trace-flow-node.skill .trace-flow-icon { background: #6745a1; }
+html.management-console[data-management-theme="light"] .trace-flow-node.result .trace-flow-icon { background: var(--green); }
+html.management-console[data-management-theme="light"] .import-page-shell :is(.selected-files, .file-preview) { color: var(--text); background: var(--surface-strong); border-color: var(--line); }

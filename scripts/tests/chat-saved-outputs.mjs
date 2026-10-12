@@ -43,7 +43,9 @@ try {
   await chrome.evaluate("document.querySelector('.chat-saved-outputs summary').click()");
   await until(()=>chrome.evaluate("Array.from(document.querySelectorAll('.chat-saved-outputs img')).some(image=>image.naturalWidth===1)"),'saved image decodes');
   assert.ok(await chrome.evaluate("Array.from(document.querySelectorAll('.chat-saved-outputs a')).some(a=>a.href.includes('/fixture.png'))"));
+  const before=await chrome.evaluate('performance.timeOrigin');
   await chrome.send('Page.reload');
+  await until(()=>chrome.evaluate(`performance.timeOrigin!==${before} && document.readyState==='complete'`),'new document after reload');
   await until(()=>chrome.evaluate("document.querySelectorAll('.chat-saved-outputs').length===1"),'refresh preserves one saved output');
   assert.equal(await chrome.evaluate("document.querySelector('.chat-saved-outputs').open"),false);
   assert.deepEqual(chrome.errors,[]);

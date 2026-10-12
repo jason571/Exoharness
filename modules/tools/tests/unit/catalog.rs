@@ -511,3 +511,15 @@ fn legacy_mixed_query_next_page_is_valid_native_input_and_preserves_the_query() 
     assert_eq!(second["offset"], 12);
     assert_eq!(second["offset_reset"], false);
 }
+
+#[test]
+fn unauthorized_native_name_is_not_a_correctable_alias_and_keeps_loaded_set() {
+    let mut catalog = fixture();
+    catalog.activate(&["sandbox_run".into()]).unwrap();
+    let loaded = catalog.active.clone();
+    assert!(matches!(
+        catalog.activate(&["sandbox_run".into(), "coding_apply_patch".into()]),
+        Err(crate::ToolError::Authorization)
+    ));
+    assert_eq!(catalog.active, loaded);
+}

@@ -242,7 +242,7 @@ async fn successful_execution_with_wrong_output_name_is_published_without_rerunn
 async fn persisted_source_checkpoint_replaces_large_arguments_only_after_journal_commit() {
     let source = format!(
         "# {}\nprint('ok')",
-        "saved source not model history ".repeat(1500)
+        "saved source not model history ".repeat(3500)
     );
     let f=fixture(vec![tool("activate_tools",json!({"names":["sandbox_run"]})),tool("sandbox_run",json!({"runtime":"python","entrypoint":"main.py","files":{"main.py":source},"output_files":[]})),answer()],true).await;
     let (_session, run) = start(&f).await;
@@ -260,7 +260,7 @@ async fn persisted_source_checkpoint_replaces_large_arguments_only_after_journal
         .list("user", &_session)
         .unwrap();
     assert_eq!(state.len(), 1);
-    assert!(state[0].files[0].size_bytes > 40000);
+    assert!(state[0].files[0].size_bytes > 100000);
     f.tasks.close().await;
     f.sandbox.stop().await.unwrap();
     f.server.abort();

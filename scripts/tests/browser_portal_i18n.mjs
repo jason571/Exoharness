@@ -47,7 +47,9 @@ try {
     assert.equal(await chrome.evaluate('document.querySelector("#delivery-heading").textContent'), '执行与交付');
     assert.equal(await chrome.evaluate('document.querySelector("#service-label").textContent'), '服务在线');
     await change('en');
+    const before=await chrome.evaluate('performance.timeOrigin');
     await chrome.send('Page.reload');
+    await until(()=>chrome.evaluate(`performance.timeOrigin!==${before} && document.readyState==='complete'`),'new document after reload');
     await until(() => chrome.evaluate('document.documentElement.lang === "en" && !!window.WorkbenchForTest && !!document.querySelector(".ui-language-switch select")'), 'persisted English');
     await chrome.evaluate(`WorkbenchForTest.mountDeliveryWorkbench();document.querySelector('#service-label').textContent='服务在线';`);
     await until(() => chrome.evaluate('document.querySelector(".delivery-toggle").textContent === "Execution & delivery" && document.querySelector("#service-label").textContent === "Service online"'), 'portal English after reload');

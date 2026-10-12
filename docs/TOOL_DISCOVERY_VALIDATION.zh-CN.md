@@ -1,6 +1,6 @@
 # 工具选择与发现验收
 
-[English](TOOL_DISCOVERY_VALIDATION.md) | 简体中文
+[English testing guide](TESTING.md) | 简体中文
 
 ## 调查对象
 

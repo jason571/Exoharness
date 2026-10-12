@@ -3,6 +3,7 @@
 // Commercial licensing: contact flyangqn@gmail.com.
 
 //! Original chat API compatibility; execution, persistence and stream are split.
+mod artifact_collection;
 mod attachments;
 mod control;
 mod publication_checkpoint;

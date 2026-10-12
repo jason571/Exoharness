@@ -47,8 +47,11 @@ async fn multi_page_site_loads_relative_css_modules_images_and_interaction_in_re
     .unwrap();
     let router = exoharness_api::media_router(Arc::new(service), port);
     let server = tokio::spawn(async move { axum::serve(socket, router).await.unwrap() });
-    let script = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../scripts/tests/coding_browser.py")
+    let source_root = std::env::var_os("EXOHARNESS_PRO_TEST_SOURCE_ROOT")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|| std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../.."));
+    let script = source_root
+        .join("scripts/tests/coding_browser.py")
         .canonicalize()
         .unwrap();
     let url = card["preview_url"].as_str().unwrap().to_owned();
