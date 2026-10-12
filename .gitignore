@@ -27,6 +27,9 @@
 /docs/LINKS_AND_CONCURRENCY_VALIDATION.md
 /docs/TOOL_DISCOVERY_VALIDATION.md
 
+# Local bug-fix history; never publish these records.
+/docs/bugs/
+
 # Build products, downloaded dependencies and caches.
 /target/
 /release/
