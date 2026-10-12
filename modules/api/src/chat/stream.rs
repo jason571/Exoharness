@@ -64,6 +64,9 @@ pub(super) async fn events(
                         payload["type"].as_str(),
                         Some("complete" | "failed" | "cancelled" | "recoverable")
                     );
+                    let Some(payload) = crate::public_chat::event(payload) else {
+                        continue;
+                    };
                     let Ok(event) = Event::default()
                         .event("chat")
                         .id(cursor.to_string())

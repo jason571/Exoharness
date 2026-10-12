@@ -12,6 +12,7 @@ use exoharness_contracts::capability::{
 use exoharness_secrets::SecretStore;
 use serde_json::{Value, json};
 use std::{
+    collections::{BTreeMap, VecDeque},
     sync::atomic::{AtomicBool, Ordering},
     sync::{Arc, Mutex},
     time::Duration,
@@ -19,6 +20,13 @@ use std::{
 use tokio::task::JoinHandle;
 #[derive(Default)]
 pub struct StateData {
+    pub http_faults: Mutex<BTreeMap<String, VecDeque<u16>>>,
+    pub malformed_call: bool,
+    pub wrong_call_id: bool,
+    pub large_call_bytes: usize,
+    pub background_read_only: bool,
+    pub background_wrong_id: bool,
+    pub background_cancel_pending: bool,
     pub extra_result: Option<Value>,
     pub requests: Mutex<Vec<Value>>,
     pub headers: Mutex<Vec<HeaderMap>>,
@@ -78,6 +86,28 @@ async fn rpc(
     state.headers.lock().unwrap().push(headers);
     state.requests.lock().unwrap().push(request.clone());
     let id = request["id"].clone();
+    let method = request["method"].as_str().unwrap_or("");
+    let key = if method == "tools/call" {
+        format!(
+            "tools/call:{}",
+            request["params"]["name"].as_str().unwrap_or("")
+        )
+    } else {
+        method.to_owned()
+    };
+    let fault = state
+        .http_faults
+        .lock()
+        .unwrap()
+        .get_mut(&key)
+        .and_then(VecDeque::pop_front);
+    if let Some(status) = fault.filter(|status| *status != 200) {
+        return (
+            StatusCode::from_u16(status).unwrap(),
+            "private upstream diagnostic",
+        )
+            .into_response();
+    }
     let result = match request["method"].as_str().unwrap_or("") {
         "initialize" => {
             json!({"protocolVersion":"2025-06-18","capabilities":{"tools":{}},"serverInfo":{"name":"fixture-server","version":"1"}})
@@ -88,7 +118,7 @@ async fn rpc(
         "tools/list" => {
             if state.background {
                 let schema = json!({"type":"object","properties":{"job_id":{"type":"string"}},"required":["job_id"]});
-                return Json(json!({"jsonrpc":"2.0","id":id,"result":{"tools":[{"name":"echo","inputSchema":{"type":"object","properties":{"text":{"type":"string"}},"required":["text"]}},{"name":"poll","inputSchema":schema},{"name":"cancel","inputSchema":schema}]}})).into_response();
+                return Json(json!({"jsonrpc":"2.0","id":id,"result":{"tools":[{"name":"echo","inputSchema":{"type":"object","properties":{"text":{"type":"string"}},"required":["text"]}},{"name":"poll","inputSchema":schema,"annotations":{"readOnlyHint":state.background_read_only}},{"name":"cancel","inputSchema":schema}]}})).into_response();
             }
             let page = request["params"]["cursor"].as_str();
             if state.repeated_cursor {
@@ -104,6 +134,18 @@ async fn rpc(
             }
         }
         "tools/call" => {
+            if state.malformed_call {
+                return ([("content-type", "application/json")], "{incomplete").into_response();
+            }
+            if state.wrong_call_id {
+                return Json(
+                    json!({"jsonrpc":"2.0","id":"not-this-request","result":{"content":[]}}),
+                )
+                .into_response();
+            }
+            if state.large_call_bytes > 0 {
+                return Json(json!({"jsonrpc":"2.0","id":id,"result":{"content":[{"type":"text","text":"X".repeat(state.large_call_bytes)}]}})).into_response();
+            }
             if let Some(result) = &state.extra_result {
                 return Json(json!({"jsonrpc":"2.0","id":id,"result":result})).into_response();
             }
@@ -139,7 +181,7 @@ async fn rpc(
                     .iter()
                     .filter(|r| r["method"] == "tools/call" && r["params"]["name"] == "poll")
                     .count();
-                let status = if name == "cancel" {
+                let status = if name == "cancel" && !state.background_cancel_pending {
                     "cancelled"
                 } else if name == "poll"
                     && polls >= 5
@@ -160,6 +202,10 @@ async fn rpc(
                     json!([])
                 };
                 let mut result = json!({"content":[],"isError":status=="failed","structuredContent":{"status":status,"artifacts":artifacts},"_meta":{"exoharness":{"background_task":{"version":1,"id":"fixture-job","status":status,"poll":{"tool":"poll","arguments":{"job_id":"fixture-job"}},"cancel":{"tool":"cancel","arguments":{"job_id":"fixture-job"}},"poll_interval_ms":500,"progress":{"progress":polls,"total":5,"message":"fixture actual progress"}}}}});
+                if name == "poll" && state.background_wrong_id {
+                    result["_meta"]["exoharness"]["background_task"]["id"] =
+                        json!("another-users-job");
+                }
                 if state.background_nested || state.background_conflicting {
                     result["structuredContent"]["_meta"] = result["_meta"].clone();
                     if state.background_conflicting {

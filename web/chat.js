@@ -1,3 +1,7 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 "use strict";
 (() => {
   var __create = Object.create;
@@ -3167,6 +3171,21 @@
     return DOMPurify;
   }
   var purify = createDOMPurify();
+
+  // src/execution-notice.ts
+  function executionNotice(value, language = document.documentElement.lang) {
+    const code = value && typeof value === "object" && "code" in value ? String(value.code) : "capability_limited";
+    const messages = {
+      capability_permission_required: ["\u76EE\u524D\u6CA1\u6709\u83B7\u5F97\u5B8C\u6210\u8FD9\u9879\u4EFB\u52A1\u6240\u9700\u7684\u6280\u80FD\u6743\u9650\uFF0C\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458\u5F00\u653E\u76F8\u5E94\u6280\u80FD\u3002\u5DF2\u5B8C\u6210\u5185\u5BB9\u5DF2\u4FDD\u7559\u3002", "The required Skill permission is unavailable. Please ask your administrator to enable it. Completed work is retained."],
+      service_unavailable: ["\u6240\u9700\u80FD\u529B\u6682\u65F6\u4E0D\u53EF\u7528\uFF0C\u6682\u65F6\u65E0\u6CD5\u5B8C\u6210\u8FD9\u9879\u4EFB\u52A1\u3002\u5DF2\u5B8C\u6210\u5185\u5BB9\u5DF2\u4FDD\u7559\u3002", "The required capability is temporarily unavailable. Completed work is retained."],
+      result_pending_verification: ["\u5DF2\u6709\u4EFB\u52A1\u7684\u6700\u7EC8\u7ED3\u679C\u6682\u65F6\u65E0\u6CD5\u786E\u8BA4\u3002\u5DF2\u5B8C\u6210\u5185\u5BB9\u5DF2\u4FDD\u7559\uFF0C\u65E0\u9700\u91CD\u590D\u63D0\u4EA4\u3002", "The existing task's final result is not yet confirmed. Completed work is retained; no resubmission is needed."],
+      task_scope_limited: ["\u5F53\u524D\u80FD\u529B\u6682\u65F6\u65E0\u6CD5\u5904\u7406\u5B8C\u6574\u4EFB\u52A1\uFF0C\u8BF7\u7F29\u5C0F\u672A\u5B8C\u6210\u90E8\u5206\u7684\u8303\u56F4\u3002\u5DF2\u5B8C\u6210\u5185\u5BB9\u5DF2\u4FDD\u7559\u3002", "The current capability cannot handle the full task. Please reduce the remaining scope. Completed work is retained."],
+      task_processing_limited: ["\u8FD9\u6B21\u4EFB\u52A1\u6682\u65F6\u672A\u80FD\u5B8C\u6210\uFF0C\u5DF2\u4FDD\u5B58\u7684\u5185\u5BB9\u4F1A\u4FDD\u7559\u3002\u4F60\u53EF\u4EE5\u7EE7\u7EED\u5B8C\u6210\u672A\u5B8C\u6210\u7684\u90E8\u5206\u3002", "This task could not be completed yet. Saved work is retained. You can continue the unfinished part."],
+      capability_limited: ["\u76EE\u524D\u53EF\u7528\u7684\u80FD\u529B\u6682\u65F6\u65E0\u6CD5\u5B8C\u6210\u8FD9\u9879\u4EFB\u52A1\uFF0C\u5DF2\u5B8C\u6210\u5185\u5BB9\u5DF2\u4FDD\u7559\u3002\u53EF\u8054\u7CFB\u7BA1\u7406\u5458\u68C0\u67E5\u6240\u9700\u6280\u80FD\u4E0E\u6743\u9650\u3002", "The available capabilities cannot currently complete this task. Completed work is retained. Your administrator can check the required Skills and permissions."]
+    };
+    const normalized = code === "capability_not_authorized" ? "capability_permission_required" : code;
+    return (Object.hasOwn(messages, normalized) ? messages[normalized] : messages.capability_limited)[language.startsWith("en") ? 1 : 0];
+  }
 
   // node_modules/marked/lib/marked.esm.js
   function A() {
@@ -10938,7 +10957,8 @@ Please report this to https://github.com/markedjs/marked.`, e) {
     }
     if (!response.ok) {
       const message = typeof payload === "object" && payload && "error" in payload ? payload.error?.message : null;
-      throw new Error(message || `${response.status} ${response.statusText}`);
+      const code = typeof payload === "object" && payload && "error" in payload ? payload.error?.code : void 0;
+      throw Object.assign(new Error(message || `${response.status} ${response.statusText}`), { code });
     }
     return payload;
   }
@@ -11332,7 +11352,7 @@ Please report this to https://github.com/markedjs/marked.`, e) {
     streaming.progress.toolCallId = event.tool_call_id;
     streaming.progress.displayedPercentage = displayedPercentage;
     streaming.progress.total = total;
-    const rawMessage = event.message?.trim() || "MCP \u670D\u52A1\u6B63\u5728\u5904\u7406";
+    const rawMessage = "\u6B63\u5728\u5904\u7406\u4EFB\u52A1\uFF0C\u5DF2\u5B8C\u6210\u5185\u5BB9\u4F1A\u4FDD\u7559\u3002";
     const elapsedSeconds = progressElapsedSeconds(rawMessage);
     const completed = displayedPercentage !== null && displayedPercentage >= 100;
     streaming.content.classList.remove("hidden");
@@ -11855,8 +11875,7 @@ Please report this to https://github.com/markedjs/marked.`, e) {
       message = "\u8FD0\u884C\u5DF2\u5B8C\u6210";
     } else if (event.type === "error" || event.type === "failed") {
       key = "failed";
-      message = event.message || "\u8FD0\u884C\u5931\u8D25";
-      error = true;
+      message = executionNotice(event.public_notice);
     } else if (event.type === "cancelled") {
       key = "cancelled";
       message = "\u8FD0\u884C\u5DF2\u505C\u6B62";
@@ -11864,9 +11883,7 @@ Please report this to https://github.com/markedjs/marked.`, e) {
       key = "recoverable";
       message = "\u8FD0\u884C\u5DF2\u6682\u505C\uFF0C\u53EF\u4EE5\u7EE7\u7EED\u6062\u590D";
     } else if (event.type === "upstream_error") {
-      key = `upstream:${event.message}`;
-      message = PORTAL_MODE ? "\u4E0A\u6E38\u670D\u52A1\u6682\u65F6\u4E0D\u53EF\u7528\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5" : event.message || "\u4E0A\u6E38\u670D\u52A1\u8FD4\u56DE\u9519\u8BEF";
-      error = true;
+      return;
     } else if (event.type === "status") {
       const status = (event.status || "").toLowerCase();
       if (["succeeded", "success", "completed", "complete"].includes(status)) {
@@ -11874,8 +11891,7 @@ Please report this to https://github.com/markedjs/marked.`, e) {
         message = event.message || "\u8FD0\u884C\u5DF2\u5B8C\u6210";
       } else if (["failed", "error", "errored"].includes(status)) {
         key = "failed";
-        message = event.message || "\u8FD0\u884C\u5931\u8D25";
-        error = true;
+        message = executionNotice(void 0);
       } else if (["cancelled", "canceled", "stopped"].includes(status)) {
         key = "cancelled";
         message = event.message || "\u8FD0\u884C\u5DF2\u505C\u6B62";
@@ -11953,9 +11969,9 @@ Please report this to https://github.com/markedjs/marked.`, e) {
     } else if (event.type === "tool_result") {
       streaming.activity.classList.add("hidden");
       streaming.content.textContent = "\u6B63\u5728\u6574\u7406\u7ED3\u679C...";
-      streaming.meta.textContent = event.is_error ? PORTAL_MODE ? "\u6B63\u5728\u68C0\u67E5\u80FD\u529B\u8FD4\u56DE\u5E76\u7EE7\u7EED\u5904\u7406" : `${event.tool} \u8FD4\u56DE\u9519\u8BEF\uFF0C\u6B63\u5728\u68C0\u67E5` : PORTAL_MODE ? "\u80FD\u529B\u8C03\u7528\u5B8C\u6210\uFF0C\u6B63\u5728\u6574\u7406" : `${event.tool} \u8C03\u7528\u5B8C\u6210\uFF0C\u6A21\u578B\u6B63\u5728\u6574\u7406`;
+      streaming.meta.textContent = event.is_error ? "\u6B63\u5728\u68C0\u67E5\u80FD\u529B\u8FD4\u56DE\u5E76\u7EE7\u7EED\u5904\u7406" : PORTAL_MODE ? "\u80FD\u529B\u8C03\u7528\u5B8C\u6210\uFF0C\u6B63\u5728\u6574\u7406" : `${event.tool} \u8C03\u7528\u5B8C\u6210\uFF0C\u6A21\u578B\u6B63\u5728\u6574\u7406`;
     } else if (event.type === "upstream_error") {
-      streaming.meta.textContent = event.message;
+      streaming.meta.textContent = "\u6B63\u5728\u5904\u7406\u4EFB\u52A1\u2026";
     }
     scrollChatToLatest();
   }
@@ -11981,7 +11997,7 @@ Please report this to https://github.com/markedjs/marked.`, e) {
           } else if (event.type === "error" || event.type === "failed") {
             closeRunStream(runId);
             if (event.type === "failed") renderSavedOutputs(event.artifacts || []);
-            reject(new Error(event.message));
+            reject(Object.assign(new Error(executionNotice(event.public_notice)), { code: event.public_notice?.code }));
           } else if (event.type === "cancelled") {
             closeRunStream(runId);
             streaming.message.remove();
@@ -12321,10 +12337,11 @@ ${attachment.text || ""}`;
       await refreshSessions();
     } catch (error) {
       streaming.message.remove();
-      if (streaming.runId) renderRunStatus(streaming.runId, "failed", error instanceof Error ? error.message : String(error));
-      else renderChatMessage("system", error instanceof Error ? error.message : String(error));
+      const message = executionNotice(error);
+      if (streaming.runId) renderRunStatus(streaming.runId, "failed", message);
+      else renderChatMessage("system", message);
       setChatPetLifecycle("failed");
-      throw error;
+      throw new Error(message);
     } finally {
       state.running = state.eventSources.size > 0;
       updateSendButton();
@@ -12408,7 +12425,7 @@ ${attachment.text || ""}`;
       running: "\u6B63\u5728\u8FD0\u884C",
       waiting_authorization: "\u7B49\u5F85\u6388\u6743",
       succeeded: "\u5DF2\u5B8C\u6210",
-      failed: "\u5931\u8D25",
+      failed: "\u80FD\u529B\u53D7\u9650",
       cancelled: "\u5DF2\u505C\u6B62",
       recoverable: "\u53EF\u6062\u590D"
     }[status || ""] || "\u6682\u65E0\u6D88\u606F";
@@ -12778,7 +12795,7 @@ ${attachment.text || ""}`;
       state.history.push({ role: "user", content: historyText(turn.prompt, attachments) });
       if (turn.run_status === "failed") {
         renderSavedOutputs(turn.response?.artifacts || []);
-        renderRunStatus(turn.run_id, "failed", `\u672C\u6B21\u8FD0\u884C\u5931\u8D25\uFF1A${turn.run_error || "\u8FD0\u884C\u8BB0\u5F55\u548C\u5DF2\u4EA7\u751F\u7684\u4E8B\u4EF6\u5DF2\u7ECF\u4FDD\u7559\u3002"}`);
+        renderRunStatus(turn.run_id, "failed", executionNotice(turn.response?.public_notice));
       } else if (turn.answer || turn.run_status === "succeeded" && turn.response) {
         renderChatMessage(
           "assistant",
@@ -12809,7 +12826,7 @@ ${attachment.text || ""}`;
         }).catch((error) => {
           if (!streaming.message.isConnected) return;
           streaming.message.remove();
-          renderRunStatus(turn.run_id, "failed", error instanceof Error ? error.message : String(error));
+          renderRunStatus(turn.run_id, "failed", executionNotice(error));
           setChatPetLifecycle("failed");
         }).finally(() => {
           state.running = state.eventSources.size > 0;
@@ -12825,7 +12842,7 @@ ${attachment.text || ""}`;
         renderRunStatus(
           turn.run_id,
           "failed",
-          `\u672C\u6B21\u8FD0\u884C\u5931\u8D25\uFF1A${turn.run_error || "\u8FD0\u884C\u8BB0\u5F55\u548C\u5DF2\u4EA7\u751F\u7684\u4E8B\u4EF6\u5DF2\u7ECF\u4FDD\u7559\u3002"}`
+          executionNotice(turn.response?.public_notice)
         );
       } else if (turn.run_status === "cancelled") {
         renderRunStatus(turn.run_id, "cancelled", "\u672C\u6B21\u8FD0\u884C\u5DF2\u505C\u6B62\u3002");

@@ -239,7 +239,7 @@ impl Catalog {
         self.execution_selected |= !names.is_empty();
         Ok(json!({"loaded":self.active,"mode":mode,"executed":false}))
     }
-    pub(crate) fn execution_guidance(&self) -> Value {
+    pub fn execution_guidance(&self) -> Value {
         let workspace_tools: Vec<_> = self
             .bindings
             .values()
@@ -251,6 +251,15 @@ impl Catalog {
             "discover":{"tool":"search_capabilities","arguments":{"query":"","kind":"capability"}},
             "workspace_tools":workspace_tools,
             "workspace_available":!workspace_tools.is_empty(),
+            "native_workspace_contract":if workspace_tools.is_empty(){Value::Null}else{json!({
+                "authority":"Use these installed interfaces and their live schemas when imported Skill instructions describe another host. This guidance does not grant access or change Skill content.",
+                "create":"workspace_create with optional skill_id binds the authorized package once; save files with workspace_edit using the returned workspace_id and revision.",
+                "execute":"sandbox_run reuses workspace_id and expected_revision; omit skill_id and files. The workspace already retains its immutable Skill binding. Do not create a separate workspace to check existing inputs.",
+                "runtime":"Use runtime=javascript for Node .js/.mjs/.cjs scripts (not node or python); python for .py, shell for .sh, typescript for .ts/.mts/.cts.",
+                "skill_entrypoint":"For a packaged script use entrypoint=skill/<package-relative-path>, not an absolute path. Script arguments refer to saved task files in the working directory.",
+                "legacy_names":"edit_workspace maps to workspace_edit; run_script maps to sandbox_run; runtime_name=node maps to runtime=javascript; entrypoint_root=skill maps to the skill/ entrypoint prefix; outputs maps to output_files. Verify the live schema before submission.",
+                "publish":"output_files selects final files for publication; workspace_publish can publish existing outputs without rerunning code. Do not install dependencies or execute on the host."
+            })},
             "coding_workflow":if workspace_tools.is_empty(){Value::Null}else{json!({"tools":["coding_search","coding_apply_patch","coding_check","coding_publish"],"message":"Reuse the saved project; search and read only related files. Apply atomic focused patches, run saved checks in the OCI sandbox, correct failing source without rewriting passing files, then publish final outputs. Check success is not final delivery. Browser acceptance requires an actual authorized browser or prepared sandbox browser; do not claim it from a successful build. Default network is disabled and missing dependencies require administrator preparation."})}
         })
     }

@@ -80,7 +80,10 @@ impl ToolRuntime {
             .as_ref()
             .ok_or_else(|| ToolError::Input("隔离执行环境尚未就绪；不会在宿主机执行".into()))?;
         if !input.runtime.valid_entrypoint(&input.entrypoint) {
-            return Err(ToolError::Input("运行类型与入口扩展名不符；未执行".into()));
+            return Err(ToolError::CorrectableInput(format!(
+                "入口必须是匹配 runtime 的安全相对路径，不能使用绝对路径或父目录；未执行代码。当前 runtime={:?}、entrypoint={}。Node 的 .js/.mjs/.cjs 脚本必须使用 runtime=javascript，.py 使用 python，.sh 使用 shell，.ts/.mts/.cts 使用 typescript。技能包入口使用 skill/ 前缀。复用已有工作区时保留 workspace_id 与 expected_revision，省略 skill_id 和 files；不要重新生成现有文件。",
+                input.runtime, input.entrypoint
+            )));
         }
         let store = sandbox.task_store().map_err(task_error)?;
         let mut snapshot = match &input.workspace_id {

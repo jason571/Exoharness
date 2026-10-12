@@ -1,7 +1,7 @@
 use super::*;
-const ADMIN: &str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+pub(super) const ADMIN: &str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const VIEWER: &str = "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv";
-fn management(f: &Fixture, surface: Surface) -> Router {
+pub(super) fn management(f: &Fixture, surface: Surface) -> Router {
     let credentials = Arc::new(
         Credentials::from_json(
             &json!([
@@ -24,7 +24,7 @@ fn management(f: &Fixture, surface: Surface) -> Router {
         Arc::new(Assistants::initialize(&f._root.path().join("trace-assistants")).unwrap());
     exoharness_api::management_router(api, assistants)
 }
-async fn get(router: &Router, path: &str, token: &str) -> (StatusCode, Value) {
+pub(super) async fn get(router: &Router, path: &str, token: &str) -> (StatusCode, Value) {
     let response = router
         .clone()
         .oneshot(

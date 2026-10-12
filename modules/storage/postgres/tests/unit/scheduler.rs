@@ -276,3 +276,142 @@ fn capability_limit_is_preserved_even_when_shared_pool_has_capacity() {
         InvocationAdmission::Claimed
     );
 }
+
+#[test]
+fn high_load_sixty_four_runs_admit_eight_per_wave_without_overbooking_or_starvation() {
+    let (store, url, namespace) = database();
+    limits(&store, 64, 8);
+    for n in 0..64 {
+        turn(
+            &store,
+            &format!("load-session-{n}"),
+            &format!("load-run-{n}"),
+            &snapshot(),
+        );
+    }
+    let mut pending: Vec<usize> = (0..64).collect();
+    let mut completed = std::collections::BTreeSet::new();
+    while !pending.is_empty() {
+        let barrier = Arc::new(Barrier::new(pending.len()));
+        let workers: Vec<_> = pending
+            .iter()
+            .map(|&n| {
+                let (url, namespace, barrier) = (url.clone(), namespace.clone(), barrier.clone());
+                std::thread::spawn(move || {
+                    let store = PostgresStore::connect(&url, &namespace).unwrap();
+                    barrier.wait();
+                    (
+                        n,
+                        start(
+                            &store,
+                            &format!("load-session-{n}"),
+                            &format!("load-run-{n}"),
+                        ),
+                    )
+                })
+            })
+            .collect();
+        let results: Vec<_> = workers
+            .into_iter()
+            .map(|worker| worker.join().unwrap())
+            .collect();
+        let admitted: Vec<_> = results
+            .iter()
+            .filter(|(_, r)| r.is_ok())
+            .map(|(n, _)| *n)
+            .collect();
+        assert_eq!(admitted.len(), pending.len().min(8));
+        assert_eq!(store.scheduler_status().unwrap()["active"], admitted.len());
+        for (n, result) in results {
+            if result.is_ok() {
+                assert!(completed.insert(n));
+                store
+                    .chat_cancel("owner", &format!("load-run-{n}"))
+                    .unwrap();
+            } else {
+                assert!(matches!(result, Err(StoreError::CapacityWaiting)));
+            }
+        }
+        pending.retain(|n| !completed.contains(n));
+        assert_eq!(store.scheduler_status().unwrap()["active"], 0);
+    }
+    assert_eq!(completed.len(), 64);
+}
+
+#[test]
+fn high_load_unknown_mcp_result_retains_shared_pool_after_run_cancellation() {
+    let (store, url, namespace) = database();
+    pools(&store, &[("a", "gpu"), ("b", "gpu")]);
+    let mut config = store.scheduler_configuration().unwrap();
+    config.max_active_runs_per_user = 64;
+    config.max_global_agent_runs = 64;
+    config.resource_pools[0].max_concurrency = 4;
+    store.save_scheduler_configuration(config).unwrap();
+    let calls: Vec<_> = (0..64)
+        .map(|n| prepare(&store, n, if n % 2 == 0 { "a" } else { "b" }))
+        .collect();
+    let barrier = Arc::new(Barrier::new(16));
+    let workers: Vec<_> = (0..16)
+        .map(|worker| {
+            let (url, namespace, barrier, calls) = (
+                url.clone(),
+                namespace.clone(),
+                barrier.clone(),
+                calls.clone(),
+            );
+            std::thread::spawn(move || {
+                let store = PostgresStore::connect(&url, &namespace).unwrap();
+                barrier.wait();
+                (worker..64)
+                    .step_by(16)
+                    .map(|n| (n, claim(&store, &calls[n], 2).unwrap()))
+                    .collect::<Vec<_>>()
+            })
+        })
+        .collect();
+    let results: Vec<_> = workers
+        .into_iter()
+        .flat_map(|worker| worker.join().unwrap())
+        .collect();
+    let admitted: Vec<_> = results
+        .iter()
+        .filter(|(_, r)| *r == InvocationAdmission::Claimed)
+        .map(|(n, _)| *n)
+        .collect();
+    assert_eq!(admitted.len(), 4);
+    assert_eq!(admitted.iter().filter(|n| **n % 2 == 0).count(), 2);
+    let waiting = results
+        .iter()
+        .filter(|(_, r)| *r == InvocationAdmission::Waiting)
+        .map(|(n, _)| *n)
+        .min()
+        .unwrap();
+    for n in &admitted {
+        finish(&store, &calls[*n], I::OutcomeUnknown);
+        store.chat_cancel("owner", &calls[*n].1).unwrap();
+    }
+    let reopened = PostgresStore::connect(&url, &namespace).unwrap();
+    assert!(matches!(
+        claim(&reopened, &calls[waiting], 2),
+        Err(StoreError::OutcomeUnknown)
+    ));
+    assert_eq!(
+        reopened
+            .invocation(
+                "owner",
+                &calls[waiting].0,
+                &calls[waiting].1,
+                &calls[waiting].2
+            )
+            .unwrap()
+            .attempts,
+        0
+    );
+    for n in admitted {
+        finish(&reopened, &calls[n], I::Succeeded);
+    }
+    assert_eq!(
+        claim(&reopened, &calls[waiting], 2).unwrap(),
+        InvocationAdmission::Claimed
+    );
+}

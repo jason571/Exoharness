@@ -55,7 +55,7 @@ async fn mixed_full_and_incomplete_tool_names_are_corrected_together_then_execut
 }
 
 #[tokio::test]
-async fn repeated_incomplete_selection_stops_after_three_rejections_without_mcp_execution() {
+async fn unchanged_incomplete_selection_stops_without_repeat_dispatch_or_mcp_execution() {
     let remote = mcp_server::server(mcp_server::StateData::default()).await;
     let f = fixture(
         vec![
@@ -71,7 +71,7 @@ async fn repeated_incomplete_selection_stops_after_three_rejections_without_mcp_
     assert_eq!(terminal(&f, &run).await, RunState::Failed);
     {
         let requests = f.upstream.requests.lock().unwrap();
-        assert_eq!(requests.len(), 3);
+        assert_eq!(requests.len(), 2);
         assert!(
             requests
                 .iter()
@@ -295,69 +295,74 @@ async fn stage_batch_and_explicit_add_preserve_authorization_schema_and_exact_bu
 }
 
 #[tokio::test]
-async fn historical_durable_reads_are_bounded_without_losing_exact_journal_or_publication() {
-    let f = fixture(vec![
+async fn distinct_pages_and_duplicate_reads_preserve_exact_journal_and_publication() {
+    for (offsets, expected_bodies, expected_references) in
+        [([0, 80, 160, 240], 4, 0), ([0, 80, 0, 80], 2, 2)]
+    {
+        let f = fixture(vec![
         tool("activate_tools",json!({"names":["workspace_create","workspace_edit","workspace_read","workspace_publish"]})),
         tool("workspace_create",json!({})),
         json!({"fixture_workspace_next":"workspace_edit"}),
-        json!({"fixture_workspace_next":"workspace_read","fixture_workspace_offset":0}),
-        json!({"fixture_workspace_next":"workspace_read","fixture_workspace_offset":80}),
-        json!({"fixture_workspace_next":"workspace_read","fixture_workspace_offset":160}),
-        json!({"fixture_workspace_next":"workspace_read","fixture_workspace_offset":240}),
+        json!({"fixture_workspace_next":"workspace_read","fixture_workspace_offset":offsets[0]}),
+        json!({"fixture_workspace_next":"workspace_read","fixture_workspace_offset":offsets[1]}),
+        json!({"fixture_workspace_next":"workspace_read","fixture_workspace_offset":offsets[2]}),
+        json!({"fixture_workspace_next":"workspace_read","fixture_workspace_offset":offsets[3]}),
         json!({"fixture_workspace_next":"workspace_publish"}),
         answer(),
     ],true).await;
-    let (session, run) = start(&f).await;
-    assert_eq!(terminal(&f, &run).await, RunState::Succeeded);
-    {
-        let requests = f.upstream.requests.lock().unwrap();
-        let mut read_bodies = 0;
-        let mut read_references = 0;
-        for message in requests[7]["messages"].as_array().unwrap() {
-            if message["role"] != "tool" {
-                continue;
+        let (session, run) = start(&f).await;
+        assert_eq!(terminal(&f, &run).await, RunState::Succeeded);
+        {
+            let requests = f.upstream.requests.lock().unwrap();
+            let mut read_bodies = 0;
+            let mut read_references = 0;
+            for message in requests[7]["messages"].as_array().unwrap() {
+                if message["role"] != "tool" {
+                    continue;
+                }
+                let Ok(receipt) =
+                    serde_json::from_str::<Value>(message["content"].as_str().unwrap())
+                else {
+                    continue;
+                };
+                let result = &receipt["result"];
+                if result["_durable_read_body"] == true {
+                    read_bodies += usize::from(result["content"].is_string());
+                    read_references += usize::from(result["read_body_retained_in_journal"] == true);
+                    assert_eq!(result["revision"], 2);
+                    assert!(result["file"]["sha256"].is_string());
+                }
             }
-            let Ok(receipt) = serde_json::from_str::<Value>(message["content"].as_str().unwrap())
-            else {
-                continue;
-            };
-            let result = &receipt["result"];
-            if result["_durable_read_body"] == true {
-                read_bodies += usize::from(result["content"].is_string());
-                read_references += usize::from(result["read_body_retained_in_journal"] == true);
-                assert_eq!(result["revision"], 2);
-                assert!(result["file"]["sha256"].is_string());
-            }
+            assert_eq!(read_bodies, expected_bodies);
+            assert_eq!(read_references, expected_references);
+            assert!(
+                !requests[7]["messages"].to_string().contains(
+                    "\"role\":\"assistant\",\"content\":\"{\\\"completed_tool_checkpoint"
+                )
+            );
         }
-        assert_eq!(read_bodies, 2);
-        assert_eq!(read_references, 2);
-        assert!(
-            !requests[7]["messages"]
-                .to_string()
-                .contains("\"role\":\"assistant\",\"content\":\"{\\\"completed_tool_checkpoint")
-        );
-    }
-    for sequence in 4..=7 {
-        let record = invocation(&f, &session, &run, sequence).await;
+        for sequence in 4..=7 {
+            let record = invocation(&f, &session, &run, sequence).await;
+            assert_eq!(
+                record.result.unwrap()["content"]
+                    .as_str()
+                    .unwrap()
+                    .chars()
+                    .count(),
+                80
+            );
+        }
         assert_eq!(
-            record.result.unwrap()["content"]
-                .as_str()
+            invocation(&f, &session, &run, 8).await.result.unwrap()["artifacts"]
+                .as_array()
                 .unwrap()
-                .chars()
-                .count(),
-            80
+                .len(),
+            1
         );
+        f.tasks.close().await;
+        f.sandbox.stop().await.unwrap();
+        f.server.abort();
     }
-    assert_eq!(
-        invocation(&f, &session, &run, 8).await.result.unwrap()["artifacts"]
-            .as_array()
-            .unwrap()
-            .len(),
-        1
-    );
-    f.tasks.close().await;
-    f.sandbox.stop().await.unwrap();
-    f.server.abort();
 }
 
 #[tokio::test]

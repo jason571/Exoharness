@@ -8,6 +8,12 @@ use exoharness_contracts::model::{
 };
 use exoharness_core::context::JournalEntry;
 use serde_json::json;
+#[path = "unit/read_loop.rs"]
+mod read_loop;
+#[path = "unit/read_loop_recorded.rs"]
+mod read_loop_recorded;
+#[path = "unit/recovery_budget.rs"]
+mod recovery_budget;
 use std::{
     collections::{BTreeSet, VecDeque},
     sync::{Arc, Mutex},
@@ -15,22 +21,28 @@ use std::{
 struct Fixture {
     completions: VecDeque<Completion>,
     receipts: VecDeque<Receipt>,
+    keyed_receipts: std::collections::BTreeMap<String, Receipt>,
     requests: Vec<ChatRequest>,
     calls: Vec<String>,
     saved: Arc<Mutex<Option<EngineState>>>,
     fail_save: bool,
     cancelled: bool,
+    notices: Vec<serde_json::Value>,
+    fail_notice: bool,
 }
 impl Fixture {
     fn new(completions: Vec<Completion>, receipts: Vec<Receipt>) -> Self {
         Self {
             completions: completions.into(),
             receipts: receipts.into(),
+            keyed_receipts: std::collections::BTreeMap::new(),
             requests: vec![],
             calls: vec![],
             saved: Arc::new(Mutex::new(None)),
             fail_save: false,
             cancelled: false,
+            notices: vec![],
+            fail_notice: false,
         }
     }
 }
@@ -47,7 +59,17 @@ impl Driver for Fixture {
     }
     async fn invoke(&mut self, key: &str, _: &ToolCall) -> Result<Receipt, StopReason> {
         self.calls.push(key.into());
-        self.receipts.pop_front().ok_or(StopReason::OutcomeUnknown)
+        self.keyed_receipts
+            .remove(key)
+            .or_else(|| self.receipts.pop_front())
+            .ok_or(StopReason::OutcomeUnknown)
+    }
+    async fn record_notice(&mut self, notice: serde_json::Value) -> Result<(), StopReason> {
+        if self.fail_notice {
+            return Err(StopReason::PersistenceFailed);
+        }
+        self.notices.push(notice);
+        Ok(())
     }
     async fn save(&mut self, state: &EngineState) -> Result<(), StopReason> {
         if self.fail_save {
@@ -62,6 +84,8 @@ fn policy() -> EnginePolicy {
         max_model_calls: 10,
         max_tool_calls: 10,
         max_reported_tokens: 1000,
+        max_recovery_tokens: 100_000,
+        recovery_output_cap_available: true,
         max_context_bytes: 100_000,
         output_token_limit: 500,
         requires_execution: true,
@@ -136,11 +160,17 @@ fn unavailable_service(id: &str) -> Receipt {
 
 #[tokio::test]
 async fn unavailable_service_replans_without_replaying_successful_or_unsubmitted_calls() {
+    let mut fallback = proposal("fallback");
+    fallback.name = "fallback-tool".into();
+    let mut available_tools = tools();
+    let mut fallback_schema = available_tools[0].clone();
+    fallback_schema.name = "fallback-tool".into();
+    available_tools.push(fallback_schema);
     let mut driver = Fixture::new(
         vec![
             completion(vec![proposal("saved")]),
             completion(vec![proposal("unavailable"), proposal("dependent")]),
-            completion(vec![proposal("fallback")]),
+            completion(vec![fallback]),
             completion(vec![]),
         ],
         vec![
@@ -157,7 +187,7 @@ async fn unavailable_service_replans_without_replaying_successful_or_unsubmitted
             &policy(),
             "system",
             &BTreeSet::new(),
-            &tools()
+            &available_tools
         )
         .await,
         RunOutcome::Finished("done".into())
@@ -175,8 +205,7 @@ async fn unavailable_service_replans_without_replaying_successful_or_unsubmitted
 }
 
 #[tokio::test]
-async fn service_recovery_budget_survives_serialization_and_never_admits_unknown_or_submitted_work()
-{
+async fn service_unavailability_does_not_retry_same_tool_and_resume_keeps_decision() {
     let mut driver = Fixture::new(
         (0..3)
             .map(|n| completion(vec![proposal(&format!("failed-{n}"))]))
@@ -196,9 +225,9 @@ async fn service_recovery_budget_survives_serialization_and_never_admits_unknown
             &tools()
         )
         .await,
-        RunOutcome::Stopped(StopReason::InputRejected)
+        RunOutcome::Stopped(StopReason::UnchangedCorrection)
     );
-    assert_eq!(state.service_recoveries, 2);
+    assert_eq!(state.service_recoveries, 1);
     let mut restored: EngineState =
         serde_json::from_str(&serde_json::to_string(&state).unwrap()).unwrap();
     assert_eq!(
@@ -211,9 +240,9 @@ async fn service_recovery_budget_survives_serialization_and_never_admits_unknown
             &tools()
         )
         .await,
-        RunOutcome::Stopped(StopReason::InputRejected)
+        RunOutcome::Stopped(StopReason::UnchangedCorrection)
     );
-    assert_eq!(driver.requests.len(), 3);
+    assert_eq!(driver.requests.len(), 2);
     for (status, executed) in [
         (ReceiptState::OutcomeUnknown, false),
         (ReceiptState::FailedAfterExecution, false),

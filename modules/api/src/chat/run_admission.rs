@@ -67,6 +67,11 @@ pub(super) async fn start(
                 }
             }
             Err(error) => {
+                let code = if matches!(error, StoreError::NotAuthorized) {
+                    "capability_permission_required"
+                } else {
+                    "service_unavailable"
+                };
                 let message = if matches!(error, StoreError::NotAuthorized) {
                     "助理配置或授权已改变，请重新发起任务"
                 } else {
@@ -79,7 +84,8 @@ pub(super) async fn start(
                     run.to_owned(),
                 );
                 let _ = tokio::task::spawn_blocking(move || {
-                    store.finish_chat(&owner, &session, &run, json!({}), Some(message))
+                    store.chat_event(&owner,&session,&run,json!({"type":"execution_exception","severity":"error","source":"run_admission","diagnostic":format!("{error:?}"),"recoverable":false}))?;
+                    store.finish_chat(&owner, &session, &run, json!({"public_notice":crate::public_chat::notice(code)}), Some(message))
                 })
                 .await;
                 return Err(());

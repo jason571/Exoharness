@@ -20,6 +20,7 @@ mod knowledge;
 mod management;
 mod mcp;
 mod media;
+mod public_chat;
 mod registry;
 mod routes;
 mod runtime;

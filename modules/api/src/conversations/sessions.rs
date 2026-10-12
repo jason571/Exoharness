@@ -117,17 +117,17 @@ pub(super) async fn detail(
     Path(session): Path<String>,
     Query(query): Query<History>,
 ) -> Result<Json<Value>, ApiError> {
-    Ok(Json(
-        storage(state.store, move |store| {
-            store.conversation_detail(
-                &principal.id,
-                &session,
-                query.before_ordinal,
-                query.turn_limit.unwrap_or(30),
-            )
-        })
-        .await?,
-    ))
+    let mut value = storage(state.store, move |store| {
+        store.conversation_detail(
+            &principal.id,
+            &session,
+            query.before_ordinal,
+            query.turn_limit.unwrap_or(30),
+        )
+    })
+    .await?;
+    crate::public_chat::history(&mut value);
+    Ok(Json(value))
 }
 pub(super) async fn update(
     State(state): State<ConversationState>,

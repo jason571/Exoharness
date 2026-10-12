@@ -1,5 +1,5 @@
 use super::*;
-async fn configure(f: &Fixture, user: u32, global: u32) {
+pub(super) async fn configure(f: &Fixture, user: u32, global: u32) {
     let s = f.store.clone();
     tokio::task::spawn_blocking(move || {
         let mut c = s.scheduler_configuration().unwrap();

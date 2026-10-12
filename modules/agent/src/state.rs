@@ -14,6 +14,8 @@ pub struct EnginePolicy {
     pub max_model_calls: u64,
     pub max_tool_calls: u64,
     pub max_reported_tokens: u64,
+    pub max_recovery_tokens: u64,
+    pub recovery_output_cap_available: bool,
     pub max_context_bytes: usize,
     pub output_token_limit: u64,
     pub requires_execution: bool,
@@ -23,6 +25,7 @@ impl EnginePolicy {
         self.max_model_calls > 0
             && self.max_tool_calls > 0
             && self.max_reported_tokens > 0
+            && self.max_recovery_tokens > 0
             && self.max_context_bytes > 0
             && self.output_token_limit > 0
     }
@@ -39,6 +42,8 @@ pub enum StopReason {
     ModelBudget,
     ToolBudget,
     TokenBudget,
+    RecoveryTokenBudget,
+    UnchangedCorrection,
     ContextBudget,
     RepeatedCall,
     MissingExecution,
@@ -58,6 +63,14 @@ pub struct EngineState {
     pub in_flight_model: Option<String>,
     pub tool_calls: u64,
     pub reported_tokens: u64,
+    #[serde(default)]
+    pub recovery_tokens: u64,
+    #[serde(default)]
+    pub recovery_token_limit: u64,
+    #[serde(default)]
+    pub recovery_active: bool,
+    #[serde(default)]
+    pub recovery_accounting_initialized: bool,
     pub usage: Usage,
     pub unreported_requests: u64,
     pub successful_executions: u64,
@@ -75,6 +88,9 @@ pub struct EngineState {
     /// Persisted so Resume cannot reopen execution or reset the guard.
     #[serde(default)]
     pub repeat_finalization: bool,
+    /// At most two host read-loop reviews, persisted across checkpoint recovery.
+    #[serde(default)]
+    pub read_loop_reviews: Vec<serde_json::Value>,
     pub repeated: ConsecutiveCalls,
     pub blocked: Option<StopReason>,
     pub answer: Option<String>,
@@ -89,6 +105,10 @@ impl EngineState {
             in_flight_model: None,
             tool_calls: 0,
             reported_tokens: 0,
+            recovery_tokens: 0,
+            recovery_token_limit: 0,
+            recovery_active: false,
+            recovery_accounting_initialized: true,
             usage: Usage {
                 input_tokens: Some(0),
                 output_tokens: Some(0),
@@ -101,6 +121,7 @@ impl EngineState {
             service_recoveries: 0,
             sandbox_corrections: 0,
             repeat_finalization: false,
+            read_loop_reviews: vec![],
             repeated: ConsecutiveCalls::new(repeat_limit)?,
             blocked: None,
             answer: None,

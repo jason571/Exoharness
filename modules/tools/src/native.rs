@@ -38,10 +38,10 @@ pub(crate) fn sandbox_tool() -> Tool {
         "sandbox_run",
         "隔离沙盒执行 Python、Shell、JavaScript、TypeScript：计算、数据处理、绘图、图表、网页和文档生成。Execute code only in the isolated, network-disabled OCI sandbox. Never executes on the host. Before processing a generated or uploaded file, import its persisted artifact_id using workspace_import and read the local relative path: URL downloads, DNS and network requests cannot work here. A remote MCP link is not a local file; retrieve its completed result to obtain an owned artifact, never regenerate successful media. For saved task files supply workspace_id and expected_revision, omit files and reuse the saved entrypoint; edit source with workspace_edit first. Without workspace_id, files creates a new task workspace. Writable /work and /workspace are aliases. An authorized Skill package is read-only at /skill and /work/skill; use entrypoint skill/scripts/... for its scripts. Returned workspace revision includes generated files, even after script failure. output_files publishes only final requested files; omit it for intermediate steps or checks. No package installation. Host waits and forwards cancellation, not model polling.",
         json!({
-            "runtime":{"type":"string","enum":["python","shell","javascript","typescript"]},
-            "entrypoint":{"type":"string","minLength":1},
+            "runtime":{"type":"string","enum":["python","shell","javascript","typescript"],"description":"Node .js/.mjs/.cjs uses javascript, never python or node. Python .py uses python, .sh uses shell, .ts/.mts/.cts uses typescript."},
+            "entrypoint":{"type":"string","minLength":1,"description":"Safe saved relative path matching runtime. Packaged Skill scripts use skill/scripts/...; no absolute paths. Arguments refer to task files in the same saved workspace."},
             "files":{"type":"object","additionalProperties":{"type":"string"},"maxProperties":128},
-            "skill_id":{"type":"string"},
+            "skill_id":{"type":"string","description":"Only for creation with new files. Omit when workspace_id is present: the saved workspace already binds its immutable Skill revision."},
             "workspace_id":{"type":"string","pattern":"^[a-f0-9]{64}$"},
             "expected_revision":{"type":"integer","minimum":1},
             "timeout_seconds":{"type":"integer","minimum":1,"maximum":3600},

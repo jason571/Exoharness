@@ -22,6 +22,39 @@ fn fixture() -> Catalog {
     }
 }
 #[test]
+fn skill_execution_guidance_translates_legacy_names_without_granting_tools() {
+    let mut catalog = fixture();
+    let guidance = catalog.execution_guidance();
+    let contract = &guidance["native_workspace_contract"];
+    assert!(
+        contract["runtime"]
+            .as_str()
+            .unwrap()
+            .contains("runtime=javascript")
+    );
+    assert!(
+        contract["execute"]
+            .as_str()
+            .unwrap()
+            .contains("omit skill_id and files")
+    );
+    assert!(
+        contract["skill_entrypoint"]
+            .as_str()
+            .unwrap()
+            .contains("skill/<package-relative-path>")
+    );
+    assert!(
+        contract["legacy_names"]
+            .as_str()
+            .unwrap()
+            .contains("run_script maps to sandbox_run")
+    );
+    assert!(catalog.active.is_empty());
+    catalog.bindings.clear();
+    assert!(catalog.execution_guidance()["native_workspace_contract"].is_null());
+}
+#[test]
 fn durable_workflow_selects_only_authorized_unique_dependencies_without_execution() {
     let mut catalog = fixture();
     let source = catalog.bindings["sandbox_run"].clone();

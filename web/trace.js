@@ -413,6 +413,8 @@ function eventSummary(event, invocations = []) {
     const phase = ({ invocation_prepared: "准备调用（尚未提交）", invocation_submitted: "已提交调用", invocation_resolved: "调用已结算", tool_call: "调用能力", tool_result: payload.is_error ? "能力返回错误" : "能力返回" })[type];
     return `${phase} · ${tool || payload.invocation_id || payload.tool_call_id || "未知能力"}`;
   }
+  if (type === "execution_recovery_budget") return `恢复消耗 ${payload.charged_tokens ?? 0} / ${payload.token_limit ?? 0} Token`;
+  if (type === "execution_exception") return `${payload.recoverable ? "可纠正异常" : "异常需处理"} · ${payload.source || "execution"} · ${payload.reason || payload.receipt_state || payload.diagnostic_reference || "详情已保存"}`;
   if (type === "run_transition") return `${statusLabel(payload.from)} → ${statusLabel(payload.to)}`;
   if (event.event_type === "connection_resolution") {
     const bindings = Array.isArray(payload.bindings) ? payload.bindings : [];
@@ -514,14 +516,14 @@ function renderTimeline(trace) {
     timeline.innerHTML = '<p class="list-message">该 Run 没有持久化事件</p>';
     return;
   }
-  const labels = { text_delta: "助手输出", assistant_start: "助手开始响应", turn_end: "本轮响应结束", tool_call: "调用能力", tool_result: "能力返回", tool_progress: "执行进度", turn_created: "接收请求", run_created: "创建运行", run_transition: "运行状态", invocation_prepared: "准备调用", invocation_submitted: "提交调用", invocation_resolved: "调用结算", recovery_updated: "恢复状态", run_status: "运行状态", status: "状态更新", phase: "执行阶段", resource_queue: "执行资源", capability_routing: "能力选择", error: "执行错误", connection_resolution: "依赖连接" };
+  const labels = { text_delta: "助手输出", assistant_start: "助手开始响应", turn_end: "本轮响应结束", tool_call: "调用能力", tool_result: "能力返回", tool_progress: "执行进度", turn_created: "接收请求", run_created: "创建运行", run_transition: "运行状态", invocation_prepared: "准备调用", invocation_submitted: "提交调用", invocation_resolved: "调用结算", recovery_updated: "恢复状态", run_status: "运行状态", status: "状态更新", phase: "执行阶段", resource_queue: "执行资源", capability_routing: "能力选择", execution_exception: "异常 · 诊断已保留", execution_recovery_budget: "恢复Token预算", error: "执行错误", connection_resolution: "依赖连接" };
   const fragment = document.createDocumentFragment();
   entries.forEach((entry) => {
     const event = entry.first;
     const key = `${timelineState.mode}:${event.sequence}`;
     const item = document.createElement("article");
     item.className = "trace-step";
-    item.classList.toggle("trace-step-error", /error|fail/.test(event.event_type) || event.payload?.status === "failed" || event.payload?.is_error === true);
+    item.classList.toggle("trace-step-error", /error|fail/.test(event.event_type) || ["error", "warning"].includes(event.payload?.severity) || event.payload?.status === "failed" || event.payload?.is_error === true);
     item.dataset.eventSequence = event.sequence;
     item.innerHTML = `<span class="trace-step-marker"></span><div class="trace-step-copy"><span class="trace-step-heading"><strong></strong><code></code></span><div class="trace-step-meta"><time></time><small></small></div><p class="trace-step-text"></p></div>`;
     const copy = item.querySelector(".trace-step-copy");

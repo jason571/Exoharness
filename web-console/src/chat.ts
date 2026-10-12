@@ -3,6 +3,7 @@
 // Commercial licensing: contact flyangqn@gmail.com.
 
 import DOMPurify from "dompurify";
+import { executionNotice } from "./execution-notice";
 import { marked } from "marked";
 import hljs from "highlight.js/lib/core";
 import bash from "highlight.js/lib/languages/bash";
@@ -64,6 +65,7 @@ interface ChatResult {
   tool_calls: string[];
   warnings: string[];
   artifacts?: ChatArtifact[];
+  public_notice?: { code: string };
 }
 
 interface ChatArtifact {
@@ -101,8 +103,8 @@ type ChatStreamEvent =
   | { type: "upstream_error"; message: string }
   | { type: "turn_end" }
   | { type: "complete"; response: ChatResult }
-  | { type: "error"; message: string }
-  | { type: "failed"; status: string; message: string; artifacts?: ChatArtifact[] }
+  | { type: "error"; message: string; public_notice?: { code: string } }
+  | { type: "failed"; status: string; message: string; public_notice?: { code: string }; artifacts?: ChatArtifact[] }
   | { type: "cancelled"; status: string; message: string }
   | { type: "recoverable"; status: string; message: string };
 
@@ -395,7 +397,9 @@ async function api<T>(path: string, options: ApiRequestInit = {}): Promise<T> {
     const message = typeof payload === "object" && payload && "error" in payload
       ? (payload as { error?: { message?: string } }).error?.message
       : null;
-    throw new Error(message || `${response.status} ${response.statusText}`);
+    const code = typeof payload === "object" && payload && "error" in payload
+      ? (payload as { error?: { code?: string } }).error?.code : undefined;
+    throw Object.assign(new Error(message || `${response.status} ${response.statusText}`), { code });
   }
   return payload as T;
 }
@@ -846,7 +850,7 @@ function renderToolProgress(streaming: StreamingMessage, event: Extract<ChatStre
   streaming.progress.toolCallId = event.tool_call_id;
   streaming.progress.displayedPercentage = displayedPercentage;
   streaming.progress.total = total;
-  const rawMessage = event.message?.trim() || "MCP 服务正在处理";
+  const rawMessage = "正在处理任务，已完成内容会保留。";
   const elapsedSeconds = progressElapsedSeconds(rawMessage);
   const completed = displayedPercentage !== null && displayedPercentage >= 100;
   streaming.content.classList.remove("hidden");
@@ -1366,8 +1370,7 @@ function notifyRunEvent(runId: string, event: ChatStreamEvent): void {
     message = "运行已完成";
   } else if (event.type === "error" || event.type === "failed") {
     key = "failed";
-    message = event.message || "运行失败";
-    error = true;
+    message = executionNotice(event.public_notice);
   } else if (event.type === "cancelled") {
     key = "cancelled";
     message = "运行已停止";
@@ -1375,9 +1378,7 @@ function notifyRunEvent(runId: string, event: ChatStreamEvent): void {
     key = "recoverable";
     message = "运行已暂停，可以继续恢复";
   } else if (event.type === "upstream_error") {
-    key = `upstream:${event.message}`;
-    message = PORTAL_MODE ? "上游服务暂时不可用，请稍后重试" : event.message || "上游服务返回错误";
-    error = true;
+    return;
   } else if (event.type === "status") {
     const status = (event.status || "").toLowerCase();
     if (["succeeded", "success", "completed", "complete"].includes(status)) {
@@ -1385,8 +1386,7 @@ function notifyRunEvent(runId: string, event: ChatStreamEvent): void {
       message = event.message || "运行已完成";
     } else if (["failed", "error", "errored"].includes(status)) {
       key = "failed";
-      message = event.message || "运行失败";
-      error = true;
+      message = executionNotice(undefined);
     } else if (["cancelled", "canceled", "stopped"].includes(status)) {
       key = "cancelled";
       message = event.message || "运行已停止";
@@ -1476,10 +1476,10 @@ function applyRunEvent(
     streaming.activity.classList.add("hidden");
     streaming.content.textContent = "正在整理结果...";
     streaming.meta.textContent = event.is_error
-      ? (PORTAL_MODE ? "正在检查能力返回并继续处理" : `${event.tool} 返回错误，正在检查`)
+      ? "正在检查能力返回并继续处理"
       : (PORTAL_MODE ? "能力调用完成，正在整理" : `${event.tool} 调用完成，模型正在整理`);
   } else if (event.type === "upstream_error") {
-    streaming.meta.textContent = event.message;
+    streaming.meta.textContent = "正在处理任务…";
   }
   scrollChatToLatest();
 }
@@ -1507,7 +1507,7 @@ function followRun(runId: string, streaming: StreamingMessage): Promise<ChatResu
         } else if (event.type === "error" || event.type === "failed") {
           closeRunStream(runId);
           if (event.type === "failed") renderSavedOutputs(event.artifacts || []);
-          reject(new Error(event.message));
+          reject(Object.assign(new Error(executionNotice(event.public_notice)), { code: event.public_notice?.code }));
         } else if (event.type === "cancelled") {
           closeRunStream(runId);
           streaming.message.remove();
@@ -1873,10 +1873,11 @@ async function runChat(event: SubmitEvent): Promise<void> {
     await refreshSessions();
   } catch (error) {
     streaming.message.remove();
-    if (streaming.runId) renderRunStatus(streaming.runId, "failed", error instanceof Error ? error.message : String(error));
-    else renderChatMessage("system", error instanceof Error ? error.message : String(error));
+    const message = executionNotice(error);
+    if (streaming.runId) renderRunStatus(streaming.runId, "failed", message);
+    else renderChatMessage("system", message);
     setChatPetLifecycle("failed");
-    throw error;
+    throw new Error(message);
   } finally {
     state.running = state.eventSources.size > 0;
     updateSendButton();
@@ -1967,7 +1968,7 @@ function statusLabel(status: string | null): string {
     running: "正在运行",
     waiting_authorization: "等待授权",
     succeeded: "已完成",
-    failed: "失败",
+    failed: "能力受限",
     cancelled: "已停止",
     recoverable: "可恢复",
   } as Record<string, string>)[status || ""] || "暂无消息";
@@ -2311,7 +2312,7 @@ function renderPersistedTurns(turns: PersistedTurn[], projectionOnly = false): v
     state.history.push({ role: "user", content: historyText(turn.prompt, attachments) });
     if (turn.run_status === "failed") {
       renderSavedOutputs(turn.response?.artifacts || []);
-      renderRunStatus(turn.run_id, "failed", `本次运行失败：${turn.run_error || "运行记录和已产生的事件已经保留。"}`);
+      renderRunStatus(turn.run_id, "failed", executionNotice(turn.response?.public_notice));
     } else if (turn.answer || (turn.run_status === "succeeded" && turn.response)) {
       renderChatMessage(
         "assistant",
@@ -2341,7 +2342,7 @@ function renderPersistedTurns(turns: PersistedTurn[], projectionOnly = false): v
         .catch((error) => {
           if (!streaming.message.isConnected) return;
           streaming.message.remove();
-          renderRunStatus(turn.run_id, "failed", error instanceof Error ? error.message : String(error));
+          renderRunStatus(turn.run_id, "failed", executionNotice(error));
           setChatPetLifecycle("failed");
         })
         .finally(() => {
@@ -2357,7 +2358,7 @@ function renderPersistedTurns(turns: PersistedTurn[], projectionOnly = false): v
     } else if (turn.run_status === "failed") {
       renderRunStatus(
         turn.run_id, "failed",
-        `本次运行失败：${turn.run_error || "运行记录和已产生的事件已经保留。"}`,
+        executionNotice(turn.response?.public_notice),
       );
     } else if (turn.run_status === "cancelled") {
       renderRunStatus(turn.run_id, "cancelled", "本次运行已停止。");

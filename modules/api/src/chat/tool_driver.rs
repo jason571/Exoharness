@@ -78,6 +78,7 @@ pub(super) async fn invoke(
     if let Some(diagnostics) = diagnostics {
         let result = json!({"isError":true,"_host_input_rejection":1,"code_executed":false,
             "diagnostics":diagnostics,
+            "execution_guidance":if native_workspace {driver.catalog.as_ref().map(|catalog|catalog.execution_guidance())} else {None},
             "correction":"Correct only the invalid input using this tool's live Schema. Preserve exact authored data and successful results. Do not delete authored data merely to pass validation. If inline data and an existing resource select incompatible modes, use an authorized staging/edit tool before execution. Remaining calls in this proposed batch have not been submitted; do not repeat completed calls."});
         event(driver,json!({"type":"input_rejected","tool_call_id":id,"tool":call.name,
             "capability":binding.capability,"revision":binding.revision,"arguments":call.arguments,"result":result})).await?;
@@ -170,6 +171,7 @@ pub(super) async fn invoke(
     };
     // The dispatch borrow must end before putting its mutable catalog back.
     driver.catalog = Some(catalog);
+    let authorization_denied = matches!(&outcome, Err(exoharness_tools::ToolError::Authorization));
     let (state, receipt_state, mut value, executed, artifacts) = match outcome {
         Ok(result) if !result.failed => (
             InvocationState::Succeeded,
@@ -190,7 +192,7 @@ pub(super) async fn invoke(
             ReceiptState::RejectedBeforeExecution,
             json!({"isError":true,"_host_service_unavailable":1,"code_executed":false,
                 "message":message,"capability":binding.capability,
-                "recovery":"The MCP service could not be initialized or discovered. No business tool was submitted. A bounded retry is safe for this rejected call; if it remains unavailable, discover another authorized capability or use an authorized workspace tool to create an appropriate alternative deliverable. Preserve successful receipts and exact authored inputs. Never repeat completed or unknown calls, bypass permissions, change server configuration, or claim an artifact exists without a receipt. Remaining batch calls have not been submitted. If discovery confirms no suitable fallback, directly tell the user that no available Skill or capability can complete this task, naming the requested task type, in the user's language, and tell them to contact their administrator to enable a suitable Skill or capability. Distinguish an existing service connection outage from a capability that is not granted or installed. Do not refer them to traces or internal rejection messages. Preserve and describe any completed results."}),
+                "recovery":"The MCP service could not be initialized or discovered. No business tool was submitted. Analyze this connection outage before choosing another action. Do not repeat the same unavailable tool with unchanged conditions or vary business arguments to probe the outage. Discover another authorized capability or use an authorized workspace tool only when it can produce the requested deliverable. Preserve successful receipts and exact authored inputs. Never repeat completed or unknown calls, bypass permissions, change server configuration, or claim an artifact exists without a receipt. Remaining batch calls have not been submitted. If discovery confirms no suitable fallback, directly tell the user that no available Skill or capability can complete this task, naming the requested task type, in the user's language, and tell them to contact their administrator to enable a suitable Skill or capability. Distinguish an existing service connection outage from a capability that is not granted or installed. Do not refer them to traces or internal rejection messages. Preserve and describe any completed results."}),
             false,
             vec![],
         ),
@@ -231,6 +233,13 @@ pub(super) async fn invoke(
         .as_object_mut()
         .ok_or(StopReason::InvalidProposal)?
         .remove("_host_sandbox_failure");
+    value
+        .as_object_mut()
+        .unwrap()
+        .remove("_host_authorization_denied");
+    if authorization_denied {
+        value["_host_authorization_denied"] = json!(1);
+    }
     if native_workspace
         && call.name == "sandbox_run"
         && receipt_state == ReceiptState::FailedAfterExecution
@@ -243,7 +252,7 @@ pub(super) async fn invoke(
     {
         value["_host_sandbox_failure"] = json!(1);
         value["recovery"] = json!(
-            "The OCI process failed and cleanup is confirmed. Inspect its stderr and saved workspace revision, correct the failed code or missing input, and continue only the unfinished step. Never repeat successful generation or completed code, enable sandbox networking, execute on the host, install packages, or replay unknown calls. The sandbox has no network: import an owned artifact with workspace_import and read the returned relative file path instead of fetching a URL. If a generated file is only a remote MCP link, retrieve the existing completed job through its authorized MCP to obtain a persisted artifact; do not regenerate it. Remaining batch calls have not run. Publish the completed final files after correction; if recovery is unavailable, explain the actual limitation and preserve the completed results in the user's language."
+            "The OCI process failed and cleanup is confirmed. Inspect its stderr and saved workspace revision, correct the failed code or missing input, and continue only the unfinished step. A revision increment from a failed execution does not change the source: save corrected code or missing input with an authorized workspace edit before rerunning. Read focused source context before making a patch; never guess an old hunk. Never repeat successful generation or completed code, enable sandbox networking, execute on the host, install packages, or replay unknown calls. The sandbox has no network: import an owned artifact with workspace_import and read the returned relative file path instead of fetching a URL. If a generated file is only a remote MCP link, retrieve the existing completed job through its authorized MCP to obtain a persisted artifact; do not regenerate it. Remaining batch calls have not run. Publish the completed final files after correction; if recovery is unavailable, explain the actual limitation and preserve the completed results in the user's language."
         );
     }
     let (owner, session, run, resolve_id, result) = (
@@ -262,6 +271,12 @@ pub(super) async fn invoke(
         return Err(error);
     }
     event(driver,json!({"type":"tool_result","tool_call_id":id,"tool":call.name,"is_error":receipt_state!=ReceiptState::Completed})).await?;
+    if receipt_state != ReceiptState::Completed {
+        event(driver,json!({"type":"execution_exception","source":"tool","severity":"warning","tool_call_id":id,
+            "tool":call.name,"receipt_state":format!("{receipt_state:?}"),
+            "recoverable":value["_host_input_rejection"]==1 || value["_host_service_unavailable"]==1 || value["_host_sandbox_failure"]==1,
+            "diagnostic_reference":"original invocation receipt"})).await?;
+    }
     driver.tool_calls.push(call.name.clone());
     super::artifact_collection::append(&mut driver.artifacts, artifacts);
     if receipt_state != ReceiptState::Completed

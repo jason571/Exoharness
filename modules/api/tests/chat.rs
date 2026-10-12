@@ -477,6 +477,19 @@ async fn provider_failure_stops_without_retry_and_unavailable_inputs_do_not_crea
     .await
     .1;
     assert_eq!(history["turns"].as_array().unwrap().len(), 1);
+    assert_eq!(
+        history["turns"][0]["response"]["public_notice"]["code"],
+        "service_unavailable"
+    );
+    assert!(history["turns"][0]["response"].get("model_error").is_none());
+    assert!(!history.to_string().contains("模型服务拒绝请求"));
+    let store = f.store.clone();
+    let (sid, rid) = (session.clone(), run.clone());
+    let trace =
+        tokio::task::spawn_blocking(move || store.events("user", &sid, &rid, 0, 256).unwrap())
+            .await
+            .unwrap();
+    assert!(trace.iter().any(|e|matches!(&e.event,exoharness_storage_postgres::ExecutionEvent::Chat{payload} if payload["type"]=="execution_exception" && payload["model_error"]["http_status"]==429 && payload["severity"]=="error")));
     f.models.set_model_enabled("llm", false, None).unwrap();
     assert_eq!(
         request(

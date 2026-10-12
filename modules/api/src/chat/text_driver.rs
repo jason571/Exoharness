@@ -177,6 +177,14 @@ impl Driver for TextDriver {
     async fn invoke(&mut self, key: &str, call: &ToolCall) -> Result<Receipt, StopReason> {
         super::tool_driver::invoke(self, key, call).await
     }
+    async fn record_notice(&mut self, notice: Value) -> Result<(), StopReason> {
+        let (owner, session, run) = (self.owner.clone(), self.session.clone(), self.run.clone());
+        storage(self.state.store.clone(), move |s| {
+            s.chat_event(&owner, &session, &run, notice)
+        })
+        .await
+        .map_err(|_| StopReason::PersistenceFailed)
+    }
     async fn save(&mut self, state: &EngineState) -> Result<(), StopReason> {
         let mut metadata =
             serde_json::to_value(state).map_err(|_| StopReason::PersistenceFailed)?;

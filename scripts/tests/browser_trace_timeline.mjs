@@ -402,6 +402,9 @@ try {
   assert.equal(await evaluate("state.trace.run.id"),'run-1');
   assert.equal(await evaluate("timelineState.pageAfter"),0);
   assert.equal(await evaluate("document.querySelector('#trace-event-prev').hidden"),true);
+  await evaluate(`renderTimeline({...state.trace,run:{...state.trace.run,id:'exception-fixture',last_sequence:1},events:[{sequence:1,event_type:'execution_exception',created_at:Date.now(),payload:{severity:'warning',source:'tool',recoverable:true,receipt_state:'FailedAfterExecution',diagnostic_reference:'original invocation receipt'}}],invocations:[]})`);
+  assert(await evaluate("document.querySelector('[data-event-sequence=\"1\"]').classList.contains('trace-step-error')"),'recoverable exception is clearly highlighted in Trace');
+  assert(await evaluate("document.querySelector('[data-event-sequence=\"1\"]').textContent.includes('可纠正异常')"));
   assert.deepEqual(errors, []);
   console.log(`Trace stream aggregation, raw events, boundaries, refresh state, session grouping, totals, user isolation and mobile layout passed. Screenshots: ${output}`);
 } finally {

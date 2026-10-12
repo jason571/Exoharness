@@ -101,7 +101,7 @@ fn selected_skill_revision_is_included_once_and_unselected_skills_are_absent() {
 }
 
 #[test]
-fn only_durable_old_read_bodies_are_compacted_and_recent_data_stays_exact() {
+fn distinct_durable_read_pages_and_external_data_stay_exact() {
     let mut entries = vec![JournalEntry::User("Continue the original task".into())];
     entries.push(JournalEntry::ToolExchange {
         invocation_id: "write-1".into(),
@@ -138,8 +138,8 @@ fn only_durable_old_read_bodies_are_compacted_and_recent_data_stays_exact() {
     let original = entries.clone();
     let request = project_request("system", &entries, &BTreeSet::new(), vec![], 2048).unwrap();
     let serialized = serde_json::to_string(&request).unwrap();
-    for n in 0..3 {
-        assert!(!serialized.contains(&format!("exact-body-{n}")));
+    for n in 0..5 {
+        assert!(serialized.contains(&format!("exact-body-{n}")));
         assert!(serialized.contains(&format!("store://read-{n}")));
     }
     assert!(serialized.contains("exact-body-3"));

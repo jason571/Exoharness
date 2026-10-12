@@ -1,7 +1,18 @@
+// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
+// SPDX-License-Identifier: AGPL-3.0-only
+// Commercial licensing: contact flyangqn@gmail.com.
+
 "use strict";
 (() => {
   // src/i18n-catalog.ts
   var entries = `
+\u80FD\u529B\u53D7\u9650|Capability limited
+\u6B63\u5728\u5904\u7406\u4EFB\u52A1\uFF0C\u5DF2\u5B8C\u6210\u5185\u5BB9\u4F1A\u4FDD\u7559\u3002|Processing the task. Completed work is retained.
+\u76EE\u524D\u6CA1\u6709\u83B7\u5F97\u5B8C\u6210\u8FD9\u9879\u4EFB\u52A1\u6240\u9700\u7684\u6280\u80FD\u6743\u9650\uFF0C\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458\u5F00\u653E\u76F8\u5E94\u6280\u80FD\u3002\u5DF2\u5B8C\u6210\u5185\u5BB9\u5DF2\u4FDD\u7559\u3002|The required Skill permission is unavailable. Please ask your administrator to enable it. Completed work is retained.
+\u6240\u9700\u80FD\u529B\u6682\u65F6\u4E0D\u53EF\u7528\uFF0C\u6682\u65F6\u65E0\u6CD5\u5B8C\u6210\u8FD9\u9879\u4EFB\u52A1\u3002\u5DF2\u5B8C\u6210\u5185\u5BB9\u5DF2\u4FDD\u7559\u3002|The required capability is temporarily unavailable. Completed work is retained.
+\u5DF2\u6709\u4EFB\u52A1\u7684\u6700\u7EC8\u7ED3\u679C\u6682\u65F6\u65E0\u6CD5\u786E\u8BA4\u3002\u5DF2\u5B8C\u6210\u5185\u5BB9\u5DF2\u4FDD\u7559\uFF0C\u65E0\u9700\u91CD\u590D\u63D0\u4EA4\u3002|The existing task's final result is not yet confirmed. Completed work is retained; no resubmission is needed.
+\u5F53\u524D\u80FD\u529B\u6682\u65F6\u65E0\u6CD5\u5904\u7406\u5B8C\u6574\u4EFB\u52A1\uFF0C\u8BF7\u7F29\u5C0F\u672A\u5B8C\u6210\u90E8\u5206\u7684\u8303\u56F4\u3002\u5DF2\u5B8C\u6210\u5185\u5BB9\u5DF2\u4FDD\u7559\u3002|The current capability cannot handle the full task. Please reduce the remaining scope. Completed work is retained.
+\u76EE\u524D\u53EF\u7528\u7684\u80FD\u529B\u6682\u65F6\u65E0\u6CD5\u5B8C\u6210\u8FD9\u9879\u4EFB\u52A1\uFF0C\u5DF2\u5B8C\u6210\u5185\u5BB9\u5DF2\u4FDD\u7559\u3002\u53EF\u8054\u7CFB\u7BA1\u7406\u5458\u68C0\u67E5\u6240\u9700\u6280\u80FD\u4E0E\u6743\u9650\u3002|The available capabilities cannot currently complete this task. Completed work is retained. Your administrator can check the required Skills and permissions.
 \u8FD0\u884C\u603B\u89C8|Overview
 \u6307\u5B9A\u670D\u52A1|Selected services
 \uFF1A\u8FDE\u63A5 HTTP MCP|: Connect HTTP MCP

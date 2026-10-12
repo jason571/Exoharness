@@ -31,7 +31,7 @@ use std::{
     collections::VecDeque,
     sync::{
         Arc, Mutex,
-        atomic::{AtomicU64, Ordering},
+        atomic::{AtomicBool, AtomicU64, Ordering},
     },
     time::Duration,
 };
@@ -45,6 +45,8 @@ mod chat_attachments;
 mod coding;
 #[path = "unit/durable_workflow.rs"]
 mod durable_workflow;
+#[path = "unit/external_service_faults.rs"]
+mod external_service_faults;
 #[path = "unit/input_correction.rs"]
 mod input_correction;
 #[path = "unit/mcp_admission.rs"]
@@ -57,6 +59,8 @@ mod mcp_delivery;
 mod model_tools;
 #[path = "unit/publication_recovery.rs"]
 mod publication_recovery;
+#[path = "unit/read_loop.rs"]
+mod read_loop;
 #[path = "unit/run_admission.rs"]
 mod run_admission;
 #[path = "unit/sandbox_failure_recovery.rs"]
@@ -74,10 +78,14 @@ mod tool_workspace;
 struct Upstream {
     replies: Arc<Mutex<VecDeque<Value>>>,
     requests: Arc<Mutex<Vec<Value>>>,
+    paused: Arc<AtomicBool>,
 }
 async fn reply(State(state): State<Upstream>, body: Bytes) -> axum::Json<Value> {
     let request: Value = serde_json::from_slice(&body).unwrap();
     state.requests.lock().unwrap().push(request.clone());
+    while state.paused.load(Ordering::SeqCst) {
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
     let response = state
         .replies
         .lock()
@@ -101,7 +109,7 @@ async fn reply(State(state): State<Upstream>, body: Bytes) -> axum::Json<Value> 
         let revision = result["revision"].as_u64().unwrap();
         if let Some(mut args) = response.get("fixture_project_arguments").cloned() {
             args["workspace_id"] = json!(id);
-            if action != "coding_search" {
+            if !matches!(action, "coding_search" | "workspace_read") {
                 args["expected_revision"] = json!(revision);
             }
             return axum::Json(tool(action, args));
@@ -171,6 +179,7 @@ async fn fixture(replies: Vec<Value>, grant: bool) -> Fixture {
     let upstream = Upstream {
         replies: Arc::new(Mutex::new(replies.into())),
         requests: Arc::new(Mutex::new(vec![])),
+        paused: Arc::new(AtomicBool::new(false)),
     };
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let url = format!("http://{}", listener.local_addr().unwrap());
@@ -218,7 +227,7 @@ async fn fixture(replies: Vec<Value>, grant: bool) -> Fixture {
     let import_skills = skills.clone();
     let import_registry = registry.clone();
     tokio::task::spawn_blocking(move || {
-    let imported=import_skills.import(&RegistryAccess::Administrator,&serde_json::from_value(json!({"files":[{"path":"SKILL.md","content_base64":STANDARD.encode("---\nname: document-fixture\ndescription: Generate a Chinese document in the sandbox.\n---\nUse sandbox_run, then publish only the final output file.\n")}]})).unwrap(),"admin").unwrap();
+    let imported=import_skills.import(&RegistryAccess::Administrator,&serde_json::from_value(json!({"files":[{"path":"SKILL.md","content_base64":STANDARD.encode("---\nname: document-fixture\ndescription: Generate a Chinese document in the sandbox.\n---\nUse sandbox_run, then publish only the final output file.\n")},{"path":"scripts/create_document.cjs","content_base64":STANDARD.encode("const fs=require('node:fs');const {Document,Packer,Paragraph}=require('docx');const spec=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));Packer.toBuffer(new Document({sections:[{children:[new Paragraph(spec.title)]}]})).then(data=>fs.writeFileSync(process.argv[3],data));\n")}]})).unwrap(),"admin").unwrap();
     import_registry
         .0
         .set_capability_enabled(

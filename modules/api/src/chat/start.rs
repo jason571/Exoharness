@@ -89,50 +89,60 @@ pub(super) async fn turn(
     let models = state.models.clone();
     let assistants = state.assistants.clone();
     let requested = body.model;
-    let (model, revision, adapter, system, output_limit, profile_revision, profile) =
-        tokio::task::spawn_blocking(move || {
-            let catalog = models.refresh().map_err(|_| configuration())?;
-            assistants.refresh().map_err(|_| configuration())?;
-            let profile = assistants
-                .detail(&profile_id)
-                .filter(|p| p["enabled"] == true)
-                .ok_or(configuration())?;
-            let name = profile["default_llm"]
+    let (
+        model,
+        revision,
+        adapter,
+        system,
+        output_limit,
+        recovery_output_cap_available,
+        profile_revision,
+        profile,
+    ) = tokio::task::spawn_blocking(move || {
+        let catalog = models.refresh().map_err(|_| configuration())?;
+        assistants.refresh().map_err(|_| configuration())?;
+        let profile = assistants
+            .detail(&profile_id)
+            .filter(|p| p["enabled"] == true)
+            .ok_or(configuration())?;
+        let name = profile["default_llm"]
+            .as_str()
+            .map(str::to_owned)
+            .or(requested)
+            .or_else(|| catalog["default_models"]["llm"].as_str().map(str::to_owned))
+            .or_else(|| catalog["default_model"].as_str().map(str::to_owned))
+            .ok_or(configuration())?;
+        let binding = models.bind_enabled(&name).map_err(|_| configuration())?;
+        if binding
+            .model
+            .get("model_type")
+            .and_then(Value::as_str)
+            .unwrap_or("llm")
+            != "llm"
+        {
+            return Err(configuration());
+        }
+        // Assistant access.models selects callable model capabilities (e.g.
+        // speech synthesis), not the enabled conversational LLM binding.
+        let system = profile["system_prompt"].as_str().unwrap_or("").to_owned();
+        let limit = binding.model["max_tokens"].as_u64().unwrap_or(4096);
+        Ok((
+            name,
+            binding.revision,
+            binding.provider["api"]
                 .as_str()
-                .map(str::to_owned)
-                .or(requested)
-                .or_else(|| catalog["default_models"]["llm"].as_str().map(str::to_owned))
-                .or_else(|| catalog["default_model"].as_str().map(str::to_owned))
-                .ok_or(configuration())?;
-            let binding = models.bind_enabled(&name).map_err(|_| configuration())?;
-            if binding
-                .model
-                .get("model_type")
-                .and_then(Value::as_str)
-                .unwrap_or("llm")
-                != "llm"
-            {
-                return Err(configuration());
-            }
-            // Assistant access.models selects callable model capabilities (e.g.
-            // speech synthesis), not the enabled conversational LLM binding.
-            let system = profile["system_prompt"].as_str().unwrap_or("").to_owned();
-            let limit = binding.model["max_tokens"].as_u64().unwrap_or(4096);
-            Ok((
-                name,
-                binding.revision,
-                binding.provider["api"]
-                    .as_str()
-                    .unwrap_or("chat_completions")
-                    .to_owned(),
-                system,
-                limit,
-                profile["active_revision"].as_u64().unwrap_or(1),
-                profile.clone(),
-            ))
-        })
-        .await
-        .map_err(|_| configuration())??;
+                .unwrap_or("chat_completions")
+                .to_owned(),
+            system,
+            limit,
+            binding.provider["api"] != "openai_compatible"
+                || binding.provider["output_token_parameter"] != "omit",
+            profile["active_revision"].as_u64().unwrap_or(1),
+            profile.clone(),
+        ))
+    })
+    .await
+    .map_err(|_| configuration())??;
     let catalog = if let Some(tools) = &state.tools {
         let tools = tools.clone();
         let owner = principal.id.clone();
@@ -162,6 +172,13 @@ pub(super) async fn turn(
     let id = bytes.iter().map(|b| format!("{b:02x}")).collect::<String>();
     let run = format!("run-{id}");
     let turn = format!("turn-{id}");
+    let recovery_token_limit = std::env::var("EXOHARNESS_RECOVERY_TOKEN_LIMIT")
+        .map(|value| value.parse::<u64>())
+        .unwrap_or(Ok(196_608))
+        .map_err(|_| configuration())?;
+    if !(1024..=300_000).contains(&recovery_token_limit) {
+        return Err(configuration());
+    }
     let snapshot = ExecutionSnapshot {
         version: 1,
         assistant_id: history["agent_profile"]["id"].as_str().unwrap_or("").into(),
@@ -170,7 +187,7 @@ pub(super) async fn turn(
             config_id: model.clone(),
             revision,
             adapter,
-            settings: json!({"output_token_limit":output_limit,"execution_kind":if catalog.is_some(){"agent_chat"}else{"text_chat"}}),
+            settings: json!({"output_token_limit":output_limit,"max_recovery_tokens":recovery_token_limit,"recovery_output_cap_available":recovery_output_cap_available,"execution_kind":if catalog.is_some(){"agent_chat"}else{"text_chat"}}),
         },
         capabilities: catalog.as_ref().map_or_else(Vec::new, |c| c.snapshots()),
         max_consecutive_identical_calls: 3,
@@ -251,6 +268,8 @@ pub(super) async fn turn(
             run: run.clone(),
             model,
             revision,
+            recovery_token_limit,
+            recovery_output_cap_available,
             request,
             catalog,
         },

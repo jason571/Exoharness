@@ -4,6 +4,13 @@
 
 /** Interface copy only. User messages, documents and tool payloads are not translated. */
 const entries = `
+能力受限|Capability limited
+正在处理任务，已完成内容会保留。|Processing the task. Completed work is retained.
+目前没有获得完成这项任务所需的技能权限，请联系管理员开放相应技能。已完成内容已保留。|The required Skill permission is unavailable. Please ask your administrator to enable it. Completed work is retained.
+所需能力暂时不可用，暂时无法完成这项任务。已完成内容已保留。|The required capability is temporarily unavailable. Completed work is retained.
+已有任务的最终结果暂时无法确认。已完成内容已保留，无需重复提交。|The existing task's final result is not yet confirmed. Completed work is retained; no resubmission is needed.
+当前能力暂时无法处理完整任务，请缩小未完成部分的范围。已完成内容已保留。|The current capability cannot handle the full task. Please reduce the remaining scope. Completed work is retained.
+目前可用的能力暂时无法完成这项任务，已完成内容已保留。可联系管理员检查所需技能与权限。|The available capabilities cannot currently complete this task. Completed work is retained. Your administrator can check the required Skills and permissions.
 运行总览|Overview
 指定服务|Selected services
 ：连接 HTTP MCP|: Connect HTTP MCP

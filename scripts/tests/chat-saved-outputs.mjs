@@ -12,7 +12,7 @@ const profile={id:'fixture',revision:1,display_name:'测试助理',avatar_text:'
 const session={id:'fixture-session',title:'失败后保存的文件',pinned:false,created_at:Date.now(),updated_at:Date.now(),turn_count:1,latest_run_status:'failed',latest_run_id:'fixture-run',managed_coding:false,parent_id:null,project_name:null,agent_profile:profile};
 const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Zl1sAAAAASUVORK5CYII=','base64');
 const artifact=()=>({kind:'image',filename:'saved.png',content_type:'image/png',download_url:origin+'/fixture.png'});
-const turn=()=>({id:'fixture-turn',ordinal:1,prompt:'生成海报',attachments:[],answer:null,response:{artifacts:[artifact()]},run_id:'fixture-run',run_status:'failed',run_error:'后续步骤失败',created_at:Date.now(),updated_at:Date.now()});
+const turn=()=>({id:'fixture-turn',ordinal:1,prompt:'生成海报',attachments:[],answer:null,response:{artifacts:[artifact()]},run_id:'fixture-run',run_status:'failed',run_error:'Traceback: RuntimeError: private MCP 503',created_at:Date.now(),updated_at:Date.now()});
 const requests=[];
 const server=createServer(async(req,res)=>{
   try {
@@ -38,6 +38,7 @@ try {
   chrome=await browser();await chrome.send('Page.navigate',{url:origin+'/chat?session=fixture-session'});
   await until(()=>chrome.evaluate("document.querySelectorAll('.chat-saved-outputs').length===1"),'saved failed output');
   assert.equal(await chrome.evaluate("document.querySelector('.chat-saved-outputs').open"),false);
+  assert.ok(!await chrome.evaluate('/Traceback|RuntimeError|MCP 503|本次运行失败/.test(document.body.innerText)'));
   assert.ok(await chrome.evaluate("document.querySelector('.chat-saved-outputs summary').textContent.includes('非最终成品')"));
   assert.equal(await chrome.evaluate("document.querySelector('[data-run-id=fixture-run]').dataset.runStatus"),'failed');
   await chrome.evaluate("document.querySelector('.chat-saved-outputs summary').click()");

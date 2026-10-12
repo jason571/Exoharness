@@ -58,6 +58,10 @@ pub trait Driver: Send {
     /// is replayed locally; submitted/unknown outcomes must NEVER be resubmitted.
     /// Cancellation must propagate to the adapter, not merely drop its future.
     async fn invoke(&mut self, key: &str, call: &ToolCall) -> Result<Receipt, StopReason>;
+    /// Persist host diagnostics to the execution trace, without exposing them in chat.
+    async fn record_notice(&mut self, _notice: Value) -> Result<(), StopReason> {
+        Ok(())
+    }
     /// Commit cursor/counters and appended journal entries atomically using CAS.
     /// Full exchanges belong in the journal, not copied into checkpoint metadata.
     async fn save(&mut self, state: &EngineState) -> Result<(), StopReason>;
