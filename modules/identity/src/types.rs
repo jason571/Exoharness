@@ -183,6 +183,8 @@ impl Default for RegistrationEmailTemplate {
 
 #[derive(Debug, Error)]
 pub enum AuthError {
+    #[error("password reset link is invalid, expired or consumed")]
+    PasswordResetInvalid,
     #[error("{0}")]
     Validation(String),
     #[error("{0}")]

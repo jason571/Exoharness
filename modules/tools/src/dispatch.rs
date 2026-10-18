@@ -46,6 +46,20 @@ impl ToolRuntime {
                 let id = call.arguments["id"]
                     .as_str()
                     .ok_or(ToolError::Authorization)?;
+                if !catalog.records.get(id).is_some_and(|record| {
+                    matches!(
+                        &record.manifest.spec,
+                        exoharness_contracts::capability::CapabilitySpec::Skill(_)
+                    )
+                }) {
+                    // A read lookup cannot distinguish an invented, stale or
+                    // inaccessible ID outside the frozen authorized catalog.
+                    // Correct metadata selection without disclosing existence;
+                    // current() still enforces live grants and revisions below.
+                    return Err(ToolError::CorrectableInput(
+                        "read_skill.id must be an exact Skill ID from the authorized instructions catalog, not a service/tool ID. Use search_capabilities with kind=skill and no capability_id, then read a returned exact ID. Do not repeat this identity or infer task-wide missing permission. No package content was read or execution submitted.".into(),
+                    ));
+                }
                 let record = self.current(catalog, owner, id).await?;
                 let path = call.arguments["path"].as_str().unwrap_or("SKILL.md");
                 if catalog.read.contains(&(id.into(), path.into())) {
@@ -72,7 +86,30 @@ impl ToolRuntime {
                         ToolError::Input("此文件不是UTF-8说明文件；不返回编码数据".into())
                     })?;
                     catalog.read.insert((id.into(), path.into()));
-                    json!({"id":id,"revision":record.revision,"path":path,"content":text,"files":package.files.keys().collect::<Vec<_>>(),"execution_guidance":catalog.execution_guidance()})
+                    let context = if path == "SKILL.md" {
+                        crate::skill_context::compile(
+                            catalog,
+                            id,
+                            record.revision,
+                            text,
+                            &package.files,
+                        )
+                    } else {
+                        None
+                    };
+                    let mut value = json!({"id":id,"revision":record.revision,"path":path,"content":text,"files":package.files.keys().collect::<Vec<_>>(),"execution_guidance":catalog.execution_guidance()});
+                    if let Some(context) = context {
+                        if context["auto_activate_entry"] == true {
+                            // A verified immutable package can load uniquely
+                            // resolved authorized schemas, never grant or run tools.
+                            let names: Vec<String> =
+                                serde_json::from_value(context["entry_tools"].clone())
+                                    .map_err(|_| ToolError::Storage)?;
+                            catalog.active.extend(names);
+                        }
+                        value["_host_skill_context"] = context;
+                    }
+                    value
                 }
             }
             _ if binding.capability == SANDBOX_ID => {

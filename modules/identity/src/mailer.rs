@@ -11,6 +11,10 @@ use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport, Transport};
 use thiserror::Error;
 
+#[cfg(test)]
+#[path = "../tests/unit/mailer.rs"]
+mod tests;
+
 const SMTP_HOST_ENV: &str = "EXOHARNESS_SMTP_HOST";
 const SMTP_PORT_ENV: &str = "EXOHARNESS_SMTP_PORT";
 const SMTP_USERNAME_ENV: &str = "EXOHARNESS_SMTP_USERNAME";
@@ -47,6 +51,14 @@ pub trait RegistrationMailer: Send + Sync {
         code: &str,
         message: &RegistrationEmailMessage,
     ) -> Result<(), MailerError>;
+    fn send_password_reset(
+        &self,
+        _email: &str,
+        _link: &str,
+        _message: &RegistrationEmailMessage,
+    ) -> Result<(), MailerError> {
+        Err(MailerError::Message)
+    }
 }
 
 pub struct DisabledMailer;
@@ -180,6 +192,14 @@ impl RegistrationMailer for SmtpMailer {
             .send(&message)
             .map(|_| ())
             .map_err(|_| MailerError::Send)
+    }
+    fn send_password_reset(
+        &self,
+        email: &str,
+        _link: &str,
+        message: &RegistrationEmailMessage,
+    ) -> Result<(), MailerError> {
+        self.send_registration_code(email, "", message)
     }
 }
 

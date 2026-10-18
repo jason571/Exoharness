@@ -116,6 +116,16 @@ async fn project_failure_local_patch_check_and_static_preview_use_one_real_oci_w
     let csp = page.headers()["content-security-policy"].to_str().unwrap();
     assert!(csp.contains("sandbox allow-scripts"));
     assert!(!csp.contains("allow-same-origin"));
+    assert!(csp.contains("allow-popups allow-popups-to-escape-sandbox"));
+    assert!(!csp.contains("allow-forms"));
+    assert!(csp.contains("form-action 'none'"));
+    if let Ok(prefix) = std::env::var("EXOHARNESS_PREVIEW_CSP_FIXTURE") {
+        std::fs::write(
+            format!("{prefix}-project.json"),
+            json!({"csp":csp}).to_string(),
+        )
+        .unwrap();
+    }
     let resource = preview.join("assets/app.js").unwrap();
     let script = router
         .oneshot(

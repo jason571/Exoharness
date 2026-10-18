@@ -13,6 +13,7 @@ pub struct WorkflowView {
     pub tools: Vec<String>,
     provider_tools: BTreeSet<String>,
     consumed_invocations: BTreeSet<String>,
+    retire_provider_history: bool,
 }
 
 /// A schema reload disables the compact view, not the underlying obligation.
@@ -145,6 +146,7 @@ fn view(entries: &[JournalEntry], reset_on_activation: bool) -> Option<WorkflowV
         tools: serde_json::from_value(host["tools"].clone()).ok()?,
         provider_tools,
         consumed_invocations,
+        retire_provider_history: host["directive"]["retire_provider_history"] != false,
     })
 }
 
@@ -174,7 +176,7 @@ pub(crate) fn compact(items: &mut Vec<ContextItem>, entries: &[JournalEntry]) {
                 }
                 // The required step still needs exact prerequisite receipts;
                 // complete means those inputs have been durably consumed.
-                !(view.provider_tools.contains(tool)
+                !((view.retire_provider_history && view.provider_tools.contains(tool))
                     || (!view.required && view.consumed_invocations.contains(invocation_id)))
             }
             ContextItem::Checkpoint {
@@ -195,7 +197,9 @@ pub(crate) fn compact(items: &mut Vec<ContextItem>, entries: &[JournalEntry]) {
                     } if id == invocation_id => Some(tool),
                     _ => None,
                 });
-                !tool.is_some_and(|tool| view.provider_tools.contains(tool))
+                !tool.is_some_and(|tool| {
+                    view.retire_provider_history && view.provider_tools.contains(tool)
+                })
             }
             ContextItem::Skill { .. } => view.required,
             _ => true,

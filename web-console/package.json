@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "npm run typecheck && npm run build:models && npm run build:agents && npm run build:knowledge && npm run build:chat && npm run build:settings && npm run build:i18n",
+    "build": "npm run typecheck && npm run build:models && npm run build:agents && npm run build:knowledge && npm run build:chat && npm run build:settings && npm run build:i18n && npm run build:external",
+    "build:external": "esbuild src/external-applications.ts --bundle --format=iife --target=es2022 --outfile=../web/external-applications.js && esbuild src/external-conversations.ts --bundle --format=iife --target=es2022 --outfile=../web/external-conversations.js",
     "build:i18n": "esbuild src/i18n.ts --bundle --format=iife --target=es2022 --outfile=../web/i18n.js",
     "typecheck": "tsc --noEmit",
     "build:models": "esbuild src/models.ts --bundle --format=iife --target=es2022 --outfile=../web/models.js",

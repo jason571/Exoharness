@@ -15,3 +15,4 @@ postgres.workspace = true
 r2d2.workspace = true
 r2d2_postgres.workspace = true
 sha2.workspace = true
+getrandom.workspace = true

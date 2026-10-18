@@ -6,6 +6,7 @@
 mod accounts;
 mod capabilities;
 mod errors;
+mod password_reset;
 mod registration;
 mod security;
 pub(crate) mod sessions;
@@ -30,6 +31,7 @@ pub(crate) struct IdentityState {
     pub assistants: Arc<Assistants>,
     pub api: ApiState,
     pub registry: Option<Arc<exoharness_registry::Registry>>,
+    pub password_reset_base: Option<url::Url>,
 }
 
 pub fn identity_router(
@@ -47,12 +49,25 @@ pub fn identity_router_with_registry(
     assistants: Arc<Assistants>,
     registry: Option<Arc<exoharness_registry::Registry>>,
 ) -> Router {
+    let public_url = format!("http://127.0.0.1:{}", api.port);
+    identity_router_with_public_url(api, store, mailer, assistants, registry, &public_url)
+}
+pub fn identity_router_with_public_url(
+    api: ApiState,
+    store: Arc<AuthStore>,
+    mailer: Arc<dyn RegistrationMailer>,
+    assistants: Arc<Assistants>,
+    registry: Option<Arc<exoharness_registry::Registry>>,
+    public_url: &str,
+) -> Router {
+    let external_management = crate::external_management_router(api.clone(), assistants.clone());
     let state = IdentityState {
         store,
         mailer,
         assistants,
         api: api.clone(),
         registry,
+        password_reset_base: password_reset::public_base(public_url),
     };
     let protected = match api.surface {
         Surface::Management => Router::new()
@@ -83,6 +98,15 @@ pub fn identity_router_with_registry(
         Router::new()
             .route("/v1/auth/registration-code", post(registration::code))
             .route("/v1/auth/register", post(registration::register))
+            .route("/v1/auth/password-reset", post(password_reset::request))
+            .route(
+                "/v1/auth/password-reset/validate",
+                post(password_reset::validate),
+            )
+            .route(
+                "/v1/auth/password-reset/complete",
+                post(password_reset::complete),
+            )
     } else {
         Router::new()
     };
@@ -90,6 +114,7 @@ pub fn identity_router_with_registry(
         .merge(public)
         .layer(DefaultBodyLimit::max(32 * 1024))
         .with_state(state)
+        .merge(external_management)
 }
 
 /// Bounded hashing and database workers; never block an async request worker.

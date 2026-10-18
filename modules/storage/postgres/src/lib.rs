@@ -6,14 +6,21 @@
 //! dedicated blocking worker, never directly inside an async HTTP/model loop.
 mod artifacts;
 mod chat;
+mod task_context;
 mod codec;
 mod model_observation;
 pub use artifacts::StoredArtifact;
 mod control;
 mod conversations;
+mod external_sessions;
+pub use external_sessions::ExternalSessionRequest;
+mod external_conversations;
+pub use external_conversations::ExternalConversationQuery;
 mod invocations;
 mod mcp_admission;
 pub use mcp_admission::InvocationAdmission;
+mod mcp_reconciliation;
+pub use mcp_reconciliation::PendingMcpTask;
 mod journal;
 mod knowledge;
 mod overview;
@@ -134,6 +141,10 @@ impl PostgresStore {
         tx.batch_execute(include_str!("../migrations/0003_document_import.sql"))?;
         tx.batch_execute(include_str!("../migrations/0004_conversation_titles.sql"))?;
         tx.batch_execute(include_str!("../migrations/0005_scheduler.sql"))?;
+        tx.batch_execute(include_str!("../migrations/0006_external_sessions.sql"))?;
+        tx.batch_execute(include_str!(
+            "../migrations/0007_external_session_devices.sql"
+        ))?;
         tx.commit()?;
         Ok(())
     }

@@ -53,7 +53,7 @@ pub(super) async fn get(
         })
     };
     let csp = format!(
-        "sandbox allow-scripts; default-src 'none'; script-src 'unsafe-inline' {base}; style-src 'unsafe-inline' {base}; img-src data: blob: {base}; font-src data: {base}; media-src data: blob: {base}; connect-src {base}; object-src 'none'; base-uri 'none'; form-action 'none'; worker-src 'none'"
+        "sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox; default-src 'none'; script-src 'unsafe-inline' {base}; style-src 'unsafe-inline' {base}; img-src data: blob: {base}; font-src data: {base}; media-src data: blob: {base}; connect-src {base}; object-src 'none'; base-uri 'none'; form-action 'none'; worker-src 'none'"
     );
     Response::builder()
         .status(StatusCode::OK)

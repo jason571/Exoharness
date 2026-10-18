@@ -1,7 +1,3 @@
-// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
-// SPDX-License-Identifier: AGPL-3.0-only
-// Commercial licensing: contact flyangqn@gmail.com.
-
 "use strict";
 (() => {
   var __create = Object.create;
@@ -3185,6 +3181,57 @@
     };
     const normalized = code === "capability_not_authorized" ? "capability_permission_required" : code;
     return (Object.hasOwn(messages, normalized) ? messages[normalized] : messages.capability_limited)[language.startsWith("en") ? 1 : 0];
+  }
+
+  // src/progress-message.ts
+  function progressMessage(value) {
+    if (typeof value !== "string") return "\u6B63\u5728\u5904\u7406...";
+    const message = value.trim();
+    if (!message || new TextEncoder().encode(message).length > 4096 || /[\u0000-\u001f\u007f-\u009f]/.test(message)) return "\u6B63\u5728\u5904\u7406...";
+    const lower = message.toLowerCase();
+    const privatePatterns = [
+      "traceback",
+      "exception",
+      "runtimeerror",
+      "stack trace",
+      "panic",
+      "failed",
+      "failure",
+      "error:",
+      " error",
+      "permission denied",
+      "unauthorized",
+      "forbidden",
+      "http status",
+      "mcp 503",
+      "authorization",
+      "bearer ",
+      "api_key",
+      "apikey",
+      "password",
+      "secret",
+      "access_token",
+      "token=",
+      "token:",
+      "signature=",
+      "http://",
+      "https://",
+      "file://",
+      "/home/",
+      "/mnt/",
+      "/tmp/",
+      "/usr/",
+      ":\\",
+      "\u5931\u8D25",
+      "\u5F02\u5E38",
+      "\u62A5\u9519",
+      "\u7ED3\u679C\u672A\u77E5",
+      "\u6743\u9650",
+      "\u62D2\u7EDD",
+      "\u6267\u884C\u5DF2\u505C\u6B62",
+      "\u67E5\u770B\u8FFD\u8E2A"
+    ];
+    return lower.startsWith("error") || lower.startsWith("{") || lower.startsWith("[{") || privatePatterns.some((pattern) => lower.includes(pattern)) ? "\u6B63\u5728\u5904\u7406..." : message;
   }
 
   // node_modules/marked/lib/marked.esm.js
@@ -11352,7 +11399,7 @@ Please report this to https://github.com/markedjs/marked.`, e) {
     streaming.progress.toolCallId = event.tool_call_id;
     streaming.progress.displayedPercentage = displayedPercentage;
     streaming.progress.total = total;
-    const rawMessage = "\u6B63\u5728\u5904\u7406\u4EFB\u52A1\uFF0C\u5DF2\u5B8C\u6210\u5185\u5BB9\u4F1A\u4FDD\u7559\u3002";
+    const rawMessage = progressMessage(event.message);
     const elapsedSeconds = progressElapsedSeconds(rawMessage);
     const completed = displayedPercentage !== null && displayedPercentage >= 100;
     streaming.content.classList.remove("hidden");
@@ -11996,6 +12043,10 @@ Please report this to https://github.com/markedjs/marked.`, e) {
             resolve(event.response);
           } else if (event.type === "error" || event.type === "failed") {
             closeRunStream(runId);
+            if (event.type === "failed" && event.response?.partial_result && event.response.answer) {
+              resolve(event.response);
+              return;
+            }
             if (event.type === "failed") renderSavedOutputs(event.artifacts || []);
             reject(Object.assign(new Error(executionNotice(event.public_notice)), { code: event.public_notice?.code }));
           } else if (event.type === "cancelled") {
@@ -12794,7 +12845,9 @@ ${attachment.text || ""}`;
       if (!turn.regenerated_from_run_id) renderChatMessage("user", turn.prompt, "", attachments);
       state.history.push({ role: "user", content: historyText(turn.prompt, attachments) });
       if (turn.run_status === "failed") {
-        renderSavedOutputs(turn.response?.artifacts || []);
+        if (turn.response?.partial_result && turn.answer) {
+          renderChatMessage("assistant", turn.answer, resultMeta(turn.response), [], turn.response.artifacts || []);
+        } else renderSavedOutputs(turn.response?.artifacts || []);
         renderRunStatus(turn.run_id, "failed", executionNotice(turn.response?.public_notice));
       } else if (turn.answer || turn.run_status === "succeeded" && turn.response) {
         renderChatMessage(

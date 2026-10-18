@@ -300,3 +300,58 @@ fn embedded_binary_resource_is_referenced_but_text_resource_is_kept_exact() {
         2_000_000
     );
 }
+
+#[test]
+fn duplicated_mcp_json_has_one_exact_typed_copy_without_changing_journal() {
+    let data = json!({"results":[{"url":"https://github.com/jason571/Exoharness","title":"ExoHarness","content":"summary","raw_content":"source\n".repeat(7000)}],"code":"fn main() { println!(\"ok\"); }","table":[[1,null,true],[2,"原文",false]],"job_id":"saved-job"});
+    let result = json!({"isError":false,"structuredContent":data,"content":[{"type":"text","text":data.to_string()},{"type":"text","text":"Distinct warning"},{"type":"resource_link","uri":"https://media.example/file"}]});
+    let entries = vec![JournalEntry::ToolExchange {
+        invocation_id: "search-1".into(),
+        tool: "any-mcp".into(),
+        arguments: json!({}),
+        result: result.clone(),
+    }];
+    let original = entries.clone();
+    let request = project_request("system", &entries, &BTreeSet::new(), vec![], 2048).unwrap();
+    let Message::ToolResult {
+        content, call_id, ..
+    } = &request.messages[2]
+    else {
+        panic!("paired tool result required")
+    };
+    let projected: serde_json::Value = serde_json::from_str(content).unwrap();
+    assert_eq!(call_id, "search-1");
+    assert_eq!(projected["structuredContent"], data);
+    assert_eq!(projected["content"].as_array().unwrap().len(), 2);
+    assert_eq!(projected["content"][0]["text"], "Distinct warning");
+    assert_eq!(entries, original);
+    assert!(
+        serde_json::to_vec(&projected).unwrap().len()
+            < serde_json::to_vec(&result).unwrap().len() * 6 / 10
+    );
+}
+
+#[test]
+fn different_or_annotated_mcp_text_and_unstructured_data_stay_exact() {
+    for result in [
+        json!({"structuredContent":{"n":1},"content":[{"type":"text","text":"{\"n\":2}"}]}),
+        json!({"structuredContent":{"n":1},"content":[{"type":"text","text":"{\"n\":1}","annotations":{"audience":["user"]}}]}),
+        json!({"structuredContent":null,"content":[{"type":"text","text":"null"}]}),
+        json!({"content":[{"type":"text","text":"fn main() {}\n| header |\n| value |"}]}),
+    ] {
+        let entries = vec![JournalEntry::ToolExchange {
+            invocation_id: "exact".into(),
+            tool: "any-mcp".into(),
+            arguments: json!({}),
+            result: result.clone(),
+        }];
+        let request = project_request("system", &entries, &BTreeSet::new(), vec![], 2048).unwrap();
+        let Message::ToolResult { content, .. } = &request.messages[2] else {
+            panic!("result")
+        };
+        assert_eq!(
+            serde_json::from_str::<serde_json::Value>(content).unwrap(),
+            result
+        );
+    }
+}

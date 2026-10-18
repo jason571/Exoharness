@@ -24,9 +24,25 @@ use tower::ServiceExt;
 pub const ADMIN: &str = "initial-admin-password";
 pub struct Mailer {
     pub delivered: Mutex<Vec<(String, String)>>,
+    pub reset_links: Mutex<Vec<(String, String)>>,
     pub fail: AtomicBool,
 }
 impl RegistrationMailer for Mailer {
+    fn send_password_reset(
+        &self,
+        email: &str,
+        link: &str,
+        _message: &RegistrationEmailMessage,
+    ) -> Result<(), MailerError> {
+        if self.fail.load(Ordering::Relaxed) {
+            return Err(MailerError::Send);
+        }
+        self.reset_links
+            .lock()
+            .unwrap()
+            .push((email.into(), link.into()));
+        Ok(())
+    }
     fn is_configured(&self) -> bool {
         true
     }
@@ -98,15 +114,19 @@ pub async fn fixture() -> Fixture {
     let json =
         json!([{"id":"admin","role":"admin","token":ADMIN,"kind":"local_password"}]).to_string();
     let configured_store = store.clone();
+    let external_key_directory = root.join("external-keys");
     let credentials = Arc::new(
         tokio::task::spawn_blocking(move || {
-            Credentials::with_identity(&json, configured_store, true).unwrap()
+            Credentials::with_identity(&json, configured_store, true)
+                .unwrap()
+                .with_external_key_directory(external_key_directory)
         })
         .await
         .unwrap(),
     );
     let mailer = Arc::new(Mailer {
         delivered: Mutex::new(Vec::new()),
+        reset_links: Mutex::new(Vec::new()),
         fail: AtomicBool::new(false),
     });
     let (_, stop) = watch::channel(false);

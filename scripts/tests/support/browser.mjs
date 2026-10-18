@@ -17,7 +17,7 @@ export async function browser() {
     socket?.close();chrome.kill('SIGTERM');
     await new Promise(resolve=>{if(chrome.exitCode!==null)return resolve();chrome.once('exit',resolve);setTimeout(resolve,3000).unref();});
     if(chrome.exitCode===null) {chrome.kill('SIGKILL');await new Promise(resolve=>chrome.once('exit',resolve));}
-    await rm(profile,{recursive:true,force:true});
+    await rm(profile,{recursive:true,force:true,maxRetries:5,retryDelay:100});
   }
   try {
     let port;

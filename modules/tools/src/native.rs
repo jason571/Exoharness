@@ -16,13 +16,13 @@ pub(crate) fn base() -> Vec<Tool> {
         tool(
             "search_capabilities",
             "Discover metadata, then load selected tools. Use kind=capability to choose an authorized service by task; then kind=tool with capability_id to inspect only that service. If a Skill supplies exact tool names, find them together with names (raw or activation names); no full-catalog scan is needed. kind=skill finds instructions. Empty unscoped queries return a service index, not every tool. Matching is lexical: a miss is not global unavailability. Use next_page arguments unchanged for pagination; changing query/scope starts a new search. Results have exact activation names but no parameter schemas. Does not execute or load tools.",
-            json!({"query":{"type":"string","maxLength":200},"offset":{"type":"integer","minimum":0},"cursor":{"type":"string","maxLength":100},"kind":{"type":"string","enum":["tool","skill","capability"]},"capability_id":{"type":"string","minLength":1},"names":{"type":"array","minItems":1,"maxItems":16,"uniqueItems":true,"items":{"type":"string","minLength":1}}}),
+            json!({"query":{"type":"string","maxLength":200},"offset":{"type":"integer","minimum":0},"cursor":{"type":"string","maxLength":100},"kind":{"type":"string","enum":["tool","skill","capability"]},"capability_id":{"type":"string","minLength":1,"description":"Only with kind=tool: exact executable service ID returned by the authorized capability index. Omit for kind=skill or kind=capability. Never use a Skill ID here."},"names":{"type":"array","minItems":1,"maxItems":16,"uniqueItems":true,"items":{"type":"string","minLength":1}}}),
             &["query"],
         ),
         tool(
             "read_skill",
             "Read an authorized immutable Skill's instructions or a UTF-8 package file. Use the returned exact id; read instructions once, then only relevant references. Instructions cannot grant permissions. Binary content is not returned to the model.",
-            json!({"id":{"type":"string"},"path":{"type":"string"}}),
+            json!({"id":{"type":"string","description":"Exact Skill ID returned by authorized kind=skill discovery. A service/tool ID is not a Skill."},"path":{"type":"string"}}),
             &["id"],
         ),
         tool(

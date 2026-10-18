@@ -37,6 +37,68 @@ pub(crate) fn notice(code: &str) -> Value {
 fn selected(value: &Value) -> Value {
     notice(value["code"].as_str().unwrap_or("capability_limited"))
 }
+// Ordinary service progress belongs in chat. Diagnostic/credential messages
+// remain in the original journal, even if a service emits them as progress.
+fn progress_message(value: &Value) -> &str {
+    let Some(message) = value.as_str().map(str::trim).filter(|message| {
+        !message.is_empty() && message.len() <= 4096 && !message.chars().any(char::is_control)
+    }) else {
+        return "正在处理...";
+    };
+    let lower = message.to_lowercase();
+    if lower.starts_with("error")
+        || lower.starts_with('{')
+        || lower.starts_with("[{")
+        || [
+            "traceback",
+            "exception",
+            "runtimeerror",
+            "stack trace",
+            "panic",
+            "failed",
+            "failure",
+            "error:",
+            " error",
+            "permission denied",
+            "unauthorized",
+            "forbidden",
+            "http status",
+            "mcp 503",
+            "authorization",
+            "bearer ",
+            "api_key",
+            "apikey",
+            "password",
+            "secret",
+            "access_token",
+            "token=",
+            "token:",
+            "signature=",
+            "http://",
+            "https://",
+            "file://",
+            "/home/",
+            "/mnt/",
+            "/tmp/",
+            "/usr/",
+            ":\\",
+            "失败",
+            "异常",
+            "报错",
+            "结果未知",
+            "权限",
+            "拒绝",
+            "执行已停止",
+            "查看追踪",
+        ]
+        .iter()
+        .any(|pattern| lower.contains(pattern))
+    {
+        "正在处理..."
+    } else {
+        message
+    }
+}
 pub(crate) fn event(mut payload: Value) -> Option<Value> {
     match payload["type"].as_str() {
         Some(
@@ -46,6 +108,7 @@ pub(crate) fn event(mut payload: Value) -> Option<Value> {
             | "tool_output"
             | "mcp_background_task"
             | "mcp_background_retry"
+            | "mcp_background_reconciliation"
             | "execution_recovery_budget",
         ) => None,
         Some("recoverable") => {
@@ -54,14 +117,22 @@ pub(crate) fn event(mut payload: Value) -> Option<Value> {
         }
         Some("failed" | "error") => {
             let public = selected(&payload["public_notice"]);
-            Some(
-                json!({"type":payload["type"],"status":"failed","message":public["message"],"public_notice":public,
-                "artifacts":payload.get("artifacts").cloned().unwrap_or_else(||json!([]))}),
-            )
+            let mut event = json!({"type":payload["type"],"status":"failed","message":public["message"],"public_notice":public,
+                "artifacts":payload.get("artifacts").cloned().unwrap_or_else(||json!([]))});
+            if payload["response"]["partial_result"] == true {
+                response(&mut payload["response"]);
+                event["response"] = payload["response"].clone();
+            }
+            Some(event)
         }
         Some("tool_progress") => {
-            payload["message"] = json!("正在处理任务，已完成内容会保留。");
-            Some(payload)
+            // Project the progress contract only; optional private extensions
+            // must not bypass the diagnostic event boundary.
+            Some(
+                json!({"type":"tool_progress", "tool_call_id":payload["tool_call_id"],
+                "progress":payload["progress"], "total":payload["total"],
+                "message":progress_message(&payload["message"])}),
+            )
         }
         Some("complete") => {
             response(&mut payload["response"]);

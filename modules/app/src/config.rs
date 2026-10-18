@@ -9,6 +9,7 @@ pub struct Config {
     pub portal: SocketAddr,
     pub media: SocketAddr,
     pub media_public_base: String,
+    pub portal_public_base: String,
     pub credentials: PathBuf,
     pub namespace: String,
     pub capability_directory: PathBuf,
@@ -60,6 +61,8 @@ impl Config {
             management,
             portal,
             media,
+            portal_public_base: env::var("EXOHARNESS_PORTAL_PUBLIC_BASE_URL")
+                .unwrap_or_else(|_| format!("http://{portal}")),
             media_public_base: env::var("EXOHARNESS_MEDIA_PUBLIC_BASE_URL")
                 .unwrap_or_else(|_| format!("http://{media}")),
             credentials,

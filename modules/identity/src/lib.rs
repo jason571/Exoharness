@@ -4,9 +4,14 @@
 
 //! Persistent identity, account grants and verification; no API/Agent dependency.
 mod attempts;
+pub mod external;
 mod helpers;
 pub mod mailer;
+mod password_reset;
 mod policy;
+pub use password_reset::{
+    IssuedPasswordReset, PASSWORD_RESET_RESEND_SECONDS, PASSWORD_RESET_TTL_SECONDS,
+};
 mod registration;
 mod roles;
 mod schema;

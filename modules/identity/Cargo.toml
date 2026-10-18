@@ -15,4 +15,5 @@ sha2.workspace = true
 getrandom.workspace = true
 argon2 = "0.5"
 base64 = "0.22"
+url = "2"
 lettre = { version = "0.11", default-features = false, features = ["builder","smtp-transport","rustls-tls"] }

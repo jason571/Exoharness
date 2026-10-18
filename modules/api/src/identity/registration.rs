@@ -19,7 +19,7 @@ use serde_json::{Value, json};
 pub(crate) struct Email {
     email: String,
 }
-fn origin(state: &IdentityState, headers: &HeaderMap) -> Result<(), IdentityError> {
+pub(super) fn origin(state: &IdentityState, headers: &HeaderMap) -> Result<(), IdentityError> {
     if !auth::request_origin_valid(headers, state.api.port) {
         return Err(IdentityError::new(
             StatusCode::FORBIDDEN,
@@ -43,7 +43,7 @@ pub(crate) async fn code(
         ));
     }
     let mailer = state.mailer.clone();
-    work(state.store, move |store| {
+    let sent = work(state.store, move |store| {
         if let Some(code) = store.issue_registration_code(&input.email)? {
             let template = store.registration_email_template()?;
             let (subject, body) = template.render(&code.code);
@@ -59,15 +59,21 @@ pub(crate) async fn code(
                 return Err(exoharness_identity::AuthError::EmailDelivery);
             }
             store.activate_registration_code(&code.id)?;
+            return Ok(true);
         }
-        Ok(())
+        Ok(false)
     })
     .await?;
+    if !sent {
+        return Err(IdentityError::new(
+            StatusCode::CONFLICT,
+            "email_already_registered",
+            "该邮箱已注册，请直接登录",
+        ));
+    }
     Ok((
         StatusCode::ACCEPTED,
-        Json(
-            json!({"message":"若邮箱可以注册，验证码将发送到该邮箱","expires_in":600,"resend_after":60}),
-        ),
+        Json(json!({"message":"验证码已发送，请查收邮箱","expires_in":600,"resend_after":60})),
     ))
 }
 #[derive(Deserialize)]

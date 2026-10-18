@@ -26,9 +26,10 @@ pub(super) async fn start(
             return Err(());
         }
         let result = {
-            let (store, assistants, owner, session, run) = (
+            let (store, assistants, identity, owner, session, run) = (
                 state.store.clone(),
                 state.assistants.clone(),
+                state.identity.clone(),
                 owner.to_owned(),
                 session.to_owned(),
                 run.to_owned(),
@@ -36,6 +37,16 @@ pub(super) async fn start(
             tokio::task::spawn_blocking(move || {
             let current = store.run(&owner,&session,&run)?;
             if current.state != RunState::Queued { return Err(StoreError::Conflict); }
+            if let Some(external) = current.snapshot.model.settings.get("external_application") {
+                let grant_id = external["grant_id"].as_str().ok_or(StoreError::NotAuthorized)?;
+                let grant = identity.as_ref().ok_or(StoreError::NotAuthorized)?
+                    .external_grant(grant_id).map_err(|_| StoreError::NotAuthorized)?
+                    .ok_or(StoreError::NotAuthorized)?;
+                if grant.user_id != owner || external["client_id"] != grant.client_id
+                    || grant.assistant_id != current.snapshot.assistant_id {
+                    return Err(StoreError::NotAuthorized);
+                }
+            }
             assistants.refresh().map_err(|_| StoreError::NotAuthorized)?;
             if !assistants.detail(&current.snapshot.assistant_id).is_some_and(|profile|
                 profile["enabled"]==true && profile["active_revision"].as_u64()==Some(current.snapshot.assistant_revision)) {

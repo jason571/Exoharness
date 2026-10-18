@@ -136,7 +136,7 @@ async fn deliver(
             ),
         );
     if preview {
-        response=response.header("content-security-policy","sandbox allow-scripts; default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; media-src data: blob:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'")
+        response=response.header("content-security-policy","sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox; default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; media-src data: blob:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'")
             .header("permissions-policy","camera=(), microphone=(), geolocation=(), clipboard-read=(), clipboard-write=()");
     }
     if headers.get("if-none-match").and_then(|v| v.to_str().ok()) == Some(etag.as_str()) {

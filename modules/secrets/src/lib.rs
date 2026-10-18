@@ -3,7 +3,9 @@
 // Commercial licensing: contact flyangqn@gmail.com.
 
 //! Local secrets are private files, never serializable manifest values.
+mod cipher;
 mod filesystem;
+pub use cipher::SecretCipher;
 mod store;
 mod value;
 pub use store::SecretStore;

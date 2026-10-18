@@ -5,8 +5,8 @@ import { resolve } from 'node:path';
 import { browser, until } from './support/browser.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
-const pages = { '/overview': 'overview.html', '/services': 'index.html', '/imports': 'imports.html', '/models': 'models.html', '/agents': 'agents.html', '/knowledge': 'knowledge.html', '/trace': 'trace.html', '/audit': 'audit.html', '/users': 'users.html', '/security': 'security.html' };
-const assets = ['auth.js', 'i18n.js', 'styles.css', 'management.css', 'management-theme.js', 'management-theme.css'];
+const pages = { '/overview': 'overview.html', '/services': 'index.html', '/imports': 'imports.html', '/models': 'models.html', '/agents': 'agents.html', '/external-applications': 'external-applications.html', '/external-conversations': 'external-conversations.html', '/knowledge': 'knowledge.html', '/trace': 'trace.html', '/audit': 'audit.html', '/users': 'users.html', '/security': 'security.html' };
+const assets = ['auth.js', 'i18n.js', 'styles.css', 'management.css', 'management-theme.js', 'management-theme.css', 'external-applications.css'];
 let blockStorage = false;
 const server = createServer(async (req, res) => {
   try {

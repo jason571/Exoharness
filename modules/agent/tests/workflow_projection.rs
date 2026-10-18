@@ -29,6 +29,32 @@ fn request(entries: &[JournalEntry]) -> String {
     )
     .unwrap()
 }
+
+#[test]
+fn early_stage_keeps_provider_style_facts_until_their_overview_is_committed() {
+    let mut stage = checkpoint("p", "required", "provider");
+    if let JournalEntry::Checkpoint { summary, .. } = &mut stage {
+        summary["_host_workflow"]["directive"]["retire_provider_history"] = json!(false);
+    }
+    let entries = vec![
+        JournalEntry::User("create".into()),
+        exchange(
+            "evidence",
+            "prepare",
+            json!({}),
+            json!({"style":"EXACT STYLE EVIDENCE"}),
+        ),
+        exchange("p", "prepare", json!({}), json!({})),
+        stage,
+    ];
+    assert!(request(&entries).contains("EXACT STYLE EVIDENCE"));
+    let mut committed = entries.clone();
+    if let JournalEntry::Checkpoint { summary, .. } = committed.last_mut().unwrap() {
+        summary["_host_workflow"]["directive"]["retire_provider_history"] = json!(true);
+    }
+    assert!(!request(&committed).contains("EXACT STYLE EVIDENCE"));
+    assert!(request(&entries).contains("EXACT STYLE EVIDENCE"));
+}
 #[test]
 fn persisted_stage_omits_authored_source_but_keeps_exact_speech_and_atomic_pairs() {
     let entries = vec![

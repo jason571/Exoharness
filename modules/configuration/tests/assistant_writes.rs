@@ -158,3 +158,26 @@ fn omitted_access_never_implicitly_grants_mcp_and_updates_preserve_explicit_acce
         "mcp_server:global:_:test"
     );
 }
+
+#[test]
+fn external_assignment_projects_enabled_private_assistants_without_publishing_them() {
+    let root = Fixture::new();
+    let service = Assistants::initialize(&root.0).unwrap();
+    let mut private = input();
+    private["access"]["published"] = json!(false);
+    service.create("xiaoan", private, true, false).unwrap();
+    let identity = service.delegated_profile("xiaoan");
+    assert_eq!(identity["id"], "xiaoan");
+    assert_eq!(identity["display_name"], "助理");
+    assert!(identity.get("system_prompt").is_none());
+    assert!(identity.get("access").is_none());
+    assert!(service.public_profile("xiaoan").is_null());
+    assert!(service.assignment("xiaoan").is_err());
+    assert_eq!(
+        service.detail("xiaoan").unwrap()["access"]["published"],
+        false
+    );
+    service.set_enabled("xiaoan", false).unwrap();
+    assert!(service.delegated_profile("xiaoan").is_null());
+    assert!(service.delegated_profile("unknown").is_null());
+}

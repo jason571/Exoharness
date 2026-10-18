@@ -21,6 +21,112 @@ fn fixture() -> Catalog {
         model_choices: BTreeMap::new(),
     }
 }
+
+#[test]
+fn immutable_skill_stage_declarations_are_exact_and_fail_closed() {
+    let mut catalog = fixture();
+    let text = "# Skill\nAlways retain 用户要求.\n## Planning\nPlanning only.\n## Delivery\nRetain delivery.\n";
+    let spec = json!({"version":1,"entry_tools":["sandbox_run"],"stages":[{"tools":["sandbox_run"],"omit_sections":["## Planning"]}]});
+    let files = [(
+        "context-stages.json".to_string(),
+        serde_json::to_vec(&spec).unwrap(),
+    )]
+    .into();
+    let compiled = crate::skill_context::compile(&catalog, "skill", 1, text, &files).unwrap();
+    let range: &serde_json::Value = &compiled["stages"][0]["omit_ranges"][0];
+    assert_eq!(
+        &text[range[0].as_u64().unwrap() as usize..range[1].as_u64().unwrap() as usize],
+        "## Planning\nPlanning only.\n"
+    );
+    assert!(
+        catalog
+            .entry_schemas(&["sandbox_run".into()], &["sandbox_run".into()])
+            .is_none()
+    );
+    catalog.activate(&["sandbox_run".into()]).unwrap();
+    assert_eq!(
+        catalog
+            .entry_schemas(&["sandbox_run".into()], &["sandbox_run".into()])
+            .unwrap()
+            .len(),
+        4
+    );
+    for bad in [
+        spec.to_string().replace("Planning", "Absent"),
+        spec.to_string().replace("sandbox_run", "unauthorized"),
+        spec.to_string().replace("\"version\":1", "\"version\":2"),
+    ] {
+        let files = [("context-stages.json".to_string(), bad.into_bytes())].into();
+        assert!(crate::skill_context::compile(&catalog, "skill", 1, text, &files).is_none());
+    }
+    assert!(
+        crate::skill_context::compile(
+            &catalog,
+            "skill",
+            1,
+            &format!("{text}## Planning\nDuplicate"),
+            &files
+        )
+        .is_none()
+    );
+    let mut duplicate = catalog.bindings["sandbox_run"].clone();
+    duplicate.tool.name = "other".into();
+    catalog.bindings.insert("other".into(), duplicate);
+    assert!(crate::skill_context::compile(&catalog, "skill", 1, text, &files).is_none());
+}
+
+#[test]
+fn native_web_entry_compiles_only_when_all_four_interfaces_are_available() {
+    let mut catalog = fixture();
+    for tool in native::sandbox_tools() {
+        catalog.bindings.insert(
+            tool.name.clone(),
+            Binding {
+                capability: "tool:native:sandbox".into(),
+                revision: 1,
+                raw_name: tool.name.clone(),
+                tool,
+            },
+        );
+    }
+    let names = [
+        "workspace_create",
+        "workspace_edit",
+        "sandbox_run",
+        "workspace_publish",
+    ];
+    let declaration = json!({"version":1,"auto_activate_entry":true,"entry_tools":names,
+        "stages":[{"tools":names,"omit_sections":[]}]});
+    let files = [(
+        "context-stages.json".into(),
+        serde_json::to_vec(&declaration).unwrap(),
+    )]
+    .into();
+    let compiled = crate::skill_context::compile(
+        &catalog,
+        "web-skill",
+        1,
+        "# Website\nPreserve complete creative and delivery requirements.\n",
+        &files,
+    )
+    .unwrap();
+    assert_eq!(compiled["auto_activate_entry"], true);
+    assert_eq!(
+        compiled["entry_tools"],
+        json!([
+            "sandbox_run",
+            "workspace_create",
+            "workspace_edit",
+            "workspace_publish"
+        ])
+    );
+    assert_eq!(compiled["stages"][0]["omit_ranges"], json!([]));
+    assert!(catalog.active.is_empty());
+    catalog.bindings.remove("workspace_publish");
+    assert!(
+        crate::skill_context::compile(&catalog, "web-skill", 1, "# Website\n", &files).is_none()
+    );
+}
 #[test]
 fn skill_execution_guidance_translates_legacy_names_without_granting_tools() {
     let mut catalog = fixture();
@@ -67,6 +173,9 @@ fn durable_workflow_selects_only_authorized_unique_dependencies_without_executio
         "required_tool":"sandbox_run","checkpoint":{"id":"immutable"},
         "prerequisite_tools":[{"capability_id":"historical-absent-id","tool":"model.voice"}]});
     let names = catalog.resolve_workflow(&source, &directive).unwrap();
+    let mut invalid = directive.clone();
+    invalid["retire_provider_history"] = json!("false");
+    assert!(catalog.resolve_workflow(&source, &invalid).is_none());
     assert_eq!(names, vec!["sandbox_run", "voice"]);
     let schemas = catalog.workflow_schemas(&names).unwrap();
     assert_eq!(schemas.len(), crate::native::base().len() + 2);
@@ -396,6 +505,42 @@ fn many_tools() -> Catalog {
         });
     }
     catalog
+}
+
+#[test]
+fn invalid_discovery_scopes_allow_bounded_correction_without_permission_claims() {
+    let mut catalog = many_tools();
+    catalog.activate(&["create_plan".into()]).unwrap();
+    let before_active = catalog.active.clone();
+    let before_cursor = catalog.discovery_key.clone();
+    for arguments in [
+        json!({"kind":"capability","capability_id":"skill:global:_:web-site-builder","query":"web site builder landing page HTML"}),
+        json!({"kind":"skill","capability_id":"skill:global:_:web-site-builder","query":"web"}),
+        json!({"kind":"capability","capability_id":"mcp:workflow","query":""}),
+        json!({"kind":"tool","capability_id":"skill:global:_:web-site-builder","query":""}),
+        json!({"kind":"tool","capability_id":"mcp:forbidden","query":""}),
+        json!({"kind":"tool","capability_id":"invented-id","query":""}),
+    ] {
+        assert!(matches!(
+            catalog.discover(&arguments),
+            Err(crate::ToolError::CorrectableInput(_))
+        ));
+        assert_eq!(catalog.active, before_active);
+        assert_eq!(catalog.discovery_key, before_cursor);
+    }
+    let index = catalog
+        .discover(&json!({"kind":"capability","query":""}))
+        .unwrap();
+    assert_eq!(index["total"], 2);
+    let tools = catalog
+        .discover(&json!({"kind":"tool","capability_id":"mcp:workflow","query":""}))
+        .unwrap();
+    assert_eq!(tools["total"], 8);
+    assert!(!tools.to_string().contains("input_schema"));
+    assert_eq!(catalog.active, before_active);
+    // Reading metadata still cannot activate an inaccessible provider.
+    assert!(catalog.activate(&["mcp:forbidden".into()]).is_err());
+    assert_eq!(catalog.active, before_active);
 }
 
 #[test]

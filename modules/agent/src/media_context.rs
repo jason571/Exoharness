@@ -7,6 +7,21 @@ use serde_json::{Value, json};
 
 pub(super) fn project(value: &Value, invocation: &str) -> Value {
     let mut projected = value.clone();
+    // Some MCPs return the same JSON as structuredContent and as a text block.
+    // Keep the typed value once, without shortening code or losing fields.
+    if let Some(structured) = value.get("structuredContent").filter(|v| v.is_object())
+        && let Some(content) = projected.get_mut("content").and_then(Value::as_array_mut)
+    {
+        content.retain(|item| {
+            item["type"] != "text"
+                || item.as_object().is_none_or(|object| object.len() != 2)
+                || item.get("annotations").is_some()
+                || item.get("_meta").is_some()
+                || item.get("text").and_then(Value::as_str).is_none_or(|text| {
+                    serde_json::from_str::<Value>(text).map_or(true, |parsed| parsed != *structured)
+                })
+        });
+    }
     let Some(content) = projected.get_mut("content").and_then(Value::as_array_mut) else {
         return projected;
     };

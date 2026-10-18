@@ -14,6 +14,8 @@ mod read_loop;
 mod read_loop_recorded;
 #[path = "unit/recovery_budget.rs"]
 mod recovery_budget;
+#[path = "unit/failure_finalization.rs"]
+mod failure_finalization;
 use std::{
     collections::{BTreeSet, VecDeque},
     sync::{Arc, Mutex},
@@ -1000,4 +1002,70 @@ async fn sandbox_corrections_are_bounded_and_unknown_or_cancelled_work_never_rep
         assert_eq!(st.sandbox_corrections, 0);
         assert_eq!(d.requests.len(), 1);
     }
+}
+
+#[tokio::test]
+async fn large_search_results_reach_video_execution_instead_of_exhausting_context() {
+    let data = json!({"results":[{"url":"https://github.com/jason571/Exoharness","title":"ExoHarness","raw_content":"Rust harness source ".repeat(2400)}]});
+    let mut search = receipt("search", ReceiptState::Completed);
+    search.performed_execution = false;
+    search.result = json!({"isError":false,"structuredContent":data,"content":[{"type":"text","text":data.to_string()}]});
+    let mut call = proposal("search");
+    call.name = "search-source".into();
+    let mut video_call = proposal("video");
+    video_call.name = "generate-video".into();
+    video_call.arguments = json!({"duration_seconds":15});
+    let mut video = receipt("video", ReceiptState::Completed);
+    video.result = json!({"job_id":"fixture-video","status":"completed","url":"https://media.example/fixture.mp4"});
+    let mut driver = Fixture::new(
+        vec![
+            completion(vec![call]),
+            completion(vec![video_call]),
+            completion(vec![]),
+        ],
+        vec![search.clone(), video],
+    );
+    let mut limits = policy();
+    limits.max_context_bytes = 70_000;
+    assert!(serde_json::to_vec(&search.result).unwrap().len() > limits.max_context_bytes);
+    let mut schemas = tools();
+    schemas[0].name = "search-source".into();
+    let mut generate = schemas[0].clone();
+    generate.name = "generate-video".into();
+    schemas.push(generate);
+    let mut state = EngineState::new(
+        vec![JournalEntry::User(
+            "Create a 15-second ExoHarness video using https://github.com/jason571/Exoharness"
+                .into(),
+        )],
+        3,
+    )
+    .unwrap();
+    assert!(matches!(
+        run(
+            &mut driver,
+            &mut state,
+            &limits,
+            "system",
+            &BTreeSet::new(),
+            &schemas
+        )
+        .await,
+        RunOutcome::Finished(_)
+    ));
+    assert_eq!(
+        driver.calls.len(),
+        2,
+        "exactly one source lookup and one video submission"
+    );
+    assert_eq!(state.successful_executions, 1);
+    assert!(
+        driver
+            .requests
+            .iter()
+            .all(|request| serde_json::to_vec(request).unwrap().len() < limits.max_context_bytes)
+    );
+    assert!(
+        matches!(&state.entries[1],JournalEntry::ToolExchange{result,..} if result==&search.result)
+    );
 }

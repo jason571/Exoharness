@@ -27,7 +27,9 @@ pub struct StateData {
     pub background_read_only: bool,
     pub background_wrong_id: bool,
     pub background_cancel_pending: bool,
+    pub background_delayed_cancel: bool,
     pub extra_result: Option<Value>,
+    pub extra_results: Mutex<VecDeque<Value>>,
     pub requests: Mutex<Vec<Value>>,
     pub headers: Mutex<Vec<HeaderMap>>,
     pub repeated_cursor: bool,
@@ -146,6 +148,9 @@ async fn rpc(
             if state.large_call_bytes > 0 {
                 return Json(json!({"jsonrpc":"2.0","id":id,"result":{"content":[{"type":"text","text":"X".repeat(state.large_call_bytes)}]}})).into_response();
             }
+            if let Some(result) = state.extra_results.lock().unwrap().pop_front() {
+                return Json(json!({"jsonrpc":"2.0","id":id,"result":result})).into_response();
+            }
             if let Some(result) = &state.extra_result {
                 return Json(json!({"jsonrpc":"2.0","id":id,"result":result})).into_response();
             }
@@ -188,7 +193,9 @@ async fn rpc(
                     && (!state.background_never_complete
                         || state.release_background.load(Ordering::SeqCst))
                 {
-                    if state.background_failed {
+                    if state.background_delayed_cancel {
+                        "cancelled"
+                    } else if state.background_failed {
                         "failed"
                     } else {
                         "completed"

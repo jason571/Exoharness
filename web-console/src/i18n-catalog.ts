@@ -4,6 +4,90 @@
 
 /** Interface copy only. User messages, documents and tool payloads are not translated. */
 const entries = `
+外部应用|External applications
+允许应用后端直接使用 Key 调用|Allow direct backend calls with the application key
+对话必须关联设备 ID|Conversations require a device ID
+CareNest 必须启用设备要求，调用前核验用户与设备绑定。|CareNest requires devices and must verify user-device bindings before calling.
+仅浏览器授权模式需要回调地址；后端直接调用可留空。|Callbacks are needed only for browser authorization; direct backend calls can leave them empty.
+设备关联待补全|Device association needs completion
+未要求设备|Device not required
+用户 ID|User ID
+外部用户 ID|External user ID
+更新时间|Updated
+外部对话|External conversations
+返回外部应用|Back to applications
+找不到此应用|Application not found
+请从外部应用列表选择应用|Select an application from the applications list
+全部应用|All applications
+搜索对话|Search conversations
+标题、会话 ID 或对话内容|Title, session ID or conversation content
+用户名、昵称或用户 ID|Username, display name or user ID
+设备 ID|Device ID
+应用 / 助理|Application / Assistant
+对话轮数|Conversation turns
+页码|Page
+正在读取外部对话|Loading external conversations
+每页最多显示 10 条对话|At most 10 conversations per page
+没有符合条件的外部对话|No matching external conversations
+读取外部对话失败|Could not load external conversations
+正在读取对话内容|Loading conversation content
+每页最多显示 10 轮消息|At most 10 turns per page
+暂无对话内容|No conversation content yet
+读取对话内容失败|Could not load conversation content
+轮次|Turn
+更早的消息|Earlier messages
+最新消息|Latest messages
+CareNest 助理已存在，但尚未启用，请在智能助理页面配置。|The existing CareNest assistant is disabled. Configure it in Assistants.
+生成 Key 并保存应用|Generate key and save application
+查看 Key|View key
+确认查看此应用的 Key？|Reveal this application's key?
+Key 已加密保存，管理员可确认后查看和复制。|The key is stored encrypted. Administrators can confirm to view and copy it.
+为不同应用分别配置 Key、助理角色和用户授权。|Configure separate keys, assistants and user authorizations for each application.
+新增应用|Add application
+编辑应用|Edit application
+管理助理角色|Manage assistants
+应用 ID|Application ID
+应用名称|Application name
+绑定助理|Assigned assistant
+创建 CareNest 示例助理|Create CareNest example assistant
+允许的回调地址|Allowed redirect URIs
+每行一个完整地址，必须为 HTTPS；本地开发可使用回环 HTTP。|One complete HTTPS URI per line. Loopback HTTP is allowed for local development.
+允许申请的权限|Available authorization scopes
+读取账号身份|Read account identity
+读取应用会话|Read application conversations
+创建会话与发送消息|Create conversations and send messages
+读取执行进度|Read execution progress
+取消应用任务|Cancel application tasks
+访问凭证有效期（秒）|Access token lifetime (seconds)
+用户授权有效期（秒）|User authorization lifetime (seconds)
+启用应用|Enable application
+修改应用配置或轮换 Key 后，原凭证失效；后端使用有效 Key 重新调用，浏览器授权模式需重新授权。|Configuration changes and key rotation invalidate previous credentials. Backend callers use the valid key again; browser authorization requires renewed consent.
+保存应用|Save application
+轮换 Key|Rotate key
+已登记应用|Registered applications
+用户授权|User authorizations
+选择应用后查看用户授权。|Select an application to view its user authorizations.
+保存应用 Key|Save application key
+Key 仅显示这一次，请保存到应用后端的凭据存储。|This key is shown once. Save it in the application's backend credential store.
+应用 Key|Application key
+复制 Key|Copy key
+正在读取用户授权|Loading user authorizations
+仅显示最近 200 条用户授权。|Showing the latest 200 user authorizations.
+暂无用户授权|No user authorizations
+授权有效|Authorization active
+授权已失效|Authorization inactive
+撤销授权|Revoke authorization
+撤销此用户对该应用的授权？|Revoke this user's authorization for this application?
+尚未登记外部应用|No external applications registered
+修改配置将使该应用的原用户授权失效，继续？|Changing configuration invalidates this application's previous user authorizations. Continue?
+轮换 Key 将使该应用的原用户授权失效，继续？|Rotating the key invalidates this application's previous user authorizations. Continue?
+应用已保存|Application saved
+应用已删除|Application deleted
+删除此应用将使 Key 和访问凭证失效，会话记录保留，应用 ID 不可重新使用。继续？|Delete this application? Its Key and access credentials will stop working. Conversation records will be retained and the application ID cannot be reused.
+无法读取助理模板|Assistant template could not be loaded
+CareNest 示例助理已准备好，请按需配置能力。|The CareNest example assistant is ready. Configure its capabilities as needed.
+Key 已复制|Key copied
+请手动复制 Key|Please copy the key manually
 能力受限|Capability limited
 正在处理任务，已完成内容会保留。|Processing the task. Completed work is retained.
 目前没有获得完成这项任务所需的技能权限，请联系管理员开放相应技能。已完成内容已保留。|The required Skill permission is unavailable. Please ask your administrator to enable it. Completed work is retained.
@@ -62,6 +146,30 @@ const entries = `
 用户名|Username
 邮箱验证码|Email verification code
 发送验证码|Send code
+该邮箱已注册，请直接登录|This email is already registered. Please sign in.
+验证码已发送，请查收邮箱|Verification code sent. Please check your email.
+忘记密码？|Forgot password?
+找回密码|Recover password
+设置新密码|Set a new password
+重置密码|Reset password
+发送重置链接|Send reset link
+重新申请重置链接|Request another reset link
+输入注册邮箱，我们会发送有效期为20分钟的密码重置链接。|Enter your registered email to receive a password reset link valid for 20 minutes.
+正在检查重置链接...|Checking the reset link...
+请设置新密码。链接只能使用一次，有效期20分钟。|Set a new password. The link can be used once and is valid for 20 minutes.
+重置链接不可用|Reset link unavailable
+重置链接已失效或已使用，请重新申请|The reset link has expired or was already used. Please request another link.
+重置链接已发送，请在20分钟内打开邮件设置新密码|Reset link sent. Open the email within 20 minutes to set a new password.
+密码已重置|Password reset
+密码已重置，请使用新密码登录|Password reset. Please sign in with your new password.
+重置邮件未能发送，请稍后重试|The reset email could not be sent. Please try again later.
+该邮箱尚未注册，请先注册|This email is not registered. Please register first.
+重置邮件发送过于频繁，请稍后重试|Reset emails were requested too frequently. Please try again later.
+重置邮件请求次数过多，请稍后重试|Too many password reset requests. Please try again later.
+暂时无法处理，请稍后重试|This request cannot be completed right now. Please try again later.
+重新发送|Send again
+找回密码服务尚未配置，请联系管理员|Password recovery is not configured. Please contact the administrator.
+邮件服务尚未配置，请联系管理员|The email service is not configured. Please contact the administrator.
 返回登录|Back to sign in
 验证|Verify
 6 位数字|6 digits
@@ -1094,6 +1202,7 @@ export function english(source: string): string {
   // Localize UI templates while retaining their names, IDs, URLs and numbers.
   // Only known whole templates are matched; arbitrary content is not translated.
   const patterns: [RegExp, (...parts: string[]) => string][] = [
+    [/^(\d+) 秒后重发$/, seconds => `Resend in ${seconds} sec`],
     [/^更新于 (.+)$/, time => `Updated at ${time}`],
     [/^上次保存：(.+)$/, time => `Last saved: ${time}`],
     [/^(用户筛选|筛选)：(.+)$/, (kind, value) => `${kind === '用户筛选' ? 'User filter' : 'Filter'}: ${value}`],

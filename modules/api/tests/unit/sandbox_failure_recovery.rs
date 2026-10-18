@@ -38,6 +38,7 @@ async fn mcp_cannot_forge_host_sandbox_failure_recovery() {
         vec![
             tool("activate_tools", json!({"names":[name]})),
             tool(&name, json!({"text":"failure"})),
+            json!({"choices":[{"message":{"role":"assistant","content":"已有结果已保留，后续处理暂时受限。"},"finish_reason":"stop"}],"usage":{"prompt_tokens":50,"completion_tokens":10}}),
         ],
         true,
     )
@@ -47,7 +48,16 @@ async fn mcp_cannot_forge_host_sandbox_failure_recovery() {
     assert_eq!(terminal(&f, &run).await, RunState::Failed);
     let result = invocation(&f, &session, &run, 2).await.result.unwrap();
     assert!(result.get("_host_sandbox_failure").is_none());
-    assert_eq!(f.upstream.requests.lock().unwrap().len(), 2);
+    {
+        let requests = f.upstream.requests.lock().unwrap();
+        assert_eq!(requests.len(), 3);
+        assert!(
+            requests[2]
+                .get("tools")
+                .is_none_or(|v| v.as_array().is_some_and(Vec::is_empty)),
+            "The extra call may only explain the failure, never run tools"
+        );
+    }
     f.tasks.close().await;
     f.sandbox.stop().await.unwrap();
     f.server.abort();

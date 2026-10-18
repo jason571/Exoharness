@@ -4,6 +4,7 @@
 
 import DOMPurify from "dompurify";
 import { executionNotice } from "./execution-notice";
+import { progressMessage } from "./progress-message";
 import { marked } from "marked";
 import hljs from "highlight.js/lib/core";
 import bash from "highlight.js/lib/languages/bash";
@@ -59,6 +60,7 @@ interface HistoryMessage {
 }
 
 interface ChatResult {
+  partial_result?: boolean;
   answer: string;
   model: { name: string; provider: string; model_id: string; api: string };
   usage: { total_tokens?: number; cost?: { total?: number } };
@@ -104,7 +106,7 @@ type ChatStreamEvent =
   | { type: "turn_end" }
   | { type: "complete"; response: ChatResult }
   | { type: "error"; message: string; public_notice?: { code: string } }
-  | { type: "failed"; status: string; message: string; public_notice?: { code: string }; artifacts?: ChatArtifact[] }
+  | { type: "failed"; status: string; message: string; public_notice?: { code: string }; artifacts?: ChatArtifact[]; response?: ChatResult }
   | { type: "cancelled"; status: string; message: string }
   | { type: "recoverable"; status: string; message: string };
 
@@ -850,7 +852,7 @@ function renderToolProgress(streaming: StreamingMessage, event: Extract<ChatStre
   streaming.progress.toolCallId = event.tool_call_id;
   streaming.progress.displayedPercentage = displayedPercentage;
   streaming.progress.total = total;
-  const rawMessage = "正在处理任务，已完成内容会保留。";
+  const rawMessage = progressMessage(event.message);
   const elapsedSeconds = progressElapsedSeconds(rawMessage);
   const completed = displayedPercentage !== null && displayedPercentage >= 100;
   streaming.content.classList.remove("hidden");
@@ -1506,6 +1508,10 @@ function followRun(runId: string, streaming: StreamingMessage): Promise<ChatResu
           resolve(event.response);
         } else if (event.type === "error" || event.type === "failed") {
           closeRunStream(runId);
+          if (event.type === "failed" && event.response?.partial_result && event.response.answer) {
+            resolve(event.response);
+            return;
+          }
           if (event.type === "failed") renderSavedOutputs(event.artifacts || []);
           reject(Object.assign(new Error(executionNotice(event.public_notice)), { code: event.public_notice?.code }));
         } else if (event.type === "cancelled") {
@@ -2311,7 +2317,9 @@ function renderPersistedTurns(turns: PersistedTurn[], projectionOnly = false): v
     if (!turn.regenerated_from_run_id) renderChatMessage("user", turn.prompt, "", attachments);
     state.history.push({ role: "user", content: historyText(turn.prompt, attachments) });
     if (turn.run_status === "failed") {
-      renderSavedOutputs(turn.response?.artifacts || []);
+      if (turn.response?.partial_result && turn.answer) {
+        renderChatMessage("assistant",turn.answer,resultMeta(turn.response),[],turn.response.artifacts || []);
+      } else renderSavedOutputs(turn.response?.artifacts || []);
       renderRunStatus(turn.run_id, "failed", executionNotice(turn.response?.public_notice));
     } else if (turn.answer || (turn.run_status === "succeeded" && turn.response)) {
       renderChatMessage(

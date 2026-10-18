@@ -92,6 +92,14 @@ impl Driver for TextDriver {
             }
             return tools;
         }
+        if let Some((names, workflow)) = exoharness_agent::initial_skill_tools(entries)
+            && let Some(tools) = self
+                .catalog
+                .as_ref()
+                .and_then(|catalog| catalog.entry_schemas(&names, &workflow))
+        {
+            return tools;
+        }
         self.tools(fallback)
     }
     async fn model(&mut self, key: &str, request: ChatRequest) -> Result<Completion, StopReason> {

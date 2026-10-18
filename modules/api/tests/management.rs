@@ -17,6 +17,13 @@ use std::sync::{
 use tokio::sync::watch;
 use tower::ServiceExt;
 
+#[path = "support/identity.rs"]
+#[allow(dead_code)]
+mod identity_support;
+
+#[path = "unit/overview_users.rs"]
+mod overview_users;
+
 const ADMIN: &str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const USER: &str = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 async fn fixture() -> (Router, Router, PostgresStore) {

@@ -149,8 +149,19 @@ impl Catalog {
         }
         let query = arguments["query"].as_str().unwrap_or("");
         let scope = arguments["capability_id"].as_str();
+        let requested_kind = arguments["kind"].as_str();
+        if scope.is_some() && matches!(requested_kind, Some("skill" | "capability")) {
+            return Err(ToolError::CorrectableInput(
+                "capability_id scopes executable tools only: use kind=tool with an exact service ID from the authorized index. To find Skill instructions, use kind=skill without capability_id, then read_skill with a returned exact ID. To find services, use kind=capability without capability_id. No capability was executed or permissions changed.".into(),
+            ));
+        }
         if scope.is_some_and(|id| !self.bindings.values().any(|b| b.capability == id)) {
-            return Err(ToolError::Authorization);
+            // Discovery sees only the frozen authorized index. An absent ID
+            // may be invented, stale or inaccessible; it proves no denial.
+            // Return the same bounded correction without revealing existence.
+            return Err(ToolError::CorrectableInput(
+                "The supplied capability_id is not an executable service in the authorized index. Remove capability_id and use kind=capability to find available services, or kind=skill to find instructions; then use only exact returned identities. Do not repeat this scope or infer that the requested task lacks permission. No capability was executed or permissions changed.".into(),
+            ));
         }
         let names: Vec<String> = arguments
             .get("names")
@@ -158,7 +169,6 @@ impl Catalog {
             .transpose()
             .map_err(|_| ToolError::Input("names 必须为工具名称数组；未改变加载集合".into()))?
             .unwrap_or_default();
-        let requested_kind = arguments["kind"].as_str();
         let kind = if requested_kind == Some("skill") || requested_kind == Some("capability") {
             requested_kind
         } else if query.trim().is_empty() && scope.is_none() && names.is_empty() {

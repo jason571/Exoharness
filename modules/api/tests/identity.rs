@@ -458,3 +458,57 @@ async fn mail_failure_does_not_activate_code_and_registration_fields_are_native(
     assert_eq!(request(&f.portal,9798,"POST","/v1/auth/register",json!({"email":"student@example.com","code":"123456","username":"student","display_name":"同学","password":"student-password"}),None,None).await.status,StatusCode::BAD_REQUEST);
     assert_eq!(request(&f.portal,9798,"POST","/v1/auth/register",json!({"email":"student@example.com","code":123456,"username":"student","display_name":"同学","password":"student-password"}),None,None).await.status,StatusCode::UNPROCESSABLE_ENTITY);
 }
+
+#[tokio::test]
+async fn registered_email_is_explicit_without_sending_mail_or_changing_the_account() {
+    let f = fixture().await;
+    let (id, _, _) = register(&f).await;
+    assert_eq!(f.mailer.delivered.lock().unwrap().len(), 1);
+    for email in [
+        "student@example.com",
+        "STUDENT@EXAMPLE.COM",
+        " student@example.com ",
+    ] {
+        let reply = request(
+            &f.portal,
+            9798,
+            "POST",
+            "/v1/auth/registration-code",
+            json!({"email":email}),
+            None,
+            None,
+        )
+        .await;
+        assert_eq!(reply.status, StatusCode::CONFLICT);
+        assert_eq!(reply.body["error"]["code"], "email_already_registered");
+        assert_eq!(reply.body["error"]["message"], "该邮箱已注册，请直接登录");
+        assert!(reply.body.get("resend_after").is_none());
+        assert_eq!(f.mailer.delivered.lock().unwrap().len(), 1);
+    }
+    let login = request(
+        &f.portal,
+        9798,
+        "POST",
+        "/v1/auth/login",
+        json!({"identifier":"student@example.com","password":"student-password"}),
+        None,
+        None,
+    )
+    .await;
+    assert_eq!(login.status, StatusCode::OK);
+    assert_eq!(login.body["account"]["id"], id);
+    let fresh = request(
+        &f.portal,
+        9798,
+        "POST",
+        "/v1/auth/registration-code",
+        json!({"email":"new-person@example.com"}),
+        None,
+        None,
+    )
+    .await;
+    assert_eq!(fresh.status, StatusCode::ACCEPTED);
+    assert_eq!(fresh.body["message"], "验证码已发送，请查收邮箱");
+    assert_eq!(fresh.body["resend_after"], 60);
+    assert_eq!(f.mailer.delivered.lock().unwrap().len(), 2);
+}

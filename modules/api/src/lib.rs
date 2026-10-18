@@ -15,10 +15,14 @@ mod console;
 mod conversations;
 mod errors;
 mod events;
+mod external;
+pub use external::{external_management_router, external_router};
 mod identity;
 mod knowledge;
 mod management;
 mod mcp;
+mod mcp_reconciliation;
+pub use mcp_reconciliation::{reconcile_mcp_page, reconcile_mcp_tasks};
 mod media;
 mod public_chat;
 mod registry;
@@ -33,7 +37,7 @@ pub use configuration::{
     configuration_router, configuration_router_with_registry, configuration_router_with_runtime,
 };
 pub use conversations::conversation_router;
-pub use identity::{identity_router, identity_router_with_registry};
+pub use identity::{identity_router, identity_router_with_registry, identity_router_with_public_url};
 pub use knowledge::{knowledge_router, knowledge_router_with_sandbox};
 pub use management::management_router;
 pub use mcp::mcp_router;

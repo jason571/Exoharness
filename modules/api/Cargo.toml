@@ -34,6 +34,8 @@ tokio-stream.workspace = true
 sha2.workspace = true
 getrandom.workspace = true
 base64 = "0.22"
+url = "2"
+serde_urlencoded = "0.7"
 
 [dev-dependencies]
 url = "2"

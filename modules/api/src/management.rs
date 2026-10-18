@@ -24,6 +24,7 @@ use std::sync::Arc;
 struct ManagementState {
     store: PostgresStore,
     assistants: Arc<Assistants>,
+    credentials: Arc<auth::Credentials>,
 }
 pub fn management_router(auth_state: ApiState, assistants: Arc<Assistants>) -> Router {
     if auth_state.surface != Surface::Management {
@@ -33,6 +34,7 @@ pub fn management_router(auth_state: ApiState, assistants: Arc<Assistants>) -> R
     let state = ManagementState {
         store: auth_state.execution.0.clone(),
         assistants,
+        credentials: auth_state.credentials.clone(),
     };
     Router::new()
         .route("/v1/management/overview", get(overview))
@@ -67,12 +69,57 @@ async fn overview(
         ));
     }
     let user = query.user.map(|value| value.trim().to_owned());
+    let matched_users = if let (Some(identity), Some(name)) = (
+        state.credentials.identity.clone(),
+        user.as_ref().filter(|name| !name.is_empty()),
+    ) {
+        let name = name.clone();
+        let mut ids =
+            crate::identity::work(identity, move |store| store.matching_user_ids(&name)).await?;
+        let needle = user.as_ref().unwrap().to_lowercase();
+        ids.extend(
+            state
+                .credentials
+                .principal_ids()
+                .into_iter()
+                .filter(|id| id.to_lowercase().contains(&needle)),
+        );
+        // Exact owner IDs remain usable for historical/deleted accounts. Do
+        // not substring-match opaque IDs when the input is an account name.
+        ids.push(user.as_ref().unwrap().clone());
+        ids.sort();
+        ids.dedup();
+        Some(ids)
+    } else {
+        None
+    };
     let scheduler = storage(state.store.clone(), |store| store.scheduler_status()).await?;
-    let mut value = storage(state.store, move |store| {
-        store.management_overview(query.days, user.as_deref())
+    let mut value = storage(state.store, move |store| match matched_users {
+        Some(ids) => store.management_overview_for_users(query.days, &ids),
+        None => store.management_overview(query.days, user.as_deref()),
     })
     .await?;
-    value["user_labels"] = json!({});
+    let ids = value["groups"]["users"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|row| row["id"].as_str())
+        .chain(
+            value["activity"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter_map(|row| row["user_id"].as_str()),
+        )
+        .map(str::to_owned)
+        .collect::<std::collections::BTreeSet<_>>()
+        .into_iter()
+        .collect::<Vec<_>>();
+    value["user_labels"] = if let Some(identity) = state.credentials.identity.clone() {
+        json!(crate::identity::work(identity, move |store| store.user_labels(&ids)).await?)
+    } else {
+        json!({})
+    };
     value["assistants"] = json!(
         state
             .assistants

@@ -12,6 +12,8 @@ use std::{
 mod mcp_admission;
 #[path = "unit/scheduler.rs"]
 mod scheduler;
+#[path = "unit/task_context.rs"]
+mod task_context;
 
 fn database() -> (PostgresStore, String, String) {
     static NEXT: AtomicU64 = AtomicU64::new(1);
@@ -127,10 +129,11 @@ fn legacy_schema_is_preserved_and_migration_is_repeatable() {
         )
         .unwrap()
         .get(0);
-    // 29 original execution tables, five knowledge tables, and one resource reservation table.
-    assert_eq!(count, 35);
+    // Original execution/knowledge tables, resource reservations, and external Session mapping.
+    assert_eq!(count, 36);
     for table in [
         "execution_runs",
+        "execution_external_sessions",
         "execution_invocations",
         "execution_model_requests",
         "execution_run_artifacts",

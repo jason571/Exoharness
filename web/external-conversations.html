@@ -1,0 +1,27 @@
+<!doctype html>
+<!-- Copyright (C) 2026 Jason Yang <flyangqn@gmail.com> | SPDX-License-Identifier: AGPL-3.0-only | Commercial licensing: flyangqn@gmail.com -->
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>外部对话 · ExoHarness</title>
+<script src="/assets/management-theme.js"></script><link rel="stylesheet" href="/assets/styles.css"><link rel="stylesheet" href="/assets/management-theme.css"><link rel="stylesheet" href="/assets/management.css"><link rel="stylesheet" href="/assets/external-applications.css">
+<script src="/assets/auth.js" defer></script><script src="/assets/external-conversations.js" defer></script><script src="/assets/i18n.js" defer></script></head>
+<body><header class="topbar management-header"><a class="brand" href="/overview"><span class="brand-mark">EH</span><span><strong>ExoHarness</strong><small>管理控制台</small></span></a><nav class="main-nav" aria-label="主导航"><a href="/external-applications" class="active" data-admin-only>外部应用</a></nav><div class="service-state"><span id="service-dot" class="status-dot"></span><span id="service-label">正在连接服务</span></div></header>
+<main class="page management-page"><section class="management-heading"><div><p class="eyebrow">CONVERSATIONS</p><h1>外部对话</h1><p id="external-conversation-application-name" data-i18n="off"></p></div><a class="button secondary" href="/external-applications">返回外部应用</a></section><section id="external-conversations" class="panel management-panel external-conversations">
+  <div class="panel-header"><h2>外部对话</h2></div>
+  <form id="external-conversation-filter" class="external-conversation-filter">
+    <input id="external-conversation-app" type="hidden">
+    <label>搜索对话<input id="external-conversation-query" maxlength="512" placeholder="标题、会话 ID 或对话内容"></label>
+    <label>用户<input id="external-conversation-user" maxlength="128" placeholder="用户名、昵称或用户 ID"></label>
+    <label>设备 ID<input id="external-conversation-device" maxlength="128" autocomplete="off"></label>
+    <button id="external-conversation-search" class="button secondary" type="submit">搜索</button>
+  </form>
+  <p id="external-conversation-note" role="status">每页最多显示 10 条对话</p>
+  <div class="external-table-scroll"><table class="external-conversation-table"><thead><tr><th>对话</th><th>应用 / 助理</th><th>用户</th><th>设备 ID</th><th>对话轮数</th><th>更新时间</th></tr></thead><tbody id="external-conversation-rows"></tbody></table></div>
+  <div class="external-pagination"><span>会话总数</span><strong id="external-conversation-total" data-i18n="off">0</strong><span>页码</span><strong id="external-conversation-page" data-i18n="off">1</strong><button id="external-conversation-prev" class="button secondary" type="button" disabled>上一页</button><button id="external-conversation-next" class="button secondary" type="button" disabled>下一页</button></div>
+</section>
+</main><dialog id="external-conversation-dialog" class="external-key-dialog external-conversation-dialog">
+  <div class="panel-header"><h2 id="external-conversation-detail-title" data-i18n="off"></h2><button id="external-conversation-close" class="button secondary" type="button">关闭</button></div>
+  <div id="external-conversation-detail-info" class="external-conversation-detail-info"></div>
+  <p id="external-conversation-detail-note" role="status"></p>
+  <div id="external-conversation-content"></div>
+  <div class="external-actions"><button id="external-conversation-older" class="button secondary" type="button" disabled>更早的消息</button><button id="external-conversation-latest" class="button secondary" type="button">最新消息</button></div>
+</dialog>
+</body></html>

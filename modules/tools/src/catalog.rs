@@ -113,6 +113,20 @@ impl Catalog {
         );
         tools
     }
+    /// A declared entry phase only narrows the model view, never dispatch grants.
+    pub fn entry_schemas(&self, names: &[String], workflow: &[String]) -> Option<Vec<Tool>> {
+        if names.is_empty()
+            || names.iter().any(|n| !self.active.contains(n))
+            || self.active.iter().any(|n| !workflow.contains(n))
+        {
+            return None;
+        }
+        let mut tools = native::base();
+        for name in names {
+            tools.push(self.bindings.get(name)?.tool.clone());
+        }
+        Some(tools)
+    }
     pub fn requires_execution(&self) -> bool {
         self.execution_selected
     }

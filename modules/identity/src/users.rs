@@ -15,7 +15,7 @@ use exoharness_database::OptionalExtension;
 use exoharness_database::params;
 impl AuthStore {
     pub fn assistant_reference_count(&self, id: &str) -> Result<i64, AuthError> {
-        Ok(self.connection()?.query_row("SELECT COUNT(*) FROM auth_users WHERE COALESCE(NULLIF(btrim(default_agent_profile_id), ''), ?1)=?2",params![DEFAULT_AGENT_PROFILE_ID,id],|row|row.get(0))?)
+        Ok(self.connection()?.query_row("SELECT (SELECT COUNT(*) FROM auth_users WHERE COALESCE(NULLIF(btrim(default_agent_profile_id), ''), ?1)=?2) + (SELECT COUNT(*) FROM auth_external_applications WHERE deleted_at IS NULL AND configuration_json::jsonb->>'assistant_id'=?2)",params![DEFAULT_AGENT_PROFILE_ID,id],|row|row.get(0))?)
     }
     pub fn authenticate_user(
         &self,
@@ -206,7 +206,7 @@ impl AuthStore {
         let connection = self.connection()?;
         // Substring matching is literal: '%' and '_' are not wildcard operators.
         let mut query = connection.prepare(
-            "SELECT id FROM auth_users WHERE strpos(lower(display_name || ' ' || username), lower(?1::TEXT)) > 0 ORDER BY id",
+            "SELECT id FROM auth_users WHERE strpos(lower(display_name || ' ' || username), lower(?1::TEXT)) > 0 OR lower(id)=lower(?1::TEXT) ORDER BY id",
         )?;
         let mut ids = query
             .query_map(params![name], |row| row.get(0))?
@@ -255,7 +255,7 @@ impl AuthStore {
         // Bind as text before casting: the database driver receives a Rust String,
         // not a native PostgreSQL JSONB parameter.
         let mut query = connection.prepare(
-            "SELECT id,display_name || ' · ' || username FROM auth_users
+            "SELECT id,CASE WHEN btrim(display_name)='' OR btrim(display_name)=username THEN username ELSE display_name || ' · ' || username END FROM auth_users
             WHERE id IN (SELECT jsonb_array_elements_text(?1::TEXT::jsonb))",
         )?;
         query

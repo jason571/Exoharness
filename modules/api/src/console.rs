@@ -25,11 +25,15 @@ pub(crate) fn routes() -> Router<ApiState> {
         .route("/exoharness-login", get(login_page))
         .route("/login", get(login_page))
         .route("/register", get(register_page))
+        .route("/forgot-password", get(password_page))
+        .route("/reset-password", get(password_page))
         .route("/overview", get(management_page))
         .route("/services", get(management_page))
         .route("/imports", get(management_page))
         .route("/models", get(management_page))
         .route("/agents", get(management_page))
+        .route("/external-applications", get(management_page))
+        .route("/external-conversations", get(management_page))
         .route("/knowledge", get(management_page))
         .route("/trace", get(management_page))
         .route("/audit", get(management_page))
@@ -99,6 +103,24 @@ async fn register_page(State(state): State<ApiState>) -> Response {
     }
     Html(include_str!("../../../web/portal-register.html")).into_response()
 }
+async fn password_page(State(state): State<ApiState>, uri: axum::http::Uri) -> Response {
+    if state.surface != Surface::Portal {
+        return StatusCode::NOT_FOUND.into_response();
+    }
+    let page = if uri.path() == "/forgot-password" {
+        include_str!("../../../web/portal-forgot-password.html")
+    } else {
+        include_str!("../../../web/portal-reset-password.html")
+    };
+    (
+        [
+            (header::CACHE_CONTROL, "no-store"),
+            (header::REFERRER_POLICY, "no-referrer"),
+        ],
+        Html(page),
+    )
+        .into_response()
+}
 async fn management_page(
     State(state): State<ApiState>,
     headers: HeaderMap,
@@ -110,6 +132,8 @@ async fn management_page(
         "/imports" => include_str!("../../../web/imports.html"),
         "/models" => include_str!("../../../web/models.html"),
         "/agents" => include_str!("../../../web/agents.html"),
+        "/external-applications" => include_str!("../../../web/external-applications.html"),
+        "/external-conversations" => include_str!("../../../web/external-conversations.html"),
         "/knowledge" => include_str!("../../../web/knowledge.html"),
         "/trace" => include_str!("../../../web/trace.html"),
         "/audit" => include_str!("../../../web/audit.html"),
@@ -146,6 +170,22 @@ async fn portal_settings(State(state): State<ApiState>, headers: HeaderMap) -> R
 }
 async fn asset(Path(name): Path<String>) -> Response {
     let (kind, content) = match name.as_str() {
+        "external-applications.js" => (
+            "text/javascript; charset=utf-8",
+            include_str!("../../../web/external-applications.js"),
+        ),
+        "external-conversations.js" => (
+            "text/javascript; charset=utf-8",
+            include_str!("../../../web/external-conversations.js"),
+        ),
+        "external-applications.css" => (
+            "text/css; charset=utf-8",
+            include_str!("../../../web/external-applications.css"),
+        ),
+        "carenest-assistant.json" => (
+            "application/json; charset=utf-8",
+            include_str!("../../../web/carenest-assistant.json"),
+        ),
         "i18n.js" => (
             "text/javascript; charset=utf-8",
             include_str!("../../../web/i18n.js"),
@@ -177,6 +217,14 @@ async fn asset(Path(name): Path<String>) -> Response {
         "portal-register.js" => (
             "text/javascript; charset=utf-8",
             include_str!("../../../web/portal-register.js"),
+        ),
+        "portal-forgot-password.js" => (
+            "text/javascript; charset=utf-8",
+            include_str!("../../../web/portal-forgot-password.js"),
+        ),
+        "portal-reset-password.js" => (
+            "text/javascript; charset=utf-8",
+            include_str!("../../../web/portal-reset-password.js"),
         ),
         "portal-auth.js" => (
             "text/javascript; charset=utf-8",

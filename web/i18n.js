@@ -1,11 +1,91 @@
-// Copyright (C) 2026 Jason Yang <flyangqn@gmail.com>
-// SPDX-License-Identifier: AGPL-3.0-only
-// Commercial licensing: contact flyangqn@gmail.com.
-
 "use strict";
 (() => {
   // src/i18n-catalog.ts
   var entries = `
+\u5916\u90E8\u5E94\u7528|External applications
+\u5141\u8BB8\u5E94\u7528\u540E\u7AEF\u76F4\u63A5\u4F7F\u7528 Key \u8C03\u7528|Allow direct backend calls with the application key
+\u5BF9\u8BDD\u5FC5\u987B\u5173\u8054\u8BBE\u5907 ID|Conversations require a device ID
+CareNest \u5FC5\u987B\u542F\u7528\u8BBE\u5907\u8981\u6C42\uFF0C\u8C03\u7528\u524D\u6838\u9A8C\u7528\u6237\u4E0E\u8BBE\u5907\u7ED1\u5B9A\u3002|CareNest requires devices and must verify user-device bindings before calling.
+\u4EC5\u6D4F\u89C8\u5668\u6388\u6743\u6A21\u5F0F\u9700\u8981\u56DE\u8C03\u5730\u5740\uFF1B\u540E\u7AEF\u76F4\u63A5\u8C03\u7528\u53EF\u7559\u7A7A\u3002|Callbacks are needed only for browser authorization; direct backend calls can leave them empty.
+\u8BBE\u5907\u5173\u8054\u5F85\u8865\u5168|Device association needs completion
+\u672A\u8981\u6C42\u8BBE\u5907|Device not required
+\u7528\u6237 ID|User ID
+\u5916\u90E8\u7528\u6237 ID|External user ID
+\u66F4\u65B0\u65F6\u95F4|Updated
+\u5916\u90E8\u5BF9\u8BDD|External conversations
+\u8FD4\u56DE\u5916\u90E8\u5E94\u7528|Back to applications
+\u627E\u4E0D\u5230\u6B64\u5E94\u7528|Application not found
+\u8BF7\u4ECE\u5916\u90E8\u5E94\u7528\u5217\u8868\u9009\u62E9\u5E94\u7528|Select an application from the applications list
+\u5168\u90E8\u5E94\u7528|All applications
+\u641C\u7D22\u5BF9\u8BDD|Search conversations
+\u6807\u9898\u3001\u4F1A\u8BDD ID \u6216\u5BF9\u8BDD\u5185\u5BB9|Title, session ID or conversation content
+\u7528\u6237\u540D\u3001\u6635\u79F0\u6216\u7528\u6237 ID|Username, display name or user ID
+\u8BBE\u5907 ID|Device ID
+\u5E94\u7528 / \u52A9\u7406|Application / Assistant
+\u5BF9\u8BDD\u8F6E\u6570|Conversation turns
+\u9875\u7801|Page
+\u6B63\u5728\u8BFB\u53D6\u5916\u90E8\u5BF9\u8BDD|Loading external conversations
+\u6BCF\u9875\u6700\u591A\u663E\u793A 10 \u6761\u5BF9\u8BDD|At most 10 conversations per page
+\u6CA1\u6709\u7B26\u5408\u6761\u4EF6\u7684\u5916\u90E8\u5BF9\u8BDD|No matching external conversations
+\u8BFB\u53D6\u5916\u90E8\u5BF9\u8BDD\u5931\u8D25|Could not load external conversations
+\u6B63\u5728\u8BFB\u53D6\u5BF9\u8BDD\u5185\u5BB9|Loading conversation content
+\u6BCF\u9875\u6700\u591A\u663E\u793A 10 \u8F6E\u6D88\u606F|At most 10 turns per page
+\u6682\u65E0\u5BF9\u8BDD\u5185\u5BB9|No conversation content yet
+\u8BFB\u53D6\u5BF9\u8BDD\u5185\u5BB9\u5931\u8D25|Could not load conversation content
+\u8F6E\u6B21|Turn
+\u66F4\u65E9\u7684\u6D88\u606F|Earlier messages
+\u6700\u65B0\u6D88\u606F|Latest messages
+CareNest \u52A9\u7406\u5DF2\u5B58\u5728\uFF0C\u4F46\u5C1A\u672A\u542F\u7528\uFF0C\u8BF7\u5728\u667A\u80FD\u52A9\u7406\u9875\u9762\u914D\u7F6E\u3002|The existing CareNest assistant is disabled. Configure it in Assistants.
+\u751F\u6210 Key \u5E76\u4FDD\u5B58\u5E94\u7528|Generate key and save application
+\u67E5\u770B Key|View key
+\u786E\u8BA4\u67E5\u770B\u6B64\u5E94\u7528\u7684 Key\uFF1F|Reveal this application's key?
+Key \u5DF2\u52A0\u5BC6\u4FDD\u5B58\uFF0C\u7BA1\u7406\u5458\u53EF\u786E\u8BA4\u540E\u67E5\u770B\u548C\u590D\u5236\u3002|The key is stored encrypted. Administrators can confirm to view and copy it.
+\u4E3A\u4E0D\u540C\u5E94\u7528\u5206\u522B\u914D\u7F6E Key\u3001\u52A9\u7406\u89D2\u8272\u548C\u7528\u6237\u6388\u6743\u3002|Configure separate keys, assistants and user authorizations for each application.
+\u65B0\u589E\u5E94\u7528|Add application
+\u7F16\u8F91\u5E94\u7528|Edit application
+\u7BA1\u7406\u52A9\u7406\u89D2\u8272|Manage assistants
+\u5E94\u7528 ID|Application ID
+\u5E94\u7528\u540D\u79F0|Application name
+\u7ED1\u5B9A\u52A9\u7406|Assigned assistant
+\u521B\u5EFA CareNest \u793A\u4F8B\u52A9\u7406|Create CareNest example assistant
+\u5141\u8BB8\u7684\u56DE\u8C03\u5730\u5740|Allowed redirect URIs
+\u6BCF\u884C\u4E00\u4E2A\u5B8C\u6574\u5730\u5740\uFF0C\u5FC5\u987B\u4E3A HTTPS\uFF1B\u672C\u5730\u5F00\u53D1\u53EF\u4F7F\u7528\u56DE\u73AF HTTP\u3002|One complete HTTPS URI per line. Loopback HTTP is allowed for local development.
+\u5141\u8BB8\u7533\u8BF7\u7684\u6743\u9650|Available authorization scopes
+\u8BFB\u53D6\u8D26\u53F7\u8EAB\u4EFD|Read account identity
+\u8BFB\u53D6\u5E94\u7528\u4F1A\u8BDD|Read application conversations
+\u521B\u5EFA\u4F1A\u8BDD\u4E0E\u53D1\u9001\u6D88\u606F|Create conversations and send messages
+\u8BFB\u53D6\u6267\u884C\u8FDB\u5EA6|Read execution progress
+\u53D6\u6D88\u5E94\u7528\u4EFB\u52A1|Cancel application tasks
+\u8BBF\u95EE\u51ED\u8BC1\u6709\u6548\u671F\uFF08\u79D2\uFF09|Access token lifetime (seconds)
+\u7528\u6237\u6388\u6743\u6709\u6548\u671F\uFF08\u79D2\uFF09|User authorization lifetime (seconds)
+\u542F\u7528\u5E94\u7528|Enable application
+\u4FEE\u6539\u5E94\u7528\u914D\u7F6E\u6216\u8F6E\u6362 Key \u540E\uFF0C\u539F\u51ED\u8BC1\u5931\u6548\uFF1B\u540E\u7AEF\u4F7F\u7528\u6709\u6548 Key \u91CD\u65B0\u8C03\u7528\uFF0C\u6D4F\u89C8\u5668\u6388\u6743\u6A21\u5F0F\u9700\u91CD\u65B0\u6388\u6743\u3002|Configuration changes and key rotation invalidate previous credentials. Backend callers use the valid key again; browser authorization requires renewed consent.
+\u4FDD\u5B58\u5E94\u7528|Save application
+\u8F6E\u6362 Key|Rotate key
+\u5DF2\u767B\u8BB0\u5E94\u7528|Registered applications
+\u7528\u6237\u6388\u6743|User authorizations
+\u9009\u62E9\u5E94\u7528\u540E\u67E5\u770B\u7528\u6237\u6388\u6743\u3002|Select an application to view its user authorizations.
+\u4FDD\u5B58\u5E94\u7528 Key|Save application key
+Key \u4EC5\u663E\u793A\u8FD9\u4E00\u6B21\uFF0C\u8BF7\u4FDD\u5B58\u5230\u5E94\u7528\u540E\u7AEF\u7684\u51ED\u636E\u5B58\u50A8\u3002|This key is shown once. Save it in the application's backend credential store.
+\u5E94\u7528 Key|Application key
+\u590D\u5236 Key|Copy key
+\u6B63\u5728\u8BFB\u53D6\u7528\u6237\u6388\u6743|Loading user authorizations
+\u4EC5\u663E\u793A\u6700\u8FD1 200 \u6761\u7528\u6237\u6388\u6743\u3002|Showing the latest 200 user authorizations.
+\u6682\u65E0\u7528\u6237\u6388\u6743|No user authorizations
+\u6388\u6743\u6709\u6548|Authorization active
+\u6388\u6743\u5DF2\u5931\u6548|Authorization inactive
+\u64A4\u9500\u6388\u6743|Revoke authorization
+\u64A4\u9500\u6B64\u7528\u6237\u5BF9\u8BE5\u5E94\u7528\u7684\u6388\u6743\uFF1F|Revoke this user's authorization for this application?
+\u5C1A\u672A\u767B\u8BB0\u5916\u90E8\u5E94\u7528|No external applications registered
+\u4FEE\u6539\u914D\u7F6E\u5C06\u4F7F\u8BE5\u5E94\u7528\u7684\u539F\u7528\u6237\u6388\u6743\u5931\u6548\uFF0C\u7EE7\u7EED\uFF1F|Changing configuration invalidates this application's previous user authorizations. Continue?
+\u8F6E\u6362 Key \u5C06\u4F7F\u8BE5\u5E94\u7528\u7684\u539F\u7528\u6237\u6388\u6743\u5931\u6548\uFF0C\u7EE7\u7EED\uFF1F|Rotating the key invalidates this application's previous user authorizations. Continue?
+\u5E94\u7528\u5DF2\u4FDD\u5B58|Application saved
+\u5E94\u7528\u5DF2\u5220\u9664|Application deleted
+\u5220\u9664\u6B64\u5E94\u7528\u5C06\u4F7F Key \u548C\u8BBF\u95EE\u51ED\u8BC1\u5931\u6548\uFF0C\u4F1A\u8BDD\u8BB0\u5F55\u4FDD\u7559\uFF0C\u5E94\u7528 ID \u4E0D\u53EF\u91CD\u65B0\u4F7F\u7528\u3002\u7EE7\u7EED\uFF1F|Delete this application? Its Key and access credentials will stop working. Conversation records will be retained and the application ID cannot be reused.
+\u65E0\u6CD5\u8BFB\u53D6\u52A9\u7406\u6A21\u677F|Assistant template could not be loaded
+CareNest \u793A\u4F8B\u52A9\u7406\u5DF2\u51C6\u5907\u597D\uFF0C\u8BF7\u6309\u9700\u914D\u7F6E\u80FD\u529B\u3002|The CareNest example assistant is ready. Configure its capabilities as needed.
+Key \u5DF2\u590D\u5236|Key copied
+\u8BF7\u624B\u52A8\u590D\u5236 Key|Please copy the key manually
 \u80FD\u529B\u53D7\u9650|Capability limited
 \u6B63\u5728\u5904\u7406\u4EFB\u52A1\uFF0C\u5DF2\u5B8C\u6210\u5185\u5BB9\u4F1A\u4FDD\u7559\u3002|Processing the task. Completed work is retained.
 \u76EE\u524D\u6CA1\u6709\u83B7\u5F97\u5B8C\u6210\u8FD9\u9879\u4EFB\u52A1\u6240\u9700\u7684\u6280\u80FD\u6743\u9650\uFF0C\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458\u5F00\u653E\u76F8\u5E94\u6280\u80FD\u3002\u5DF2\u5B8C\u6210\u5185\u5BB9\u5DF2\u4FDD\u7559\u3002|The required Skill permission is unavailable. Please ask your administrator to enable it. Completed work is retained.
@@ -64,6 +144,30 @@
 \u7528\u6237\u540D|Username
 \u90AE\u7BB1\u9A8C\u8BC1\u7801|Email verification code
 \u53D1\u9001\u9A8C\u8BC1\u7801|Send code
+\u8BE5\u90AE\u7BB1\u5DF2\u6CE8\u518C\uFF0C\u8BF7\u76F4\u63A5\u767B\u5F55|This email is already registered. Please sign in.
+\u9A8C\u8BC1\u7801\u5DF2\u53D1\u9001\uFF0C\u8BF7\u67E5\u6536\u90AE\u7BB1|Verification code sent. Please check your email.
+\u5FD8\u8BB0\u5BC6\u7801\uFF1F|Forgot password?
+\u627E\u56DE\u5BC6\u7801|Recover password
+\u8BBE\u7F6E\u65B0\u5BC6\u7801|Set a new password
+\u91CD\u7F6E\u5BC6\u7801|Reset password
+\u53D1\u9001\u91CD\u7F6E\u94FE\u63A5|Send reset link
+\u91CD\u65B0\u7533\u8BF7\u91CD\u7F6E\u94FE\u63A5|Request another reset link
+\u8F93\u5165\u6CE8\u518C\u90AE\u7BB1\uFF0C\u6211\u4EEC\u4F1A\u53D1\u9001\u6709\u6548\u671F\u4E3A20\u5206\u949F\u7684\u5BC6\u7801\u91CD\u7F6E\u94FE\u63A5\u3002|Enter your registered email to receive a password reset link valid for 20 minutes.
+\u6B63\u5728\u68C0\u67E5\u91CD\u7F6E\u94FE\u63A5...|Checking the reset link...
+\u8BF7\u8BBE\u7F6E\u65B0\u5BC6\u7801\u3002\u94FE\u63A5\u53EA\u80FD\u4F7F\u7528\u4E00\u6B21\uFF0C\u6709\u6548\u671F20\u5206\u949F\u3002|Set a new password. The link can be used once and is valid for 20 minutes.
+\u91CD\u7F6E\u94FE\u63A5\u4E0D\u53EF\u7528|Reset link unavailable
+\u91CD\u7F6E\u94FE\u63A5\u5DF2\u5931\u6548\u6216\u5DF2\u4F7F\u7528\uFF0C\u8BF7\u91CD\u65B0\u7533\u8BF7|The reset link has expired or was already used. Please request another link.
+\u91CD\u7F6E\u94FE\u63A5\u5DF2\u53D1\u9001\uFF0C\u8BF7\u572820\u5206\u949F\u5185\u6253\u5F00\u90AE\u4EF6\u8BBE\u7F6E\u65B0\u5BC6\u7801|Reset link sent. Open the email within 20 minutes to set a new password.
+\u5BC6\u7801\u5DF2\u91CD\u7F6E|Password reset
+\u5BC6\u7801\u5DF2\u91CD\u7F6E\uFF0C\u8BF7\u4F7F\u7528\u65B0\u5BC6\u7801\u767B\u5F55|Password reset. Please sign in with your new password.
+\u91CD\u7F6E\u90AE\u4EF6\u672A\u80FD\u53D1\u9001\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5|The reset email could not be sent. Please try again later.
+\u8BE5\u90AE\u7BB1\u5C1A\u672A\u6CE8\u518C\uFF0C\u8BF7\u5148\u6CE8\u518C|This email is not registered. Please register first.
+\u91CD\u7F6E\u90AE\u4EF6\u53D1\u9001\u8FC7\u4E8E\u9891\u7E41\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5|Reset emails were requested too frequently. Please try again later.
+\u91CD\u7F6E\u90AE\u4EF6\u8BF7\u6C42\u6B21\u6570\u8FC7\u591A\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5|Too many password reset requests. Please try again later.
+\u6682\u65F6\u65E0\u6CD5\u5904\u7406\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5|This request cannot be completed right now. Please try again later.
+\u91CD\u65B0\u53D1\u9001|Send again
+\u627E\u56DE\u5BC6\u7801\u670D\u52A1\u5C1A\u672A\u914D\u7F6E\uFF0C\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458|Password recovery is not configured. Please contact the administrator.
+\u90AE\u4EF6\u670D\u52A1\u5C1A\u672A\u914D\u7F6E\uFF0C\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458|The email service is not configured. Please contact the administrator.
 \u8FD4\u56DE\u767B\u5F55|Back to sign in
 \u9A8C\u8BC1|Verify
 6 \u4F4D\u6570\u5B57|6 digits
@@ -1089,6 +1193,7 @@ ExoHarness \u5BF9\u8BDD|ExoHarness chat
     const direct = catalog.get(source);
     if (direct !== void 0) return direct;
     const patterns = [
+      [/^(\d+) 秒后重发$/, (seconds) => `Resend in ${seconds} sec`],
       [/^更新于 (.+)$/, (time) => `Updated at ${time}`],
       [/^上次保存：(.+)$/, (time) => `Last saved: ${time}`],
       [/^(用户筛选|筛选)：(.+)$/, (kind, value) => `${kind === "\u7528\u6237\u7B5B\u9009" ? "User filter" : "Filter"}: ${value}`],

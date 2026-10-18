@@ -160,6 +160,94 @@ async fn terminal(f: &Fixture, run: &str) -> RunState {
     }
     panic!("chat Run remained active");
 }
+
+#[tokio::test]
+async fn progress_messages_survive_user_sse_and_replay_while_diagnostics_stay_in_trace() {
+    let mut reply = server::Reply::json(server::answer());
+    reply.delay = Duration::from_secs(2);
+    let upstream = server::Server::new(reply).await;
+    let f = fixture(&upstream).await;
+    let (session, run) = start(&f).await;
+    for _ in 0..100 {
+        if upstream.count() == 1 {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    assert_eq!(upstream.count(), 1);
+    let payloads = vec![
+        json!({"type":"tool_progress","tool_call_id":"owned-call","progress":84.25,"total":100.0,"message":"[sampling] ComfyUI 节点 10 采样进度 7/8"}),
+        json!({"type":"tool_progress","tool_call_id":"owned-call","progress":88.0,"message":"正在编码视频，已运行 125 秒"}),
+        json!({"type":"tool_progress","tool_call_id":"owned-call","progress":90.0,"total":100.0,"message":"Traceback: RuntimeError private diagnostic","diagnostics":"private extension"}),
+    ];
+    let (store, sid, rid, saved) = (
+        f.store.clone(),
+        session.clone(),
+        run.clone(),
+        payloads.clone(),
+    );
+    tokio::task::spawn_blocking(move || {
+        for payload in saved {
+            store.chat_event("user", &sid, &rid, payload).unwrap();
+        }
+    })
+    .await
+    .unwrap();
+    let response = raw(
+        &f,
+        USER,
+        "GET",
+        &format!("/v1/runs/{run}/events"),
+        Value::Null,
+    )
+    .await;
+    assert_eq!(response.status(), StatusCode::OK);
+    let bytes = tokio::time::timeout(Duration::from_secs(4), response.into_body().collect())
+        .await
+        .unwrap()
+        .unwrap()
+        .to_bytes();
+    let parse = |bytes: &[u8]| {
+        std::str::from_utf8(bytes)
+            .unwrap()
+            .lines()
+            .filter_map(|line| line.strip_prefix("data: "))
+            .map(|line| serde_json::from_str::<Value>(line).unwrap())
+            .filter(|event| event["type"] == "tool_progress")
+            .collect::<Vec<_>>()
+    };
+    let projected = parse(&bytes);
+    assert_eq!(projected.len(), 3);
+    assert_eq!(projected[0], payloads[0]);
+    assert_eq!(projected[1]["message"], payloads[1]["message"]);
+    assert_eq!(projected[1]["total"], Value::Null);
+    assert_eq!(projected[2]["message"], "正在处理...");
+    assert_eq!(projected[2]["progress"], 90.0);
+    assert!(projected[2].get("diagnostics").is_none());
+    assert!(!String::from_utf8_lossy(&bytes).contains("private diagnostic"));
+    let replay = raw(
+        &f,
+        USER,
+        "GET",
+        &format!("/v1/runs/{run}/events"),
+        Value::Null,
+    )
+    .await;
+    let replay = replay.into_body().collect().await.unwrap().to_bytes();
+    assert_eq!(parse(&replay), projected);
+    let (store, sid, rid) = (f.store.clone(), session, run);
+    let events =
+        tokio::task::spawn_blocking(move || store.events("user", &sid, &rid, 0, 1000).unwrap())
+            .await
+            .unwrap();
+    assert!(events.iter().any(|event|matches!(&event.event,exoharness_storage_postgres::ExecutionEvent::Chat{payload} if payload["message"]==payloads[2]["message"])));
+    if let Some(path) = std::env::var_os("EXOHARNESS_PROGRESS_SSE_FIXTURE") {
+        std::fs::write(path,serde_json::to_vec_pretty(&json!({"source":"actual user SSE projection and journal replay","progress":projected})).unwrap()).unwrap();
+    }
+    assert_eq!(upstream.count(), 1);
+    f.tasks.close().await;
+    f.runtime.close().await;
+}
 #[tokio::test]
 async fn real_upstream_deltas_are_persisted_and_visible_before_completion() {
     let first = json!({"id":"stream","choices":[{"index":0,"delta":{"role":"assistant","content":"开始回答"}}]});

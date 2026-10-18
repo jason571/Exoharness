@@ -16,6 +16,8 @@ async fn declared_background_task_waits_five_polls_without_model_repetition_and_
         ];
         if !failed {
             replies.push(answer());
+        } else {
+            replies.push(json!({"choices":[{"message":{"role":"assistant","content":"已有内容已保留，视频暂时无法完成。"},"finish_reason":"stop"}],"usage":{"prompt_tokens":50,"completion_tokens":10}}));
         }
         let f = fixture(replies, true).await;
         register_mcp(&f, &remote.url).await;
@@ -35,7 +37,7 @@ async fn declared_background_task_waits_five_polls_without_model_repetition_and_
         );
         assert_eq!(
             f.upstream.requests.lock().unwrap().len(),
-            if failed { 2 } else { 3 }
+            3
         );
         {
             let requests = remote.state.requests.lock().unwrap();

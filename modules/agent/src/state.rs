@@ -94,6 +94,8 @@ pub struct EngineState {
     pub repeated: ConsecutiveCalls,
     pub blocked: Option<StopReason>,
     pub answer: Option<String>,
+    #[serde(default)]
+    pub failure_finalization_attempted: bool,
 }
 impl EngineState {
     pub fn new(entries: Vec<JournalEntry>, repeat_limit: usize) -> Result<Self, &'static str> {
@@ -125,6 +127,7 @@ impl EngineState {
             repeated: ConsecutiveCalls::new(repeat_limit)?,
             blocked: None,
             answer: None,
+            failure_finalization_attempted: false,
         })
     }
     /// Account provider-reported usage, including a terminal error receipt.

@@ -5,8 +5,8 @@ import { resolve } from 'node:path';
 import { browser, until } from './support/browser.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
-const pages = { '/overview': 'overview.html', '/services': 'index.html', '/imports': 'imports.html', '/models': 'models.html', '/agents': 'agents.html', '/knowledge': 'knowledge.html', '/trace': 'trace.html', '/audit': 'audit.html', '/users': 'users.html', '/security': 'security.html', '/chat': 'portal-chat.html' };
-const navigation = ['/overview', '/services', '/imports', '/models', '/agents', '/knowledge', '/trace', '/audit', '/users'];
+const pages = { '/overview': 'overview.html', '/services': 'index.html', '/imports': 'imports.html', '/models': 'models.html', '/agents': 'agents.html', '/external-applications': 'external-applications.html', '/external-conversations': 'external-conversations.html', '/knowledge': 'knowledge.html', '/trace': 'trace.html', '/audit': 'audit.html', '/users': 'users.html', '/security': 'security.html', '/chat': 'portal-chat.html' };
+const navigation = ['/overview', '/services', '/imports', '/models', '/agents', '/external-applications', '/knowledge', '/trace', '/audit', '/users'];
 let role = 'admin';
 const server = createServer(async (req, res) => {
   try {
@@ -17,7 +17,7 @@ const server = createServer(async (req, res) => {
       res.end(JSON.stringify({ role, authentication_enabled: true }));
     } else if (req.url?.startsWith('/assets/')) {
       const name = req.url.slice('/assets/'.length);
-      if (!['auth.js', 'styles.css', 'management.css', 'management-theme.js', 'management-theme.css', 'i18n.js'].includes(name)) { res.writeHead(404).end(); return; }
+      if (!['auth.js', 'styles.css', 'management.css', 'management-theme.js', 'management-theme.css', 'external-applications.css', 'i18n.js'].includes(name)) { res.writeHead(404).end(); return; }
       res.setHeader('content-type', name.endsWith('.css') ? 'text/css' : 'text/javascript');
       res.end(await readFile(resolve(root, 'web', name)));
     } else if (pages[req.url]) {
@@ -43,8 +43,8 @@ try {
         if (width <= 1180) await until(() => chrome.evaluate(`document.querySelector('.main-nav').getAnimations().every(animation=>animation.playState!=='running')`), `${path}: drawer transition settled`);
         const layout = await chrome.evaluate(`(()=>{const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right};};const header=document.querySelector('.topbar');const selector=document.querySelector('.ui-language-switch');const nav=header.querySelector('.main-nav');return {header:rect(header),nav:rect(nav),main:rect(document.querySelector('main.page')),language:rect(selector),account:rect(header.querySelector('.auth-account')),links:[...header.querySelectorAll('.main-nav>a')].map(e=>e.getAttribute('href')),active:header.querySelector('.main-nav>a.active')?.getAttribute('href'),linkSizes:[...header.querySelectorAll('.main-nav>a')].map(e=>rect(e)),navOverflow:nav.scrollWidth>nav.clientWidth,missingIcons:[...nav.querySelectorAll(':scope>a')].some(e=>!e.querySelector('svg')),overflow:document.documentElement.scrollWidth>innerWidth};})()`);
         assert.deepEqual(layout.links, navigation, `${path}: common menu order`);
-        assert.equal(layout.active, path === '/security' ? undefined : path, `${path}: correct active item`);
-        assert.ok(layout.language.right <= width && layout.language.x >= 0, `${path}: switch inside viewport`);
+        assert.equal(layout.active, path === '/security' ? undefined : path === '/external-conversations' ? '/external-applications' : path, `${path}: correct active item`);
+        assert.ok(layout.language.right <= width && layout.language.x >= 0, `${path}: switch inside viewport (${width}, ${language}, ${JSON.stringify({header:layout.header,language:layout.language,main:layout.main})})`);
         assert.equal(layout.overflow, false, `${path}: no horizontal page overflow`);
         assert.equal(layout.missingIcons, false, `${path}: every menu item has an icon`);
         if (width > 1180) {

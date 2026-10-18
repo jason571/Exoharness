@@ -22,6 +22,12 @@ impl Catalog {
         if directive["version"] != 1 || directive["context_scope"] != "checkpoint" {
             return None;
         }
+        if directive
+            .get("retire_provider_history")
+            .is_some_and(|value| !value.is_boolean())
+        {
+            return None;
+        }
         if directive["status"] == "complete" {
             return Some(vec![]);
         }

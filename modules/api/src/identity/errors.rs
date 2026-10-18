@@ -53,6 +53,11 @@ impl IdentityError {
 impl From<AuthError> for IdentityError {
     fn from(error: AuthError) -> Self {
         match error {
+            AuthError::PasswordResetInvalid => Self::new(
+                StatusCode::BAD_REQUEST,
+                "invalid_password_reset",
+                "重置链接已失效或已使用，请重新申请",
+            ),
             AuthError::EmailDelivery => Self::new(
                 StatusCode::SERVICE_UNAVAILABLE,
                 "email_delivery_failed",

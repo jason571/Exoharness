@@ -159,7 +159,11 @@ impl PostgresStore {
         let payload = if let Some(message) = error {
             // A failed later step must not hide earlier committed deliverables.
             // The UI presents these as saved outputs, not successful completion.
-            json!({"type":"failed","status":"failed","message":message,"public_notice":response.get("public_notice").cloned().unwrap_or(Value::Null),"artifacts":response.get("artifacts").cloned().unwrap_or_else(||json!([]))})
+            let mut payload = json!({"type":"failed","status":"failed","message":message,"public_notice":response.get("public_notice").cloned().unwrap_or(Value::Null),"artifacts":response.get("artifacts").cloned().unwrap_or_else(||json!([]))});
+            if response["partial_result"] == true {
+                payload["response"] = response;
+            }
+            payload
         } else {
             json!({"type":"complete","response":response})
         };

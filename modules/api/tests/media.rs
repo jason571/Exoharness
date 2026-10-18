@@ -130,6 +130,18 @@ fn generated_html_has_a_separate_sandboxed_preview_and_old_workspace_routes_work
                 .contains("sandbox allow-scripts")
         );
         assert_eq!(body, "<!doctype html><h1>中文预览</h1>".as_bytes());
+        let csp = headers["content-security-policy"].to_str().unwrap();
+        assert!(csp.contains("allow-popups allow-popups-to-escape-sandbox"));
+        assert!(!csp.contains("allow-same-origin"));
+        assert!(!csp.contains("allow-forms"));
+        assert!(csp.contains("connect-src 'none'") && csp.contains("form-action 'none'"));
+        if let Ok(prefix) = std::env::var("EXOHARNESS_PREVIEW_CSP_FIXTURE") {
+            std::fs::write(
+                format!("{prefix}-single.json"),
+                serde_json::json!({"csp":csp}).to_string(),
+            )
+            .unwrap();
+        }
         let url = published.url.replace("/artifacts/", "/workspace-files/");
         let (status, headers, _) = fetch(&router, &url, "GET", None).await;
         assert_eq!(status, StatusCode::OK);

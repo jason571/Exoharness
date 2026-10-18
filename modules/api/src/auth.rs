@@ -52,12 +52,25 @@ struct Credential {
 }
 
 pub struct Credentials {
+    pub(crate) external_key_directory: Option<std::path::PathBuf>,
     entries: Vec<(Principal, [u8; 32], bool)>,
     pub(crate) identity: Option<std::sync::Arc<exoharness_identity::AuthStore>>,
     pub(crate) registration_available: bool,
     pub(crate) browsers: BrowserSessions,
 }
 impl Credentials {
+    pub fn with_external_key_directory(mut self, directory: std::path::PathBuf) -> Self {
+        self.external_key_directory = Some(directory);
+        self
+    }
+    /// Configured principal identities only; never authentication material.
+    pub(crate) fn principal_ids(&self) -> Vec<String> {
+        self.entries
+            .iter()
+            .map(|(principal, _, _)| principal.id.clone())
+            .collect()
+    }
+
     pub fn from_json(data: &str) -> Result<Self, &'static str> {
         let records: Vec<Credential> =
             serde_json::from_str(data).map_err(|_| "invalid credential file")?;
@@ -100,6 +113,7 @@ impl Credentials {
             ));
         }
         Ok(Self {
+            external_key_directory: None,
             entries: out,
             identity: None,
             registration_available: false,

@@ -36,6 +36,7 @@ struct ChatState {
     stop: tokio::sync::watch::Receiver<bool>,
     tasks: Arc<ChatTasks>,
     tools: Option<Arc<exoharness_tools::ToolRuntime>>,
+    identity: Option<Arc<exoharness_identity::AuthStore>>,
 }
 pub fn chat_router(
     api: ApiState,
@@ -69,6 +70,7 @@ pub fn chat_router_with_tools(
     tools: Option<Arc<exoharness_tools::ToolRuntime>>,
 ) -> Router {
     let state = ChatState {
+        identity: api.credentials.identity.clone(),
         store: api.execution.0.clone(),
         models,
         assistants,
@@ -86,5 +88,34 @@ pub fn chat_router_with_tools(
         .route("/v1/runs/{run}/cancel", post(control::cancel))
         .route("/v1/runs/{run}/resume", post(control::resume))
         .layer(middleware::from_fn_with_state(api, auth::gate))
+        .with_state(state)
+}
+
+/// The external router supplies its own application and user authorization.
+pub(crate) fn external_chat_router(
+    api: ApiState,
+    models: Arc<Models>,
+    assistants: Arc<Assistants>,
+    runtime: Arc<ModelRuntime>,
+    tasks: Arc<ChatTasks>,
+    tools: Option<Arc<exoharness_tools::ToolRuntime>>,
+) -> Router {
+    let state = ChatState {
+        store: api.execution.0.clone(),
+        models,
+        assistants,
+        runtime,
+        stop: api.stop.clone(),
+        tasks,
+        tools,
+        identity: api.credentials.identity.clone(),
+    };
+    Router::new()
+        .route(
+            "/v1/external/sessions/{session}/turns",
+            post(start::turn).layer(DefaultBodyLimit::max(attachments::MAX_REQUEST_BYTES)),
+        )
+        .route("/v1/external/runs/{run}/events", get(stream::events))
+        .route("/v1/external/runs/{run}/cancel", post(control::cancel))
         .with_state(state)
 }

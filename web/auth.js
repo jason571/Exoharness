@@ -12,12 +12,14 @@
     ["/imports", "技能导入", false],
     ["/models", "模型配置", false],
     ["/agents", "智能助理", true],
+    ["/external-applications", "外部应用", true],
     ["/knowledge", "资料管理", true],
     ["/trace", "运行追踪", true],
     ["/audit", "操作记录", false],
     ["/users", "用户管理", true],
   ];
   const NAV_ICONS = {
+    "/external-applications": '<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M9 6h6v9M6 9v9h9"/>',
     "/overview": '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
     "/services": '<path d="m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/>',
     "/imports": '<path d="M12 3v12m-4-4 4 4 4-4M4 17v3h16v-3"/>',
@@ -71,7 +73,7 @@
           const subtitle = brand.querySelector("small");
           if (subtitle) subtitle.textContent = "管理控制台";
         }
-        const currentPath = location.pathname === "/" ? "/services" : location.pathname;
+        const currentPath = location.pathname === "/" ? "/services" : location.pathname === "/external-conversations" ? "/external-applications" : location.pathname;
         const links = MANAGEMENT_NAVIGATION.filter(([, , adminOnly]) => !adminOnly || this.session.role === "admin")
           .map(([path, title, adminOnly]) => {
             const link = document.createElement("a");

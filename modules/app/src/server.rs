@@ -49,6 +49,9 @@ pub async fn run() -> Result<(), String> {
     let credential_data = std::fs::read_to_string(&config.credentials)
         .map_err(|_| "cannot read local credentials")?;
     Credentials::from_json(&credential_data).map_err(str::to_owned)?;
+    let external_key_directory = config
+        .capability_directory
+        .join("external-application-keys");
     let (identity, mailer, credentials) = tokio::task::spawn_blocking(move || {
         let identity = Arc::new(
             AuthStore::open(
@@ -61,11 +64,10 @@ pub async fn run() -> Result<(), String> {
                 Some(mailer) => Arc::new(mailer),
                 None => Arc::new(DisabledMailer),
             };
-        let credentials = Arc::new(Credentials::with_identity(
-            &credential_data,
-            identity.clone(),
-            mailer.is_configured(),
-        )?);
+        let credentials = Arc::new(
+            Credentials::with_identity(&credential_data, identity.clone(), mailer.is_configured())?
+                .with_external_key_directory(external_key_directory),
+        );
         Ok::<_, String>((identity, Arc::new(MailService(mailer)), credentials))
     })
     .await
@@ -216,6 +218,11 @@ pub async fn run() -> Result<(), String> {
     };
     let mailer = host.service::<MailService>().map_err(|e| e.to_string())?;
     let (stop_tx, stop_rx) = watch::channel(false);
+    let reconciliation = tokio::spawn(exoharness_api::reconcile_mcp_tasks(
+        tool_runtime.clone(),
+        assistants.clone(),
+        stop_rx.clone(),
+    ));
     let admin_state = ApiState {
         execution: execution.clone(),
         credentials: credentials.clone(),
@@ -312,6 +319,14 @@ pub async fn run() -> Result<(), String> {
         .await
     });
     let mut portal = tokio::spawn(async move {
+        let external = exoharness_api::external_router(
+            portal_state.clone(),
+            models.clone(),
+            assistants.clone(),
+            portal_model_runtime.clone(),
+            chat_tasks.clone(),
+            Some(tool_runtime.clone()),
+        );
         let chat = exoharness_api::chat_router_with_tools(
             portal_state.clone(),
             models.clone(),
@@ -320,12 +335,13 @@ pub async fn run() -> Result<(), String> {
             chat_tasks,
             Some(tool_runtime),
         );
-        let identity_routes = exoharness_api::identity_router_with_registry(
+        let identity_routes = exoharness_api::identity_router_with_public_url(
             portal_state.clone(),
             identity,
             mailer.0.clone(),
             assistants.clone(),
             Some(portal_registry),
+            &config.portal_public_base,
         );
         let conversations =
             exoharness_api::conversation_router(portal_state.clone(), assistants.clone());
@@ -348,7 +364,8 @@ pub async fn run() -> Result<(), String> {
                 .merge(configuration)
                 .merge(knowledge)
                 .merge(conversations)
-                .merge(identity_routes),
+                .merge(identity_routes)
+                .merge(external),
         )
         .with_graceful_shutdown(async move {
             let _ = portal_stop.changed().await;
@@ -402,6 +419,7 @@ pub async fn run() -> Result<(), String> {
             let _ = media.await;
         }
     }
+    let _ = reconciliation.await;
     let cleanup = host.shutdown().await;
     if !cleanup.is_empty() {
         return Err("extension cleanup incomplete".into());

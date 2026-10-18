@@ -90,7 +90,7 @@ pub(crate) fn declared(value: &Value) -> Result<Option<Task>> {
         raw: raw.clone(),
     }))
 }
-fn schema<'a>(tools: &'a [Value], action: &Action) -> Result<&'a Value> {
+pub(crate) fn schema<'a>(tools: &'a [Value], action: &Action) -> Result<&'a Value> {
     let tool = tools
         .iter()
         .find(|t| t["name"] == action.tool)
@@ -136,7 +136,7 @@ async fn cancel_once(connection: &Connection, task: &Task, tools: &[Value]) -> O
 
 // A cancellation acknowledgement alone does not free execution capacity.
 // Trust only this MCP's explicit terminal declaration for the same owned job.
-fn confirmed_terminal(mut value: Value, id: &str) -> Option<Value> {
+pub(crate) fn confirmed_terminal(mut value: Value, id: &str) -> Option<Value> {
     let task = declared(&value).ok()??;
     if task.id != id || !matches!(task.status.as_str(), "completed" | "failed" | "cancelled") {
         return None;

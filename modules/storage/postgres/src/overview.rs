@@ -12,6 +12,21 @@ impl PostgresStore {
     /// Aggregation precedes display limits. Status uses the latest attempt;
     /// usage includes all attempts, matching the preserved management page.
     pub fn management_overview(&self, days: u64, user: Option<&str>) -> Result<Value> {
+        self.overview_user_scope(days, user, None)
+    }
+
+    /// Account names are resolved by Identity before aggregation. An empty set
+    /// matches no owners; None retains the unfiltered/legacy-ID query behavior.
+    pub fn management_overview_for_users(&self, days: u64, users: &[String]) -> Result<Value> {
+        self.overview_user_scope(days, None, Some(users))
+    }
+
+    fn overview_user_scope(
+        &self,
+        days: u64,
+        user: Option<&str>,
+        users: Option<&[String]>,
+    ) -> Result<Value> {
         if !(1..=365).contains(&days) || user.is_some_and(|value| value.len() > 512) {
             return Err(StoreError::Invalid(
                 "invalid overview period or user filter",
@@ -20,6 +35,7 @@ impl PostgresStore {
         let generated = now_ms()?;
         let since = generated.saturating_sub((days * 86_400_000) as i64);
         let user = user.filter(|value| !value.is_empty());
+        let users = users.map(<[String]>::to_vec);
         let mut connection = self.connection()?;
         let mut tx = connection
             .build_transaction()
@@ -28,12 +44,12 @@ impl PostgresStore {
             .start()?;
         // Constants only; values always use bound parameters. position() means
         // '%' and '_' in a username are literal, not wildcard expressions.
-        let scope = "($2::TEXT IS NULL OR position(lower($2::TEXT) in lower(COALESCE(s.owner_user_id,'management')))>0)";
+        let scope = "($2::TEXT IS NULL OR position(lower($2::TEXT) in lower(COALESCE(s.owner_user_id,'management')))>0) AND ($3::TEXT[] IS NULL OR COALESCE(s.owner_user_id,'management')=ANY($3::TEXT[]))";
         let latest = "NOT EXISTS (SELECT 1 FROM execution_runs newer WHERE newer.turn_id=r.turn_id AND newer.attempt>r.attempt)";
         let counts: BTreeMap<String, i64> = tx.query(
             &format!("SELECT r.status,COUNT(*) FROM execution_runs r JOIN execution_sessions s ON s.id=r.session_id
                 WHERE (r.created_at>=$1 OR r.status NOT IN ('succeeded','failed','cancelled','recoverable'))
-                AND {scope} AND {latest} GROUP BY r.status"), &[&since, &user],
+                AND {scope} AND {latest} GROUP BY r.status"), &[&since, &user, &users],
         )?.into_iter().map(|row| (row.get(0), row.get(1))).collect();
         let mut groups = Map::new();
         for (name, expression) in [
@@ -50,7 +66,7 @@ impl PostgresStore {
                 FROM execution_runs r JOIN execution_sessions s ON s.id=r.session_id
                 LEFT JOIN execution_run_budgets b ON b.run_id=r.id
                 LEFT JOIN execution_run_agent_profiles p ON p.run_id=r.id
-                WHERE r.created_at>=$1 AND {scope} GROUP BY {expression} ORDER BY 5 DESC,1 LIMIT 50"), &[&since,&user])?;
+                WHERE r.created_at>=$1 AND {scope} GROUP BY {expression} ORDER BY 5 DESC,1 LIMIT 50"), &[&since,&user,&users])?;
             groups.insert(
                 name.into(),
                 json!(
@@ -74,7 +90,7 @@ impl PostgresStore {
             JOIN execution_sessions s ON s.id=r.session_id WHERE m.started_at>=$1 AND {scope}
             GROUP BY m.provider,m.model ORDER BY 4 DESC,1,2 LIMIT 50"
                 ),
-                &[&since, &user],
+                &[&since, &user, &users],
             )?
             .into_iter()
             .map(|row| {
@@ -86,12 +102,12 @@ impl PostgresStore {
         let totals = tx.query_one(&format!("SELECT COUNT(*),COALESCE(SUM((b.usage_json::jsonb->>'total_tokens')::BIGINT),0)::BIGINT,
             COUNT(*) FILTER(WHERE r.status='succeeded') FROM execution_runs r
             JOIN execution_sessions s ON s.id=r.session_id LEFT JOIN execution_run_budgets b ON b.run_id=r.id
-            WHERE r.created_at>=$1 AND {scope}"), &[&since,&user])?;
+            WHERE r.created_at>=$1 AND {scope}"), &[&since,&user,&users])?;
         let activity = tx.query(&format!("SELECT r.id,r.session_id,left(COALESCE(NULLIF(t.prompt,''),s.title),160),r.status,r.created_at,r.started_at,
             COALESCE(s.owner_user_id,'management'),t.ordinal,r.attempt,r.turn_id
             FROM execution_runs r JOIN execution_sessions s ON s.id=r.session_id JOIN execution_turns t ON t.id=r.turn_id
             WHERE (r.created_at>=$1 OR r.status NOT IN ('succeeded','failed','cancelled','recoverable')) AND {scope} AND {latest}
-            ORDER BY CASE WHEN r.status NOT IN ('succeeded','failed','cancelled','recoverable') THEN 0 ELSE 1 END,r.created_at DESC,r.id DESC LIMIT 50"), &[&since,&user])?
+            ORDER BY CASE WHEN r.status NOT IN ('succeeded','failed','cancelled','recoverable') THEN 0 ELSE 1 END,r.created_at DESC,r.id DESC LIMIT 50"), &[&since,&user,&users])?
             .into_iter().map(|row| json!({"id":row.get::<_,String>(0),"session_id":row.get::<_,String>(1),
                 "title":row.get::<_,String>(2),"status":row.get::<_,String>(3),"created_at":row.get::<_,i64>(4),
                 "started_at":row.get::<_,Option<i64>>(5),"user_id":row.get::<_,String>(6),

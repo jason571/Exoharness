@@ -24,12 +24,31 @@ pub fn text_request(
         .rev()
         .take(8)
     {
-        let (Some(input), Some(answer)) = (turn["prompt"].as_str(), turn["answer"].as_str()) else {
+        let Some(input) = turn["prompt"].as_str() else {
             continue;
         };
-        if turn["status"] != "succeeded" {
+        let unfinished = matches!(turn["status"].as_str(), Some("failed" | "recoverable"));
+        if turn["status"] != "succeeded" && !unfinished {
             continue;
         }
+        // Preserve the user's task after failure, without treating partial work
+        // or a diagnostic as a successfully delivered assistant answer.
+        let unfinished_notice = "The previous task is unfinished. Its request and completed work remain saved. Use authorized task references if continuing; do not infer success or repeat completed/unknown side effects.";
+        let partial;
+        let answer = if unfinished
+            && turn["response"]["partial_result"] == true
+            && turn["answer"].as_str().is_some_and(|a| !a.is_empty())
+        {
+            partial = format!(
+                "{unfinished_notice}\nUser-visible partial answer:\n{}",
+                turn["answer"].as_str().unwrap()
+            );
+            partial.as_str()
+        } else if unfinished {
+            unfinished_notice
+        } else {
+            turn["answer"].as_str().unwrap_or("")
+        };
         let mut input = input.to_owned();
         if let Some(attachments) = turn["attachments"].as_array().filter(|a| !a.is_empty()) {
             let references: Vec<Value> = attachments

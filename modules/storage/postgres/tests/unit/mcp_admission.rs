@@ -305,3 +305,76 @@ fn verified_late_receipt_frees_capacity_without_resurrecting_archived_conversati
         InvocationAdmission::Claimed
     );
 }
+
+#[test]
+fn recovery_enumeration_uses_durable_ownership_and_bounded_keyset_pages() {
+    let (store, url, namespace) = database();
+    for n in 1..=4 {
+        let call = prepared(&store, n, "cap");
+        claim(&store, &call, 4).unwrap();
+        // Only the exact original invocation/capability declaration is eligible.
+        store
+            .chat_event(
+                "owner",
+                &call.0,
+                &call.1,
+                json!({"type":"mcp_background_task",
+            "tool_call_id":if n==4 {"foreign-invocation"} else {&call.2},
+            "capability_id":"cap","task":{"id":format!("job-{n}")}}),
+            )
+            .unwrap();
+        store.chat_cancel("owner", &call.1).unwrap();
+    }
+    let reopened = PostgresStore::connect(&url, &namespace).unwrap();
+    let page = reopened.pending_mcp_tasks("", 2).unwrap();
+    assert_eq!(page.len(), 2);
+    assert_eq!(page[0].invocation, "invocation-1");
+    let next = reopened.pending_mcp_tasks(&page[1].invocation, 2).unwrap();
+    assert_eq!(next.len(), 1);
+    assert_eq!(next[0].invocation, "invocation-3");
+    assert_eq!(page[0].owner, "owner");
+    assert_eq!(page[0].task["id"], "job-1");
+    assert!(reopened.pending_mcp_tasks("", 0).is_err());
+    assert!(reopened.pending_mcp_tasks("", 65).is_err());
+    let mut wrong = page[0].clone();
+    wrong.owner = "other-owner".into();
+    assert!(matches!(
+        reopened.note_mcp_reconciliation(&wrong, "pending"),
+        Err(StoreError::NotFound)
+    ));
+    reopened
+        .note_mcp_reconciliation(&page[0], "unavailable")
+        .unwrap();
+    reopened
+        .note_mcp_reconciliation(&page[0], "unavailable")
+        .unwrap();
+    let events = reopened
+        .events("owner", &page[0].session, &page[0].run, 0, 100)
+        .unwrap();
+    assert_eq!(events.iter().filter(|e|matches!(&e.event,ExecutionEvent::Chat{payload} if payload["type"]=="mcp_background_reconciliation")).count(),1);
+}
+
+#[test]
+fn foreground_observers_and_jobs_without_saved_controls_are_not_reconciled() {
+    let (store, _, _) = database();
+    let active = prepared(&store, 1, "cap");
+    claim(&store, &active, 2).unwrap();
+    store
+        .chat_event(
+            "owner",
+            &active.0,
+            &active.1,
+            json!({"type":"mcp_background_task",
+        "tool_call_id":active.2,"capability_id":"cap","task":{"id":"active-job"}}),
+        )
+        .unwrap();
+    let missing = prepared(&store, 2, "cap");
+    claim(&store, &missing, 2).unwrap();
+    finish(&store, &missing, I::OutcomeUnknown);
+    store.chat_cancel("owner", &missing.1).unwrap();
+    assert!(store.pending_mcp_tasks("", 16).unwrap().is_empty());
+    assert!(matches!(
+        claim(&store, &prepared(&store, 3, "cap"), 2),
+        Err(StoreError::OutcomeUnknown)
+    ));
+}

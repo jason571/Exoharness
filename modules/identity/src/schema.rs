@@ -109,6 +109,8 @@ impl AuthStore {
              CREATE UNIQUE INDEX IF NOT EXISTS auth_users_normalized_email
                  ON auth_users(normalized_email) WHERE normalized_email IS NOT NULL;",
         )?;
+        crate::external::migrate(&store)?;
+        crate::password_reset::migrate(&store)?;
         Ok(store)
     }
 

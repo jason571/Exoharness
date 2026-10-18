@@ -63,28 +63,40 @@ impl Assistants {
         }) else {
             return Value::Null;
         };
-        let mut result = serde_json::Map::new();
-        for field in [
-            "id",
-            "display_name",
-            "avatar_text",
-            "avatar",
-            "description",
-            "digest",
-        ] {
-            if let Some(value) = profile.get(field) {
-                result.insert(field.into(), value.clone());
-            }
-        }
-        result.insert("revision".into(), profile["active_revision"].clone());
-        result.insert(
-            "software_engineering".into(),
-            json!(
-                profile
-                    .pointer("/access/software_engineering")
-                    .is_some_and(|value| !value.is_null())
-            ),
-        );
-        Value::Object(result)
+        project_identity(&profile)
     }
+    /// Identity projection for an assistant explicitly assigned by an
+    /// administrator to an external application. Portal publication is separate.
+    pub fn delegated_profile(&self, id: &str) -> Value {
+        self.detail(id)
+            .filter(|profile| profile["enabled"] == true)
+            .map(|profile| project_identity(&profile))
+            .unwrap_or(Value::Null)
+    }
+}
+
+fn project_identity(profile: &Value) -> Value {
+    let mut result = serde_json::Map::new();
+    for field in [
+        "id",
+        "display_name",
+        "avatar_text",
+        "avatar",
+        "description",
+        "digest",
+    ] {
+        if let Some(value) = profile.get(field) {
+            result.insert(field.into(), value.clone());
+        }
+    }
+    result.insert("revision".into(), profile["active_revision"].clone());
+    result.insert(
+        "software_engineering".into(),
+        json!(
+            profile
+                .pointer("/access/software_engineering")
+                .is_some_and(|value| !value.is_null())
+        ),
+    );
+    Value::Object(result)
 }

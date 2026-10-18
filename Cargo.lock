@@ -525,6 +525,7 @@ dependencies = [
  "postgres",
  "serde",
  "serde_json",
+ "serde_urlencoded",
  "sha2 0.10.9",
  "tempfile",
  "thiserror",
@@ -652,6 +653,7 @@ dependencies = [
  "serde_json",
  "sha2 0.10.9",
  "thiserror",
+ "url",
 ]
 
 [[package]]
@@ -725,6 +727,7 @@ version = "0.1.1"
 dependencies = [
  "exoharness-core",
  "getrandom 0.4.3",
+ "ring",
  "tempfile",
  "thiserror",
 ]
@@ -771,6 +774,7 @@ name = "exoharness-storage-postgres"
 version = "0.1.1"
 dependencies = [
  "exoharness-contracts",
+ "getrandom 0.4.3",
  "postgres",
  "r2d2",
  "r2d2_postgres",
