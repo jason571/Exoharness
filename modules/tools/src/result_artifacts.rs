@@ -2,17 +2,24 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Commercial licensing: contact flyangqn@gmail.com.
 
-//! Project explicit MCP file descriptors into UI cards, never scan prose for links.
+//! Separate declared file ownership from visibility; never scan prose for links.
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use std::collections::BTreeSet;
 pub(crate) fn collect(value: &Value) -> Vec<Value> {
-    if value["isError"] == true
-        || internal(value)
-        || value.get("structuredContent").is_some_and(internal)
-    {
+    descriptors(value)
+        .into_iter()
+        .filter(|item| !internal(item))
+        .collect()
+}
+
+/// Internal files are still inputs for later authorized operations. Visibility
+/// suppresses UI cards, not descriptor validation or permanent file ownership.
+pub(crate) fn descriptors(value: &Value) -> Vec<Value> {
+    if value["isError"] == true {
         return vec![];
     }
+    let hidden = internal(value) || value.get("structuredContent").is_some_and(internal);
     let mut items: Vec<Value> = value
         .pointer("/structuredContent/artifacts")
         .and_then(Value::as_array)
@@ -33,7 +40,6 @@ pub(crate) fn collect(value: &Value) -> Vec<Value> {
     }
     let mut seen = BTreeSet::new();
     items.iter().filter_map(|item| {
-        if internal(item) {return None;}
         let url=item["url"].as_str().or_else(||item["download_url"].as_str())?;
         let parsed=url::Url::parse(url).ok()?;
         if !matches!(parsed.scheme(),"http"|"https") || parsed.host_str().is_none() || !parsed.username().is_empty() || parsed.password().is_some() {return None;}
@@ -44,10 +50,10 @@ pub(crate) fn collect(value: &Value) -> Vec<Value> {
         let identity=item["sha256"].as_str().unwrap_or(url);
         let id=format!("mcp-artifact-{:x}",Sha256::digest(format!("{identity}\0{filename}").as_bytes()));
         if !seen.insert(format!("{url}\0{filename}")) {return None;}
-        Some(json!({"id":id,"kind":kind,"filename":filename,"content_type":mime,"url":url,"download_url":item["download_url"].as_str().unwrap_or(url),"sha256":item["sha256"],"size_bytes":item["size_bytes"],"url_ttl_seconds":item["url_ttl_seconds"]}))
+        Some(json!({"id":id,"kind":kind,"filename":filename,"content_type":mime,"url":url,"download_url":item["download_url"].as_str().unwrap_or(url),"sha256":item["sha256"],"size_bytes":item["size_bytes"],"url_ttl_seconds":item["url_ttl_seconds"],"artifact_visibility":if hidden || internal(item) {"internal"} else {"public"}}))
     }).collect()
 }
-fn internal(value: &Value) -> bool {
+pub(crate) fn internal(value: &Value) -> bool {
     value["artifact_visibility"] == "internal"
         || value.pointer("/_meta/exoharness/artifact_visibility") == Some(&json!("internal"))
         || value.pointer("/_meta/exoharness/background_task/artifact_visibility")

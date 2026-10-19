@@ -59,6 +59,7 @@ fn rejects_unknown_secret_binding() {
     });
     manifest.spec = CapabilitySpec::McpServer(crate::capability::McpServerSpec {
         namespace: "github".into(),
+        artifact_origins: vec![],
         transport: McpTransport::StreamableHttp {
             url: "https://mcp.example.test".into(),
             auth_secret: Some("missing".into()),
@@ -71,6 +72,34 @@ fn rejects_unknown_secret_binding() {
 }
 
 #[test]
+fn mcp_artifact_origins_are_explicit_bounded_origins_and_legacy_encoding_is_unchanged() {
+    let mut manifest = skill_manifest();
+    manifest.spec = CapabilitySpec::McpServer(crate::capability::McpServerSpec {
+        namespace: "files".into(),
+        artifact_origins: vec![],
+        transport: McpTransport::StreamableHttp {url: "http://127.0.0.1:8766/mcp".into(), auth_secret: None, headers: Default::default()},
+        protocol_version: None, limits: Default::default(),
+    });
+    let encoded = serde_json::to_value(&manifest).unwrap();
+    assert!(encoded.pointer("/spec/config/artifact_origins").is_none());
+    assert_eq!(serde_json::from_value::<CapabilityManifest>(encoded).unwrap(), manifest);
+    for origins in [vec!["https://media.example"], vec!["http://127.0.0.1:9790/", "https://cdn.example:443"]] {
+        let mut candidate = manifest.clone();
+        let CapabilitySpec::McpServer(spec) = &mut candidate.spec else {unreachable!()};
+        spec.artifact_origins = origins.into_iter().map(str::to_owned).collect();
+        assert!(validate_and_normalize_manifest(candidate).is_ok());
+    }
+    for origins in [vec!["https://media.example/files"], vec!["https://media.example?key=x"], vec!["https://media.example#fragment"],
+        vec!["https://secret@media.example"], vec!["file:///tmp/video"], vec!["http://public.example"],
+        vec!["https://media.example", "https://MEDIA.example:443/"], vec!["https://media.example";9]] {
+        let mut candidate = manifest.clone();
+        let CapabilitySpec::McpServer(spec) = &mut candidate.spec else {unreachable!()};
+        spec.artifact_origins = origins.into_iter().map(str::to_owned).collect();
+        assert!(validate_and_normalize_manifest(candidate).is_err());
+    }
+}
+
+#[test]
 fn validates_secret_backed_http_headers_and_rejects_plaintext_credentials() {
     let mut manifest = skill_manifest();
     manifest.secret_refs.push(SecretReference {
@@ -80,6 +109,7 @@ fn validates_secret_backed_http_headers_and_rejects_plaintext_credentials() {
     });
     manifest.spec = CapabilitySpec::McpServer(crate::capability::McpServerSpec {
         namespace: "video".into(),
+        artifact_origins: vec![],
         transport: McpTransport::StreamableHttp {
             url: "https://mcp.example.test".into(),
             auth_secret: None,

@@ -18,5 +18,16 @@ pub(crate) fn terms(query: &str) -> Vec<String> {
             }
         }
     }
+    // CJK text does not normally separate embedded technical identifiers with
+    // spaces. Keep the legacy terms and recover those identifiers as metadata
+    // search terms; this never activates tools or widens the catalog.
+    for word in
+        lower.split(|c: char| !(c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.' | '+')))
+    {
+        let word = word.trim_matches(['_', '-', '.']);
+        if word.chars().any(|c| c.is_ascii_alphabetic()) {
+            terms.insert(word.to_owned());
+        }
+    }
     terms.into_iter().collect()
 }

@@ -92,3 +92,25 @@ fn duplicate_error_private_and_non_http_links_are_not_displayed() {
     internal["_meta"] = json!({"exoharness":{"artifact_visibility":"internal"}});
     assert!(collect(&json!({"content":[internal]})).is_empty());
 }
+
+#[test]
+fn internal_outputs_are_validated_for_storage_without_becoming_public_cards() {
+    let descriptor = json!({"filename":"clip.mp4","content_type":"video/mp4","download_url":"https://media.example/clip.mp4"});
+    for value in [
+        json!({"structuredContent":{"result":descriptor,"_meta":{"exoharness":{"artifact_visibility":"internal"}}}}),
+        json!({"_meta":{"exoharness":{"artifact_visibility":"internal"}},"structuredContent":{"artifacts":[descriptor]}}),
+        json!({"structuredContent":{"result":descriptor},"_meta":{"exoharness":{"background_task":{"artifact_visibility":"internal"}}}}),
+        json!({"content":[{"type":"resource_link","uri":"https://media.example/clip.mp4","name":"clip.mp4","mimeType":"video/mp4","_meta":{"exoharness":{"artifact_visibility":"internal"}}}]}),
+    ] {
+        assert!(collect(&value).is_empty());
+        let saved = descriptors(&value);
+        assert_eq!(saved.len(), 1);
+        assert_eq!(saved[0]["artifact_visibility"], "internal");
+        assert_eq!(saved[0]["filename"], "clip.mp4");
+    }
+    for value in [
+        json!({"isError":true,"structuredContent":{"result":descriptor}}),
+        json!({"_meta":{"exoharness":{"artifact_visibility":"internal"}},"content":[{"type":"text","text":descriptor.to_string()}]}),
+        json!({"structuredContent":{"result":{"filename":"clip.mp4","content_type":"video/mp4","download_url":"file:///private/clip.mp4"}}}),
+    ] { assert!(descriptors(&value).is_empty()); }
+}

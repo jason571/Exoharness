@@ -40,6 +40,32 @@ fn project(entries: &[JournalEntry]) -> Vec<Message> {
         .unwrap()
         .messages
 }
+
+#[test]
+fn combined_skill_tool_selection_retires_discovery_but_not_instructions_or_business_data() {
+    let entries = vec![
+        JournalEntry::User("create".into()),
+        discovery(),
+        exchange(
+            "read",
+            "read_skill",
+            json!({"id":"skill"}),
+            json!({"id":"skill","revision":1,"content":"KEEP EXACT SKILL RULES","tool_selection":{"executed":false,"loaded":["renderer"]}}),
+        ),
+        exchange(
+            "business",
+            "renderer",
+            json!({"table":[[1,2]]}),
+            json!({"facts":"KEEP EXACT FACTS"}),
+        ),
+    ];
+    let original = entries.clone();
+    let text = serde_json::to_string(&project(&entries)).unwrap();
+    assert!(!text.contains("LONG TOOL DESCRIPTION"));
+    assert!(text.contains("catalog_selection_retired"));
+    assert!(text.contains("KEEP EXACT SKILL RULES") && text.contains("KEEP EXACT FACTS"));
+    assert_eq!(entries, original);
+}
 #[test]
 fn selected_discovery_becomes_small_atomic_receipt_without_changing_journal_or_data() {
     let mut entries = vec![JournalEntry::User("produce output".into()), discovery()];

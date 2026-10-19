@@ -1,4 +1,18 @@
 use super::*;
+
+#[tokio::test]
+async fn inline_sandbox_failure_cannot_be_retried_by_switching_to_its_returned_workspace() {
+    let mut failed = terminated_sandbox_failure("failed-inline");
+    failed.result["entrypoint"] = json!("build.py");
+    failed.result["runtime"] = json!("python");
+    let mut initial=proposal("initial");initial.arguments=json!({"runtime":"python","entrypoint":"build.py","files":{"build.py":"raise RuntimeError('fix saved input')"}});
+    let mut unchanged=proposal("unchanged");unchanged.arguments=json!({"workspace_id":"saved-workspace","runtime":"python","entrypoint":"build.py","expected_revision":6,"output_files":["output.pptx"]});
+    let mut driver=Fixture::new(vec![completion(vec![initial]),completion(vec![unchanged]),completion(vec![])],vec![failed]);
+    let mut current=state();
+    assert_eq!(run(&mut driver,&mut current,&policy(),"system",&BTreeSet::new(),&tools()).await,RunOutcome::Stopped(StopReason::UnchangedCorrection));
+    assert_eq!(driver.calls.len(),1);
+    assert_eq!(driver.requests.len(),2);
+}
 use exoharness_agent::project_request;
 
 #[tokio::test]
@@ -255,4 +269,82 @@ async fn changing_only_revision_or_output_selection_does_not_retry_failed_sandbo
     );
     assert!(driver.calls.is_empty());
     assert_eq!(driver.requests.len(), 1);
+}
+
+#[tokio::test]
+async fn completed_input_repair_closes_only_its_episode_and_preserves_cumulative_cost() {
+    let mut invalid = proposal("invalid");
+    invalid.arguments = json!({"wrong":true});
+    let mut driver = Fixture::new(
+        vec![completion(vec![invalid]), completion(vec![proposal("fixed")]), completion(vec![])],
+        vec![input_rejection("rejected"), receipt("fixed", ReceiptState::Completed)],
+    );
+    let mut current = state();
+    assert!(matches!(run(&mut driver,&mut current,&policy(),"system",&BTreeSet::new(),&tools()).await, RunOutcome::Finished(_)));
+    assert!(!current.recovery_active);
+    assert_eq!(current.input_corrections,1);
+    assert_eq!(current.recovery_tokens,25);
+    assert_eq!(current.reported_tokens,75);
+    assert_eq!(driver.requests[2].output_token_limit,policy().output_token_limit);
+    let restored:EngineState=serde_json::from_value(serde_json::to_value(&current).unwrap()).unwrap();
+    assert_eq!(restored.input_corrections,1);
+    assert_eq!(restored.recovery_tokens,25);
+    assert!(restored.input_recovery_targets.is_empty());
+}
+
+#[tokio::test]
+async fn valid_input_cannot_close_preexisting_or_unmeasured_recovery() {
+    for unmeasured in [false,true] {
+        let mut invalid=proposal("invalid");invalid.arguments=json!({"wrong":true});
+        let mut fixed=completion(vec![proposal("fixed")]);
+        if unmeasured {fixed.usage.input_tokens=None;}
+        let mut driver=Fixture::new(vec![completion(vec![invalid]),fixed,completion(vec![])],vec![input_rejection("rejected"),receipt("fixed",ReceiptState::Completed)]);
+        let mut current=state();
+        if !unmeasured {current.recovery_active=true;current.recovery_tokens=17;}
+        let mut limits=policy();limits.max_recovery_tokens=1_000_000;
+        let _=run(&mut driver,&mut current,&limits,"system",&BTreeSet::new(),&tools()).await;
+        assert!(current.recovery_active);
+        assert!(current.recovery_tokens>=50);
+        assert_eq!(current.input_corrections,1);
+    }
+}
+
+#[tokio::test]
+async fn input_repair_target_survives_resume_and_unrelated_success_does_not_close_it() {
+    let mut current=state();current.recovery_active=true;current.input_recovery_started=true;
+    current.input_recovery_targets.insert("registered-tool".into());current.recovery_tokens=31;current.input_corrections=1;
+    let mut restored:EngineState=serde_json::from_value(serde_json::to_value(current).unwrap()).unwrap();
+    let mut other=proposal("other");other.name="other-tool".into();
+    let mut available=tools();let mut second=available[0].clone();second.name="other-tool".into();available.push(second);
+    let mut read=receipt("other",ReceiptState::Completed);read.performed_execution=false;
+    let mut driver=Fixture::new(vec![completion(vec![other]),completion(vec![])],vec![read]);
+    let mut limits=policy();limits.requires_execution=false;
+    assert!(matches!(run(&mut driver,&mut restored,&limits,"system",&BTreeSet::new(),&available).await,RunOutcome::Finished(_)));
+    assert!(restored.recovery_active);assert_eq!(restored.recovery_tokens,81);
+    assert_eq!(restored.input_recovery_targets.len(),1);
+}
+
+#[tokio::test]
+async fn successful_authorized_fallback_closes_input_episode_but_not_prior_recovery() {
+    for prior in [false,true] {
+        let mut current=state();current.recovery_active=true;current.input_recovery_started=!prior;
+        current.input_recovery_targets.insert("invalid-original-tool".into());current.input_corrections=1;current.recovery_tokens=31;
+        let mut driver=Fixture::new(vec![completion(vec![proposal("fallback")]),completion(vec![])],vec![receipt("fallback",ReceiptState::Completed)]);
+        assert!(matches!(run(&mut driver,&mut current,&policy(),"system",&BTreeSet::new(),&tools()).await,RunOutcome::Finished(_)));
+        assert_eq!(current.recovery_active,prior);assert_eq!(current.recovery_tokens,31+if prior {50}else{25});
+        assert_eq!(current.input_corrections,1);assert!(current.input_recovery_targets.is_empty());
+    }
+}
+
+#[tokio::test]
+async fn successful_input_episodes_never_reset_the_run_correction_limit() {
+    let mut proposals=vec![];let mut receipts=vec![];
+    for n in 0..3 {
+        let mut invalid=proposal(&format!("invalid-{n}"));invalid.arguments=json!({"invalid":n});
+        proposals.push(completion(vec![invalid]));receipts.push(input_rejection(&format!("rejected-{n}")));
+        if n<2 {proposals.push(completion(vec![proposal(&format!("fixed-{n}"))]));receipts.push(receipt(&format!("fixed-{n}"),ReceiptState::Completed));}
+    }
+    let mut driver=Fixture::new(proposals,receipts);let mut current=state();
+    assert_eq!(run(&mut driver,&mut current,&policy(),"system",&BTreeSet::new(),&tools()).await,RunOutcome::Stopped(StopReason::InputRejected));
+    assert_eq!(current.input_corrections,2);assert_eq!(current.recovery_tokens,50);assert_eq!(driver.requests.len(),5);
 }

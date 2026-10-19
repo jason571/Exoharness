@@ -6,9 +6,9 @@
 //! dedicated blocking worker, never directly inside an async HTTP/model loop.
 mod artifacts;
 mod chat;
-mod task_context;
 mod codec;
 mod model_observation;
+mod task_context;
 pub use artifacts::StoredArtifact;
 mod control;
 mod conversations;

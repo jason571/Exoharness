@@ -26,6 +26,7 @@ exoharness-configuration.workspace = true
 exoharness-registry.workspace = true
 exoharness-storage-postgres.workspace = true
 serde.workspace = true
+chrono = { version = "0.4.45", default-features = false, features = ["clock", "std"] }
 serde_json.workspace = true
 thiserror.workspace = true
 tokio.workspace = true

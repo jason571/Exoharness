@@ -37,7 +37,9 @@ pub use configuration::{
     configuration_router, configuration_router_with_registry, configuration_router_with_runtime,
 };
 pub use conversations::conversation_router;
-pub use identity::{identity_router, identity_router_with_registry, identity_router_with_public_url};
+pub use identity::{
+    identity_router, identity_router_with_public_url, identity_router_with_registry,
+};
 pub use knowledge::{knowledge_router, knowledge_router_with_sandbox};
 pub use management::management_router;
 pub use mcp::mcp_router;

@@ -8,19 +8,28 @@ use exoharness_contracts::model::{
 };
 use exoharness_core::context::JournalEntry;
 use serde_json::json;
+#[path = "unit/failure_finalization.rs"]
+mod failure_finalization;
+#[path = "unit/model_correction.rs"]
+mod model_correction;
 #[path = "unit/read_loop.rs"]
 mod read_loop;
 #[path = "unit/read_loop_recorded.rs"]
 mod read_loop_recorded;
 #[path = "unit/recovery_budget.rs"]
 mod recovery_budget;
-#[path = "unit/failure_finalization.rs"]
-mod failure_finalization;
+#[path = "unit/run_budget.rs"]
+mod run_budget;
+#[path = "unit/sandbox_episode.rs"]
+mod sandbox_episode;
 use std::{
     collections::{BTreeSet, VecDeque},
     sync::{Arc, Mutex},
 };
 struct Fixture {
+    model_failures: std::collections::BTreeMap<usize, exoharness_agent::FailedModel>,
+    failed_model: Option<exoharness_agent::FailedModel>,
+    initial_discovery: Option<exoharness_agent::InitialDiscovery>,
     completions: VecDeque<Completion>,
     receipts: VecDeque<Receipt>,
     keyed_receipts: std::collections::BTreeMap<String, Receipt>,
@@ -35,6 +44,9 @@ struct Fixture {
 impl Fixture {
     fn new(completions: Vec<Completion>, receipts: Vec<Receipt>) -> Self {
         Self {
+            model_failures: Default::default(),
+            failed_model: None,
+            initial_discovery: None,
             completions: completions.into(),
             receipts: receipts.into(),
             keyed_receipts: std::collections::BTreeMap::new(),
@@ -50,11 +62,21 @@ impl Fixture {
 }
 #[async_trait]
 impl Driver for Fixture {
+    fn take_model_failure(&mut self) -> Option<exoharness_agent::FailedModel> {
+        self.failed_model.take()
+    }
+    fn initial_discovery(&self) -> Option<&exoharness_agent::InitialDiscovery> {
+        self.initial_discovery.as_ref()
+    }
     fn cancelled(&self) -> bool {
         self.cancelled
     }
     async fn model(&mut self, _: &str, request: ChatRequest) -> Result<Completion, StopReason> {
         self.requests.push(request);
+        if let Some(failure) = self.model_failures.remove(&self.requests.len()) {
+            self.failed_model = Some(failure);
+            return Err(StopReason::ModelIncomplete);
+        }
         self.completions
             .pop_front()
             .ok_or(StopReason::ModelIncomplete)
@@ -158,6 +180,78 @@ fn unavailable_service(id: &str) -> Receipt {
     r.performed_execution = false;
     r.result = json!({"isError":true,"_host_service_unavailable":1,"code_executed":false,"message":"MCP initialization unavailable"});
     r
+}
+
+#[tokio::test]
+async fn discovery_projection_changes_only_after_activation_in_the_real_engine_loop() {
+    let mut state = state();
+    let initial_discovery = Some(exoharness_agent::InitialDiscovery::new(
+        json!({"items":[{"kind":"capability","id":"provider","name":"Renderer","revision":1,
+            "description":"RECOGNITION ONLY ".repeat(100)}]}),
+        vec![],
+    ));
+    let activate = ToolCall {
+        id: "select".into(),
+        name: "activate_tools".into(),
+        arguments: json!({"names":["registered-tool"]}),
+    };
+    let mut activation_receipt = receipt("selection", ReceiptState::Completed);
+    activation_receipt.performed_execution = false;
+    activation_receipt.result = json!({"executed":false,"loaded":["registered-tool"]});
+    let mut driver = Fixture::new(
+        vec![
+            completion(vec![activate]),
+            completion(vec![proposal("render")]),
+            completion(vec![]),
+        ],
+        vec![
+            activation_receipt,
+            receipt("render", ReceiptState::Completed),
+        ],
+    );
+    driver.initial_discovery = initial_discovery;
+    let mut schemas = tools();
+    schemas.push(Tool {
+        name: "activate_tools".into(),
+        description: "Activate exact tools".into(),
+        input_schema: json!({"type":"object"}),
+    });
+    assert_eq!(
+        run(
+            &mut driver,
+            &mut state,
+            &policy(),
+            "KEEP POLICY",
+            &BTreeSet::new(),
+            &schemas
+        )
+        .await,
+        RunOutcome::Finished("done".into())
+    );
+    assert_eq!(driver.requests.len(), 3);
+    for (index, request) in driver.requests.iter().enumerate() {
+        let Message::System { text } = &request.messages[0] else {
+            panic!("system message required")
+        };
+        assert!(text.starts_with("KEEP POLICY\n"));
+        assert_eq!(text.contains("RECOGNITION ONLY"), index == 0);
+        assert_eq!(
+            serde_json::to_value(&request.tools).unwrap(),
+            serde_json::to_value(&schemas).unwrap()
+        );
+    }
+    assert_eq!(driver.calls.len(), 2);
+    assert_eq!(state.model_calls, 3);
+    assert!(
+        !serde_json::to_value(&state)
+            .unwrap()
+            .to_string()
+            .contains("RECOGNITION ONLY")
+    );
+    assert!(state.entries.iter().any(
+        |entry| matches!(entry, JournalEntry::ToolExchange { tool, arguments, .. }
+        if tool == "registered-tool" && arguments["native_array"] == json!([{"n":1}]))
+    ));
 }
 
 #[tokio::test]

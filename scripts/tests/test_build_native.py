@@ -12,6 +12,20 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
 class NativeBuildTests(unittest.TestCase):
+    def evaluation_fixture(self, root):
+        for module in ('benchmark', 'evolution'):
+            folder = root / 'modules' / module
+            (folder / 'src' / module).mkdir(parents=True)
+            (folder / 'pyproject.toml').write_text('[project]\nname="fixture"\nversion="0.1.2"\n')
+            (folder / 'src' / module / '__init__.py').write_text('# public code\n')
+        for name in MODULE.EVALUATION_SCRIPTS:
+            source = root / 'scripts' / name
+            source.parent.mkdir(parents=True, exist_ok=True)
+            source.write_text('# public entrypoint\n')
+        skill = root / 'skills/workflow-evolution/SKILL.md'
+        skill.parent.mkdir(parents=True)
+        skill.write_text('Executable learning instructions\n')
+
     def test_skip_web_packages_current_prebuilt_assets_not_stale_release(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);output=root/'release';binary=root/'target/exoharness'
@@ -21,6 +35,7 @@ class NativeBuildTests(unittest.TestCase):
                 path=root/name
                 path.parent.mkdir(parents=True,exist_ok=True)
                 if not path.exists():path.write_text('public package document')
+            self.evaluation_fixture(root)
             calls=[]
             def command(argv,**kwargs):
                 calls.append(argv)
@@ -39,6 +54,32 @@ class NativeBuildTests(unittest.TestCase):
                 self.assertEqual((output/name).read_bytes(),(root/source).read_bytes())
                 self.assertIn(name,[item['file'] for item in manifest['files']])
             self.assertFalse(any(argv[0] in ('npm','docker') for argv in calls))
+
+    def test_evaluation_package_contains_execution_sources_only(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); output = root / 'release'
+            self.evaluation_fixture(root)
+            for name in ('modules/benchmark/auth.json', 'modules/evolution/private.json',
+                         'modules/evolution/src/evolution/__pycache__/cached.pyc',
+                         'skills/workflow-evolution/private-notes.md', 'scripts/credentials.json'):
+                path = root / name; path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('must not ship')
+            with patch.object(MODULE, 'ROOT', root):
+                MODULE.package_evaluation(output)
+                sources = MODULE.evaluation_sources()
+                expected = sorted('evaluation/' + str(p.relative_to(root)) for p in sources)
+                actual = sorted(p['file'] for p in MODULE.release_inventory(output))
+            self.assertEqual(actual, expected)
+            self.assertEqual(len(actual), 9)
+            self.assertTrue((output/'evaluation/skills/workflow-evolution/SKILL.md').is_file())
+            self.assertFalse(any('credentials' in name or '__pycache__' in name or 'private' in name for name in actual))
+
+    def test_missing_runtime_skill_rejects_incomplete_evaluation_package(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); self.evaluation_fixture(root)
+            (root/'skills/workflow-evolution/SKILL.md').unlink()
+            with patch.object(MODULE, 'ROOT', root), self.assertRaisesRegex(ValueError, 'evaluation source'):
+                MODULE.package_evaluation(root/'release')
 
     def test_release_inventory_excludes_data_secrets_and_cache(self):
         with tempfile.TemporaryDirectory() as directory:

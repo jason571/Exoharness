@@ -116,11 +116,18 @@ pub(super) fn parse(value: Value) -> Result<Completion> {
                 Ok(ToolCall {
                     id: text(call, "id")?.into(),
                     name: text(&call["function"], "name")?.into(),
-                    arguments: strict_json::parse(text(&call["function"], "arguments")?)
-                        .map_err(|_| error(ErrorKind::InvalidResponse))?,
+                    arguments: strict_json::parse(text(&call["function"], "arguments")?).map_err(
+                        |_| {
+                            error(ErrorKind::InvalidResponse)
+                                .with_response_diagnostic("tool_arguments_invalid_json")
+                        },
+                    )?,
                 })
             };
-            calls.push(parse().map_err(|_| error(ErrorKind::InvalidResponse))?);
+            calls.push(parse().map_err(|mut error| {
+                error.usage = Some(usage.clone());
+                error
+            })?);
         }
     }
     finish(

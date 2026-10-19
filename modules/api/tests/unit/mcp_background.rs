@@ -35,10 +35,7 @@ async fn declared_background_task_waits_five_polls_without_model_repetition_and_
             receipt["structuredContent"]["status"],
             if failed { "failed" } else { "completed" }
         );
-        assert_eq!(
-            f.upstream.requests.lock().unwrap().len(),
-            3
-        );
+        assert_eq!(f.upstream.requests.lock().unwrap().len(), 3);
         {
             let requests = remote.state.requests.lock().unwrap();
             assert_eq!(
@@ -191,11 +188,13 @@ async fn later_model_failure_keeps_completed_artifacts_in_history_and_terminal_e
     })
     .await;
     let name = exoharness_tools::public_name("mcp_server:global:_:fixture", "echo");
+    let mut truncated = answer();
+    truncated["choices"][0]["finish_reason"] = json!("length");
     let f = fixture(
         vec![
             tool("activate_tools", json!({"names":[name]})),
             tool(&name, json!({"text":"start once"})),
-            tool("not_loaded", json!({})),
+            truncated,
         ],
         true,
     )

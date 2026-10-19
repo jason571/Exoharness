@@ -88,7 +88,11 @@ impl PostgresStore {
         if record.enabled == enabled {
             return Ok(record);
         }
-        record.revision = record.revision.checked_add(1).ok_or(StoreError::Conflict)?;
+        let latest: i64 = tx.query_one(
+            "SELECT GREATEST($2::BIGINT,COALESCE(MAX(revision),0)) FROM capability_versions WHERE capability_id=$1",
+            &[&id, &record.revision],
+        )?.get(0);
+        record.revision = latest.checked_add(1).ok_or(StoreError::Conflict)?;
         record.enabled = enabled;
         record.updated_at = time;
         tx.execute(

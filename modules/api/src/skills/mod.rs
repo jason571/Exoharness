@@ -35,6 +35,7 @@ pub fn skills_router(api: ApiState, skills: Arc<Skills>) -> Router {
             get(reads::instructions),
         )
         .route("/v1/capabilities/{id}/skill-files", get(reads::files))
+        .route("/v1/capabilities/{id}/skill-package", get(reads::package))
         .layer(DefaultBodyLimit::max(96 * 1024 * 1024))
         .layer(middleware::from_fn_with_state(api, auth::gate))
         .with_state(SkillState { skills })

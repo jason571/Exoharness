@@ -1,6 +1,11 @@
 use super::*;
 
 #[test]
+fn model_response_diagnostics_remain_in_trace() {
+    assert!(event(json!({"type":"model_response_correction","diagnostic":"tool_arguments_json","usage":{"total_tokens":123}})).is_none());
+}
+
+#[test]
 fn partial_answer_is_visible_without_publishing_private_failure_fields() {
     let value=event(json!({"type":"failed","message":"private stack","public_notice":{"code":"task_processing_limited"},"response":{"answer":"13×24=312，动画暂时不可用。","partial_result":true,"model_error":{"detail":"private stack"},"usage":{"total_tokens":88}}})).unwrap();
     assert_eq!(value["response"]["partial_result"], true);

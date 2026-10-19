@@ -135,6 +135,11 @@ fn default_dot() -> String {
 pub struct McpServerSpec {
     pub namespace: String,
     pub transport: McpTransport,
+    /// Administrator-approved origins for declared output files when the
+    /// download boundary differs from the MCP endpoint. No credentials or
+    /// redirects are forwarded. Empty retains endpoint-origin-only delivery.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub artifact_origins: Vec<String>,
     /// Optional protocol version pin. `None` means negotiate a supported
     /// version during discovery.
     #[serde(default)]

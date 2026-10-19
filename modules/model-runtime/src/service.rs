@@ -203,7 +203,14 @@ impl ModelRuntime {
         if revision.is_some_and(|expected| binding.revision != expected) {
             return Err(ModelError::new(ErrorKind::Configuration));
         }
-        self.chat_with_sink(&binding, &request, sink).await
+        self.chat_with_sink(&binding, &request, sink)
+            .await
+            .map_err(|mut error| {
+                error.binding = Some(Box::new(serde_json::json!({"name":binding.model["name"],
+                "provider":binding.provider["name"],"model_id":binding.model["model_id"],
+                "configuration_revision":binding.revision,"api":"chat"})));
+                error
+            })
     }
     async fn bind(&self, name: &str) -> Result<ModelBinding> {
         let binding_permit = self

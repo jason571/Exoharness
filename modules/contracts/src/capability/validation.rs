@@ -212,6 +212,36 @@ fn validate_spec(
         }
         CapabilitySpec::McpServer(spec) => {
             validate_identifier("mcp.namespace", &spec.namespace, MAX_NAME_LEN)?;
+            if spec.artifact_origins.len() > 8 {
+                return Err(ManifestError::Validation(
+                    "MCP artifact_origins accepts at most 8 origins".into(),
+                ));
+            }
+            let mut origins = HashSet::new();
+            for origin in &spec.artifact_origins {
+                validate_mcp_http_url("mcp.artifact_origins", origin)?;
+                let parsed: http::Uri = origin
+                    .parse()
+                    .map_err(|_| ManifestError::Validation("Invalid MCP artifact origin".into()))?;
+                let port = parsed
+                    .port_u16()
+                    .unwrap_or(if parsed.scheme_str() == Some("https") {
+                        443
+                    } else {
+                        80
+                    });
+                if !matches!(parsed.path(), "" | "/")
+                    || parsed.query().is_some()
+                    || origin.contains('#')
+                    || !origins.insert((
+                        parsed.scheme_str().unwrap().to_owned(),
+                        parsed.host().unwrap().to_lowercase(),
+                        port,
+                    ))
+                {
+                    return Err(ManifestError::Validation("MCP artifact_origins must contain unique HTTP(S) origins without paths, queries or fragments".into()));
+                }
+            }
             if spec.limits.max_concurrency == 0 || spec.limits.max_concurrency > 1024 {
                 return Err(ManifestError::Validation(
                     "MCP max_concurrency must be in 1..=1024".into(),

@@ -213,7 +213,10 @@ fn replay_large_search_to_video_requests_losslessly() {
         )
         .unwrap();
         assert_eq!(entries, original);
-        assert_eq!(serde_json::to_value(&projected.tools).unwrap(), serde_json::to_value(&sample.request.tools).unwrap());
+        assert_eq!(
+            serde_json::to_value(&projected.tools).unwrap(),
+            serde_json::to_value(&sample.request.tools).unwrap()
+        );
         for (index, message) in projected.messages.iter().enumerate() {
             if let Message::Assistant { calls, .. } = message
                 && !calls.is_empty()

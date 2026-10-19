@@ -541,3 +541,77 @@ async fn malformed_native_json_has_clear_nonresumable_errors_and_does_not_regist
         json!([])
     );
 }
+
+#[tokio::test]
+async fn immutable_skill_export_is_admin_only_revision_bound_and_binary_safe() {
+    let f = fixture().await;
+    let mut input = package("export exact bytes");
+    let bytes = [0u8, 255, 127, 13, 10];
+    input["files"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"path":"fixture/references/raw.bin","content_base64":STANDARD.encode(bytes)}));
+    let (status, imported) = call(&f, "POST", "/v1/imports/skill", input.clone()).await;
+    assert_eq!(status, StatusCode::OK, "{imported}");
+    let record = &imported["capabilities"][0];
+    let path = format!(
+        "/v1/capabilities/{}/skill-package",
+        record["id"].as_str().unwrap()
+    );
+    let exact = format!("{path}?revision={}", record["revision"]);
+    let (status, exported) = raw(&f.router, "GET", &exact, Some(ADMIN), String::new()).await;
+    assert_eq!(status, StatusCode::OK, "{exported}");
+    assert_eq!(&exported["capability"], record);
+    let file = exported["files"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|f| f["path"] == "references/raw.bin")
+        .unwrap();
+    assert_eq!(
+        STANDARD
+            .decode(file["content_base64"].as_str().unwrap())
+            .unwrap(),
+        bytes
+    );
+    for token in [Some(READONLY), Some(USER), None] {
+        let (status, _) = raw(&f.router, "GET", &exact, token, String::new()).await;
+        assert!(matches!(
+            status,
+            StatusCode::FORBIDDEN | StatusCode::UNAUTHORIZED
+        ));
+    }
+    assert_eq!(
+        raw(&f.portal, "GET", &exact, Some(ADMIN), String::new())
+            .await
+            .0,
+        StatusCode::NOT_FOUND
+    );
+    for query in ["", "?revision=bad", "?revision=1&unknown=true"] {
+        assert_eq!(
+            raw(
+                &f.router,
+                "GET",
+                &format!("{path}{query}"),
+                Some(ADMIN),
+                String::new()
+            )
+            .await
+            .0,
+            StatusCode::BAD_REQUEST
+        );
+    }
+    input["expected_revision"] = record["revision"].clone();
+    input["files"][0]["content_base64"] =
+        json!(STANDARD.encode(
+            "---\nname: http-fixture\ndescription: HTTP fixture instructions\n---\nupdated"
+        ));
+    let (status, _) = call(&f, "POST", "/v1/imports/skill", input).await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(
+        raw(&f.router, "GET", &exact, Some(ADMIN), String::new())
+            .await
+            .0,
+        StatusCode::CONFLICT
+    );
+}

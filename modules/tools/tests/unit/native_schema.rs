@@ -3,6 +3,30 @@ use crate::validate;
 use serde_json::json;
 
 #[test]
+fn skill_read_accepts_optional_bounded_typed_loading_and_preserves_legacy_calls() {
+    let schema = super::base()
+        .into_iter()
+        .find(|t| t.name == "read_skill")
+        .unwrap()
+        .input_schema;
+    for args in [
+        json!({"id":"skill"}),
+        json!({"id":"skill","path":"SKILL.md","load_tools":[]}),
+        json!({"id":"skill","load_tools":["sandbox_run","workspace_read"]}),
+    ] {
+        assert!(validate(&schema, &args).is_ok());
+    }
+    for args in [
+        json!({"id":"skill","load_tools":"sandbox_run"}),
+        json!({"id":"skill","load_tools":[""]}),
+        json!({"id":"skill","load_tools":["sandbox_run","sandbox_run"]}),
+        json!({"id":"skill","load_tools":(0..17).map(|n|format!("tool{n}")).collect::<Vec<_>>()}),
+    ] {
+        assert!(validate(&schema, &args).is_err());
+    }
+}
+
+#[test]
 fn discovery_accepts_scopes_exact_batches_and_bound_cursors_without_widening_schemas() {
     let schema = super::base()
         .into_iter()

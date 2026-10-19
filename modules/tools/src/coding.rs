@@ -5,7 +5,7 @@
 //! Engineering adapter over the existing authorized workspace and OCI service.
 use crate::{
     Catalog, DispatchResult, Result, ToolError, ToolRuntime,
-    workspace::{task_error, workspace_receipt},
+    workspace::{edit_error, task_error, workspace_receipt},
 };
 use exoharness_model_runtime::CancellationToken;
 use serde_json::{Value, json};
@@ -135,12 +135,7 @@ impl ToolRuntime {
                             &invocation,
                             input["patch"].as_str().ok_or(ToolError::Authorization)?,
                         )
-                        .map_err(|error| match error {
-                            exoharness_sandbox::SandboxError::PatchRejected(message) => {
-                                ToolError::CorrectableInput(message)
-                            }
-                            other => task_error(other),
-                        })?,
+                        .map_err(edit_error)?,
                 )
                 .map_err(|_| ToolError::Storage),
                 _ => Err(ToolError::Authorization),

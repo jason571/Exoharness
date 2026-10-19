@@ -57,8 +57,15 @@ pub(super) fn compact_selected_descriptions(items: &mut [ContextItem], entries: 
         if result["isError"] == true || result["is_error"] == true {
             continue;
         }
-        if tool == "activate_tools" && result["executed"] == false {
-            if let Some(names) = result["loaded"].as_array() {
+        let selection = if tool == "activate_tools" {
+            result
+        } else if tool == "read_skill" {
+            &result["tool_selection"]
+        } else {
+            &serde_json::Value::Null
+        };
+        if selection["executed"] == false {
+            if let Some(names) = selection["loaded"].as_array() {
                 loaded.extend(names.iter().filter_map(|n| n.as_str()));
                 selection_completed |= !names.is_empty();
             }

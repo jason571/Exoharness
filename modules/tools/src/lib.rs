@@ -24,6 +24,7 @@ mod schema;
 mod selection;
 mod service;
 mod skill_context;
+mod skill_resources;
 mod workflow;
 mod workspace;
 pub use admission::allowed;

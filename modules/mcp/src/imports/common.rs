@@ -36,6 +36,8 @@ struct Config {
     protocol_version: Option<String>,
     #[serde(default, alias = "maxConcurrency")]
     max_concurrency: Option<u32>,
+    #[serde(default)]
+    artifact_origins: Vec<String>,
 }
 pub(super) fn manifest(
     request: &ImportRequest,
@@ -123,6 +125,7 @@ pub(super) fn manifest(
         spec: CapabilitySpec::McpServer(McpServerSpec {
             namespace: config.namespace.unwrap_or_else(|| name.into()),
             transport,
+            artifact_origins: config.artifact_origins,
             protocol_version: config.protocol_version,
             limits,
         }),

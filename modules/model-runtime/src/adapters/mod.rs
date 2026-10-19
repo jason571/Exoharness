@@ -55,11 +55,13 @@ pub(crate) fn parse(
         .flatten()
         .collect::<std::collections::BTreeSet<_>>();
     for call in &output.calls {
-        if !ids.insert(&call.id)
-            || !crate::validation::name(&call.name)
+        if !ids.insert(&call.id) {
+            return Err(bad().with_response_diagnostic("tool_call_id_reused"));
+        }
+        if !crate::validation::name(&call.name)
             || !request.tools.iter().any(|tool| tool.name == call.name)
         {
-            return Err(bad());
+            return Err(bad().with_response_diagnostic("tool_name_not_loaded"));
         }
     }
     match &request.tool_choice {
@@ -128,8 +130,12 @@ fn finish(
         return Err(error(ErrorKind::InvalidResponse));
     }
     for call in &calls {
-        if call.id.is_empty() || call.id.len() > 256 || !call.arguments.is_object() {
+        if call.id.is_empty() || call.id.len() > 256 {
             return Err(error(ErrorKind::InvalidResponse));
+        }
+        if !call.arguments.is_object() {
+            return Err(error(ErrorKind::InvalidResponse)
+                .with_response_diagnostic("tool_arguments_not_object"));
         }
     }
     Ok(Completion {

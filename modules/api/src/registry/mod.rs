@@ -5,6 +5,7 @@
 //! Registry HTTP composition; imports and execution belong to their modules.
 mod assistants;
 mod details;
+mod mcp_outputs;
 mod preparation;
 mod reads;
 mod removal;
@@ -54,6 +55,10 @@ pub fn registry_router_with_runtime(
         .route(
             "/v1/capabilities/{id}/permissions",
             get(details::permissions),
+        )
+        .route(
+            "/v1/capabilities/{id}/artifact-origins",
+            axum::routing::put(mcp_outputs::update),
         )
         .route(
             "/v1/capabilities/{id}/permissions/{permission}",

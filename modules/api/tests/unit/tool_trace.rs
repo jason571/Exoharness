@@ -63,7 +63,9 @@ async fn failed_run_trace_is_visible_with_exact_arguments_result_usage_and_reque
     .await;
     assert_eq!(status, StatusCode::OK);
     assert_eq!(sessions[0]["id"], session);
-    assert_eq!(sessions[0]["model_call_count"], 4);
+    // The inline-to-workspace transition no longer submits an unchanged rerun.
+    assert_eq!(sessions[0]["model_call_count"], 3);
+    assert_eq!(f.upstream.requests.lock().unwrap().len(), 3);
     let (_, runs) = get(
         &router,
         &format!("/v1/trace/runs?session_id={session}"),
@@ -83,6 +85,7 @@ async fn failed_run_trace_is_visible_with_exact_arguments_result_usage_and_reque
     .await;
     assert_eq!(status, StatusCode::OK);
     assert_eq!(detail["run"]["status"], "failed");
+    assert_eq!(detail["invocations"].as_array().unwrap().len(), 2);
     assert_eq!(detail["events"].as_array().unwrap().len(), 1);
     assert!(
         detail["invocations"][1]["result"]["execution"]["stderr"]

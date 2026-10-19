@@ -109,6 +109,7 @@ pub(crate) fn event(mut payload: Value) -> Option<Value> {
             | "mcp_background_task"
             | "mcp_background_retry"
             | "mcp_background_reconciliation"
+            | "model_response_correction"
             | "execution_recovery_budget",
         ) => None,
         Some("recoverable") => {

@@ -48,6 +48,14 @@ pub(super) fn external(
             summary[key] = value.clone();
         }
     }
+    // File ownership is host evidence needed by later workspace operations,
+    // even when a provider's compact checkpoint omits it. Visibility remains
+    // separate: these handles never create conversation artifact cards.
+    for key in ["_host_saved_artifacts", "_host_delivered_artifacts"] {
+        if let Some(files) = result.get(key) {
+            summary[key] = files.clone();
+        }
+    }
     if let Some(directive) = meta.get("workflow_continuation") {
         let names = catalog.resolve_workflow(binding, directive)?;
         if directive["status"] == "complete" {

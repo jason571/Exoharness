@@ -43,6 +43,18 @@ impl ToolRuntime {
                 )?
             }
             "read_skill" => {
+                let load: Vec<String> = call
+                    .arguments
+                    .get("load_tools")
+                    .map(|names| serde_json::from_value(names.clone()))
+                    .transpose()
+                    .map_err(|_| {
+                        ToolError::Input("load_tools must contain executable names".into())
+                    })?
+                    .unwrap_or_default();
+                // Validate before reading or caching instructions. A rejected
+                // selection must not make the first root read disappear.
+                catalog.selection(&load, "add")?;
                 let id = call.arguments["id"]
                     .as_str()
                     .ok_or(ToolError::Authorization)?;
@@ -62,7 +74,21 @@ impl ToolRuntime {
                 }
                 let record = self.current(catalog, owner, id).await?;
                 let path = call.arguments["path"].as_str().unwrap_or("SKILL.md");
-                if catalog.read.contains(&(id.into(), path.into())) {
+                // A retrieval hint must not invalidate an ordinary immutable
+                // file read. Root and explicit reference reads retain their
+                // complete content and canonical cache identity. Only the
+                // declared index uses query to select additional resources.
+                let query = call.arguments["query"]
+                    .as_str()
+                    .filter(|_| path == crate::skill_resources::INDEX);
+                let read_key = query.map_or_else(
+                    || path.to_owned(),
+                    |q| {
+                        use sha2::{Digest, Sha256};
+                        format!("{path}?query={:x}", Sha256::digest(q.as_bytes()))
+                    },
+                );
+                let mut value = if catalog.read.contains(&(id.into(), read_key.clone())) {
                     json!({"id":id,"revision":record.revision,"path":path,"already_loaded":true,"message":"Exact content remains in the preceding tool result; do not read it again.","execution_guidance":catalog.execution_guidance()})
                 } else {
                     let skills = self.skills.clone();
@@ -75,17 +101,19 @@ impl ToolRuntime {
                     .map_err(|_| ToolError::Storage)?
                     .map_err(|_| ToolError::Authorization)?;
                     let bytes = package.files.get(path).ok_or_else(|| {
-                        ToolError::Input("技能包中没有此相对路径；未读取宿主机文件".into())
+                        ToolError::CorrectableInput("The requested relative file is not in this authorized Skill package. Read SKILL.md for its supported references; do not repeat this missing path or infer task-wide missing permissions. No execution was submitted.".into())
                     })?;
                     if bytes.len() > 256 * 1024 {
-                        return Err(ToolError::Input(
+                        return Err(ToolError::CorrectableInput(
                             "文件过大，请先选择较小的参考文件；未将二进制或大文件发送给模型".into(),
                         ));
                     }
                     let text = std::str::from_utf8(bytes).map_err(|_| {
-                        ToolError::Input("此文件不是UTF-8说明文件；不返回编码数据".into())
+                        ToolError::CorrectableInput("This package file is not a UTF-8 instruction resource. Read SKILL.md for the supported file workflow; do not repeat a binary read. No execution was submitted.".into())
                     })?;
-                    catalog.read.insert((id.into(), path.into()));
+                    let resources = query
+                        .map(|q| crate::skill_resources::select(&package.files, q))
+                        .transpose()?;
                     let context = if path == "SKILL.md" {
                         crate::skill_context::compile(
                             catalog,
@@ -97,20 +125,44 @@ impl ToolRuntime {
                     } else {
                         None
                     };
+                    let mut combined = load.clone();
+                    if let Some(context) = &context
+                        && context["auto_activate_entry"] == true
+                    {
+                        let names: Vec<String> =
+                            serde_json::from_value(context["entry_tools"].clone())
+                                .map_err(|_| ToolError::Storage)?;
+                        combined.extend(names);
+                    }
+                    let selected = catalog.selection(&combined, "add")?;
                     let mut value = json!({"id":id,"revision":record.revision,"path":path,"content":text,"files":package.files.keys().collect::<Vec<_>>(),"execution_guidance":catalog.execution_guidance()});
+                    if let Some(resources) = resources {
+                        // Keep the canonical root untouched; this separate resource read
+                        // carries complete selected files and their immutable hashes.
+                        value["content"] = json!(resources.to_string());
+                        value["selected_resources"] = json!(
+                            resources["resources"]
+                                .as_array()
+                                .unwrap()
+                                .iter()
+                                .map(|r| {
+                                    json!({"id":r["id"],"path":r["path"],"sha256":r["sha256"]})
+                                })
+                                .collect::<Vec<_>>()
+                        );
+                        value.as_object_mut().unwrap().remove("files");
+                    }
+                    catalog.active = selected;
+                    catalog.read.insert((id.into(), read_key));
                     if let Some(context) = context {
-                        if context["auto_activate_entry"] == true {
-                            // A verified immutable package can load uniquely
-                            // resolved authorized schemas, never grant or run tools.
-                            let names: Vec<String> =
-                                serde_json::from_value(context["entry_tools"].clone())
-                                    .map_err(|_| ToolError::Storage)?;
-                            catalog.active.extend(names);
-                        }
                         value["_host_skill_context"] = context;
                     }
                     value
+                };
+                if !load.is_empty() {
+                    value["tool_selection"] = catalog.activate_with_mode(&load, "add")?;
                 }
+                value
             }
             _ if binding.capability == SANDBOX_ID => {
                 if call.name.starts_with("coding_") {
@@ -201,8 +253,8 @@ impl ToolRuntime {
                         .find(|v| v["name"] == binding.raw_name)
                         .ok_or(ToolError::Authorization)?;
                     if live["inputSchema"] != binding.tool.input_schema {
-                        return Err(ToolError::Input(
-                            "MCP Schema已变化，请重新验证服务后开启新运行；未执行".into(),
+                        return Err(ToolError::UnavailableBeforeExecution(
+                            "MCP Schema已变化；当前固定工具版本不可执行，未提交业务调用。保留原始数据并使用当前已授权的其他接口；管理员可重新验证服务供后续新运行使用",
                         ));
                     }
                     validate(&live["inputSchema"], &call.arguments)?;
@@ -224,7 +276,7 @@ impl ToolRuntime {
                             }
                             _ => ToolError::Input("MCP拒绝了调用；原始协议记录保留在服务端".into()),
                         })?;
-                    let value = self
+                    let mut value = self
                         .observe_mcp(
                             catalog,
                             owner,
@@ -239,6 +291,12 @@ impl ToolRuntime {
                             &progress,
                         )
                         .await?;
+                    // These top-level receipts can only be authored by the
+                    // host. Preserve all actual MCP business fields.
+                    if let Some(object) = value.as_object_mut() {
+                        object.remove("_host_delivered_artifacts");
+                        object.remove("_host_saved_artifacts");
+                    }
                     delivered = Some(
                         self.deliver_mcp_outputs(
                             catalog,
@@ -259,16 +317,21 @@ impl ToolRuntime {
                 operation?
             }
         };
-        if let Some(cards) = &delivered
-            && !cards.is_empty()
-        {
+        if let Some(outputs) = &delivered {
             // Preserve the exact MCP fields; host delivery receipts are
             // separate metadata, not changes to the service result.
-            value["_host_delivered_artifacts"] = json!(cards);
+            if !outputs.cards.is_empty() {
+                value["_host_delivered_artifacts"] = json!(outputs.cards);
+            }
+            if !outputs.saved.is_empty() {
+                value["_host_saved_artifacts"] = json!(outputs.saved);
+            }
         }
         Ok(DispatchResult {
             failed: value["isError"] == true,
-            artifacts: delivered.unwrap_or_else(|| crate::result_artifacts::collect(&value)),
+            artifacts: delivered
+                .map(|outputs| outputs.cards)
+                .unwrap_or_else(|| crate::result_artifacts::collect(&value)),
             value,
             executed,
         })

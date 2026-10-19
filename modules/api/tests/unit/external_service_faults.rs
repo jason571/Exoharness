@@ -1,4 +1,98 @@
 use super::*;
+
+#[tokio::test]
+async fn changed_schema_replans_before_submission_without_repinning_or_calling_upstream() {
+    for enum_widening in [false, true] {
+        let live_schema = json!({"type":"object","properties":{"text":{"type":"string","enum":["general","news"],"description":"Expanded categories"}},"required":["text"]});
+        let remote = mcp_server::server(mcp_server::StateData {
+            echo_input_schema: enum_widening.then_some(live_schema),
+            ..Default::default()
+        })
+        .await;
+        let name = exoharness_tools::public_name("mcp_server:global:_:fixture", "echo");
+        let f=fixture(vec![tool("activate_tools",json!({"names":[name]})),tool(&name,json!({"text":"general"})),
+            tool("activate_tools",json!({"names":["sandbox_run"]})),
+            tool("sandbox_run",json!({"runtime":"python","entrypoint":"main.py","files":{"main.py":"from pathlib import Path\nPath('/work/final.txt').write_text('authorized fallback')\n"},"output_files":["final.txt"]})),answer()],true).await;
+        register_mcp(&f, &remote.url).await;
+        let registry = f.tools.registry.clone();
+        let frozen = tokio::task::spawn_blocking(move || {
+            let id = "mcp_server:global:_:fixture";
+            let record = registry
+                .0
+                .capability(&RegistryAccess::Administrator, id)
+                .unwrap();
+            let mut cached = registry
+                .0
+                .discovered_tools(&RegistryAccess::Administrator, id)
+                .unwrap();
+            let schema =
+                &mut cached.iter_mut().find(|v| v["name"] == "echo").unwrap()["inputSchema"];
+            if enum_widening {
+                // The production Tavily incident: const general became enum
+                // general/news plus documentation changes after registration.
+                schema["properties"]["text"] =
+                    json!({"type":"string","const":"general","description":"Original category"});
+            } else {
+                schema["properties"]["legacy_optional"] = json!({"type":"string"});
+            }
+            registry
+                .0
+                .observe_capability(
+                    &RegistryAccess::Administrator,
+                    id,
+                    record.revision,
+                    Some(&cached),
+                    &json!({}),
+                    "admin",
+                )
+                .unwrap();
+            (record.revision, cached)
+        })
+        .await
+        .unwrap();
+        let (session, run) = start(&f).await;
+        assert_eq!(terminal(&f, &run).await, RunState::Succeeded);
+        let rejected = invocation(&f, &session, &run, 2).await.result.unwrap();
+        assert_eq!(rejected["_host_service_unavailable"], 1);
+        assert_eq!(rejected["code_executed"], false);
+        assert_eq!(
+            remote
+                .state
+                .requests
+                .lock()
+                .unwrap()
+                .iter()
+                .filter(|v| v["method"] == "tools/call")
+                .count(),
+            0
+        );
+        assert_eq!(f.upstream.requests.lock().unwrap().len(), 5);
+        let registry = f.tools.registry.clone();
+        tokio::task::spawn_blocking(move || {
+            let id = "mcp_server:global:_:fixture";
+            assert_eq!(
+                registry
+                    .0
+                    .capability(&RegistryAccess::Administrator, id)
+                    .unwrap()
+                    .revision,
+                frozen.0
+            );
+            assert_eq!(
+                registry
+                    .0
+                    .discovered_tools(&RegistryAccess::Administrator, id)
+                    .unwrap(),
+                frozen.1
+            );
+        })
+        .await
+        .unwrap();
+        f.tasks.close().await;
+        f.sandbox.stop().await.unwrap();
+        f.server.abort();
+    }
+}
 use std::collections::BTreeMap;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]

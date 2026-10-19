@@ -33,6 +33,10 @@ pub struct Receipt {
 #[async_trait]
 pub trait Driver: Send {
     fn cancelled(&self) -> bool;
+    /// Frozen catalog projection, never duplicated into checkpoint metadata.
+    fn initial_discovery(&self) -> Option<&crate::InitialDiscovery> {
+        None
+    }
     /// Provider-owned catalog projection. Default preserves static adapters.
     fn tools(&self, fallback: &[Tool]) -> Vec<Tool> {
         fallback.to_vec()
@@ -53,6 +57,11 @@ pub trait Driver: Send {
     /// Persist exact input/output, use the frozen model revision, classify an
     /// incomplete response and perform at most one physical model request.
     async fn model(&mut self, key: &str, request: ChatRequest) -> Result<Completion, StopReason>;
+    /// Consume a definitive failed model receipt exactly once. Unknown transport
+    /// outcomes and missing usage do not authorize a correction request.
+    fn take_model_failure(&mut self) -> Option<crate::FailedModel> {
+        None
+    }
     /// Check live grant, revision and JSON Schema, then atomically claim this
     /// stable logical key before any external side effect. An existing receipt
     /// is replayed locally; submitted/unknown outcomes must NEVER be resubmitted.

@@ -52,12 +52,25 @@ pub(super) struct TextDriver {
     pub response: Value,
     pub failure: Option<&'static str>,
     pub failed_usage: Option<exoharness_contracts::model::Usage>,
+    pub model_correction: Option<exoharness_agent::ModelCorrection>,
     pub catalog: Option<exoharness_tools::Catalog>,
+    pub initial_discovery: Option<exoharness_agent::InitialDiscovery>,
     pub tool_calls: Vec<String>,
     pub artifacts: Vec<Value>,
 }
 #[async_trait]
 impl Driver for TextDriver {
+    fn take_model_failure(&mut self) -> Option<exoharness_agent::FailedModel> {
+        self.failed_usage
+            .take()
+            .map(|usage| exoharness_agent::FailedModel {
+                usage,
+                correction: self.model_correction.take(),
+            })
+    }
+    fn initial_discovery(&self) -> Option<&exoharness_agent::InitialDiscovery> {
+        self.initial_discovery.as_ref()
+    }
     fn cancelled(&self) -> bool {
         self.cancel.is_cancelled() || *self.state.stop.borrow()
     }
@@ -136,6 +149,7 @@ impl Driver for TextDriver {
         };
         let result = match answer {
             Some(Ok(completion)) => {
+                self.failure = None;
                 if completion.configuration_revision != self.revision {
                     return Err(StopReason::ModelIncomplete);
                 }
@@ -145,8 +159,27 @@ impl Driver for TextDriver {
                 Ok(completion)
             }
             Some(Err(error)) => {
+                self.model_correction = match error.response_diagnostic {
+                    Some("tool_arguments_invalid_json") => {
+                        Some(exoharness_agent::ModelCorrection::ToolArgumentsJson)
+                    }
+                    Some("tool_name_not_loaded") => {
+                        Some(exoharness_agent::ModelCorrection::ToolNotLoaded)
+                    }
+                    Some("tool_call_id_reused") => {
+                        Some(exoharness_agent::ModelCorrection::CallIdReused)
+                    }
+                    Some("tool_arguments_not_object") => {
+                        Some(exoharness_agent::ModelCorrection::ArgumentsNotObject)
+                    }
+                    _ => None,
+                };
                 self.failed_usage = error.usage.clone();
                 self.response = json!({"model_error":{"kind":format!("{:?}",error.kind),"http_status":error.status,"retry_after_seconds":error.retry_after_seconds},"usage":error.usage.as_ref().map(|u|json!({"input_tokens":u.input_tokens,"output_tokens":u.output_tokens,"total_tokens":u.input_tokens.zip(u.output_tokens).map(|(a,b)|a.saturating_add(b))}))});
+                self.response["model_error"]["diagnostic"] = json!(error.response_diagnostic);
+                if let Some(binding) = error.binding {
+                    self.response["model"] = *binding;
+                }
                 self.failure = Some(match error.kind {
                     ErrorKind::Timeout => "模型请求超时，本次已停止；不会自动重复请求",
                     ErrorKind::Http | ErrorKind::ProviderRejected => {

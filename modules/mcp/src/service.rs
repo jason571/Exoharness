@@ -42,7 +42,8 @@ impl Mcp {
         }
         let mut parsed = parse_import(request)?;
         let mut installed = Vec::new();
-        if matches!(access, RegistryAccess::User(_)) && parsed.administrator_manifest {
+        if matches!(access, RegistryAccess::User(_)) && (parsed.administrator_manifest
+            || parsed.manifests.iter().any(|m| matches!(&m.spec, exoharness_contracts::capability::CapabilitySpec::McpServer(s) if !s.artifact_origins.is_empty()))) {
             return Err(StoreError::NotAuthorized.into());
         }
         // Write new opaque secrets before DB commit. Nothing connects or executes.

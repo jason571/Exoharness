@@ -59,7 +59,7 @@ impl ToolRuntime {
                         .ok_or(ToolError::Authorization)?;
                     let (_, file) = artifacts
                         .open_owned(&owner, artifact)
-                        .map_err(|_| ToolError::Authorization)?;
+                        .map_err(import_artifact_error)?;
                     if files.insert(path.to_owned(), file).is_some() {
                         return Err(ToolError::Input("导入路径不能重复".into()));
                     }
@@ -134,7 +134,10 @@ impl ToolRuntime {
             return Ok(receipt);
         }
         let checkpoint = matches!(name.as_str(), "workspace_create" | "workspace_edit");
-        let value = tokio::task::spawn_blocking(move || -> Result<Value> {
+        let continuation = matches!(name.as_str(), "workspace_list" | "workspace_read");
+        let context_owner = owner.clone();
+        let context_session = session.clone();
+        let mut value = tokio::task::spawn_blocking(move || -> Result<Value> {
             let id = input["workspace_id"].as_str().unwrap_or("");
             match name.as_str() {
                 "workspace_list" => {
@@ -180,7 +183,7 @@ impl ToolRuntime {
                     Ok(serde_json::to_value(
                         store
                             .edit(&owner, &session, id, revision, &operation, edit)
-                            .map_err(task_error)?,
+                            .map_err(edit_error)?,
                     )
                     .map_err(|_| ToolError::Storage)?)
                 }
@@ -189,6 +192,10 @@ impl ToolRuntime {
         })
         .await
         .map_err(|_| ToolError::Storage)??;
+        if continuation {
+            self.workspace_continuation(catalog, &context_owner, &context_session, &mut value)
+                .await?;
+        }
         let mut result = DispatchResult {
             value,
             executed: false,
@@ -201,6 +208,99 @@ impl ToolRuntime {
         Ok(result)
     }
 }
+
+impl ToolRuntime {
+    async fn workspace_continuation(
+        &self,
+        catalog: &Catalog,
+        owner: &str,
+        session: &str,
+        value: &mut Value,
+    ) -> Result<()> {
+        if catalog.binding("sandbox_run").is_none() {
+            return Ok(());
+        }
+        // A list does not select among multiple projects. Enrich only the one
+        // unambiguous workspace, or the workspace explicitly chosen for a read.
+        let target = if let Some(items) = value["workspaces"].as_array() {
+            if items.len() != 1 {
+                return Ok(());
+            }
+            &items[0]
+        } else {
+            &*value
+        };
+        let Some(id) = target["workspace_id"].as_str().map(str::to_owned) else {
+            return Ok(());
+        };
+        let Some(revision) = target["revision"].as_u64() else {
+            return Ok(());
+        };
+        let store = self.execution.clone();
+        let (o, s, w) = (owner.to_owned(), session.to_owned(), id.clone());
+        let Some(mut recipe) =
+            tokio::task::spawn_blocking(move || store.workspace_execution_recipe(&o, &s, &w))
+                .await
+                .map_err(|_| ToolError::Storage)?
+                .map_err(|_| ToolError::Storage)?
+        else {
+            return Ok(());
+        };
+        let sandbox = self.sandbox.as_ref().ok_or(ToolError::Storage)?;
+        let task_store = sandbox.task_store().map_err(task_error)?;
+        let (o, s, w) = (owner.to_owned(), session.to_owned(), id.clone());
+        let snapshot = tokio::task::spawn_blocking(move || task_store.inspect(&o, &s, &w))
+            .await
+            .map_err(|_| ToolError::Storage)?
+            .map_err(task_error)?;
+        if snapshot.revision != revision {
+            return Ok(());
+        }
+        let Some(entry) = recipe["arguments"]["entrypoint"].as_str() else {
+            return Ok(());
+        };
+        if entry.starts_with("skill/") {
+            if recipe["skill_id"].as_str() != snapshot.skill_id.as_deref()
+                || recipe["skill_revision"].as_i64() != snapshot.skill_revision
+            {
+                return Ok(());
+            }
+        } else if !snapshot.files.iter().any(|file| {
+            file.path == entry && recipe["entrypoint_sha256"].as_str() == Some(file.sha256.as_str())
+        }) {
+            return Ok(());
+        }
+        if let Some(skill) = recipe["skill_id"].as_str() {
+            let Ok(current) = self.current(catalog, owner, skill).await else {
+                return Ok(());
+            };
+            if recipe["skill_revision"].as_i64() != Some(current.revision) {
+                return Ok(());
+            }
+            recipe["instructions"] =
+                json!({"tool":"read_skill","arguments":{"id":skill,"path":"SKILL.md"}});
+        }
+        recipe["arguments"]["workspace_id"] = json!(id);
+        recipe["arguments"]["expected_revision"] = json!(revision);
+        recipe["guidance"] = json!(
+            "This saved program already delivered files. For a follow-up, inspect and edit only the task inputs needed for the requested change, then reuse this entrypoint and arguments with the NEW revision returned by the edit. Read the bound Skill instructions when needed. Do not probe the prepared environment, invent a replacement entrypoint or rewrite a passing program merely because this is a new Turn. This receipt does not grant execution permission or replay any action."
+        );
+        value["execution_recipe"] = recipe;
+        Ok(())
+    }
+}
+
+fn import_artifact_error(error: exoharness_artifacts::ArtifactError) -> ToolError {
+    match error {
+        exoharness_artifacts::ArtifactError::Store(
+            exoharness_storage_postgres::StoreError::NotFound,
+        ) => ToolError::CorrectableInput(
+            "No files were changed. The artifact_id does not identify a saved file available to this user. Use an owned artifact ID from a saved-file receipt; an external task ID is not an artifact ID. Use artifact_id from the host _host_saved_artifacts or _host_delivered_artifacts receipt. If the completed result only has a URL, discover an authorized service accepting that URL; querying the job does not necessarily persist a file. The sandbox cannot download it. Reuse the existing task result instead of submitting another generation."
+                .into(),
+        ),
+        _ => ToolError::Storage,
+    }
+}
 pub(crate) fn task_error(error: exoharness_sandbox::SandboxError) -> ToolError {
     match error {
         exoharness_sandbox::SandboxError::OutcomeUnknown
@@ -208,6 +308,23 @@ pub(crate) fn task_error(error: exoharness_sandbox::SandboxError) -> ToolError {
         _ => ToolError::Input(error.to_string()),
     }
 }
+/// Only pure, atomic edits can attest that these errors changed no files.
+/// Execution/storage/authorization and busy/unknown jobs keep their old path.
+pub(crate) fn edit_error(error: exoharness_sandbox::SandboxError) -> ToolError {
+    match error {
+        exoharness_sandbox::SandboxError::AmbiguousPatch
+        | exoharness_sandbox::SandboxError::StaleRevision
+        | exoharness_sandbox::SandboxError::PatchRejected(_) => {
+            ToolError::CorrectableInput(format!(
+                "{error}. No files were changed. Read only the relevant current file range and workspace revision, then correct the exact patch to match once without overlaps. Preserve all unrelated source and do not repeat an unchanged rejected edit."
+            ))
+        }
+        other => task_error(other),
+    }
+}
+#[cfg(test)]
+#[path = "../tests/unit/workspace_errors.rs"]
+mod tests;
 pub(crate) fn workspace_receipt(
     snapshot: TaskSnapshot,
     executed: bool,

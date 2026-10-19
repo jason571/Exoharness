@@ -399,3 +399,33 @@ async fn permission_withdrawal_and_failed_discovery_cannot_expose_stale_schema()
     );
     assert_eq!(server.state.requests.lock().unwrap().len(), count);
 }
+
+#[tokio::test]
+async fn output_origins_update_requires_admin_and_current_revision_and_retains_grants_and_secrets() {
+    let f=fixture().await;
+    let server=protocol::server(Default::default()).await;
+    let (status, imported)=call(&f,"POST","/v1/imports/manifest",ADMIN,input(&server.url)).await;
+    assert_eq!(status,StatusCode::OK);
+    let before=imported["capabilities"][0].clone();
+    let id=before["id"].as_str().unwrap();
+    let path=format!("/v1/capabilities/{id}");
+    let route=format!("{path}/artifact-origins");
+    let revision=before["revision"].as_i64().unwrap();
+    let (_,permissions)=call(&f,"GET",&format!("{path}/permissions"),ADMIN,json!({})).await;
+    for token in [USER,READER] {
+        assert_eq!(call(&f,"PUT",&route,token,json!({"expected_revision":revision,"artifact_origins":["https://media.example"]})).await.0,StatusCode::FORBIDDEN);
+    }
+    assert_eq!(call(&f,"PUT",&route,ADMIN,json!({"expected_revision":revision,"artifact_origins":["https://media.example/path"]})).await.0,StatusCode::BAD_REQUEST);
+    assert_eq!(call(&f,"PUT",&route,ADMIN,json!({"expected_revision":revision+1,"artifact_origins":["https://media.example"]})).await.0,StatusCode::CONFLICT);
+    let (status,after)=call(&f,"PUT",&route,ADMIN,json!({"expected_revision":revision,"artifact_origins":["https://media.example"]})).await;
+    assert_eq!(status,StatusCode::OK,"{after}");
+    assert_eq!(after["revision"],revision+1);
+    assert_eq!(after["enabled"],before["enabled"]);
+    assert_eq!(after["manifest"]["secret_refs"],before["manifest"]["secret_refs"]);
+    assert_eq!(after["manifest"]["spec"]["config"]["transport"],before["manifest"]["spec"]["config"]["transport"]);
+    assert_eq!(call(&f,"GET",&format!("{path}/permissions"),ADMIN,json!({})).await.1,permissions);
+    assert_eq!(call(&f,"PUT",&route,ADMIN,json!({"expected_revision":revision,"artifact_origins":["https://other.example"]})).await.0,StatusCode::CONFLICT);
+    let (_,same)=call(&f,"PUT",&route,ADMIN,json!({"expected_revision":revision+1,"artifact_origins":["https://media.example"]})).await;
+    assert_eq!(same["revision"],after["revision"]);
+    assert!(server.state.requests.lock().unwrap().is_empty());
+}

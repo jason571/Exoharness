@@ -9,6 +9,10 @@ from live_generation_acceptance import acceptance_cases
 
 
 class GenerationCaseTests(unittest.TestCase):
+    def test_video_uses_the_exact_production_prompt_without_workflow_hints(self):
+        cases = acceptance_cases(requested=["video"])
+        self.assertEqual(cases["video"]["prompt"], "为开源的ExoHarness生成15S宣传视频，开源地址，https://github.com/jason571/Exoharness\n视频最后必须出现地址链接")
+
     def test_mv_requires_existing_audio_before_any_submission(self):
         with self.assertRaisesRegex(ValueError, "existing audio"):
             acceptance_cases(requested=["mv"])

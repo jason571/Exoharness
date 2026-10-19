@@ -11,6 +11,10 @@ use std::collections::BTreeMap;
 
 const PAGE: usize = 12;
 
+#[cfg(test)]
+#[path = "../tests/unit/discovery_matching.rs"]
+mod tests;
+
 fn normalized(value: &str) -> String {
     value
         .to_lowercase()

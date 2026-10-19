@@ -284,23 +284,26 @@ async fn incomplete_length_empty_unknown_tools_and_invalid_json_never_return_exe
     let mut req = request();
     req.tools.push(tool());
     req.tool_choice = ToolChoice::Auto;
-    for (name, args) in [
-        ("unregistered", "{}"),
-        ("calculate", "{\"number\":1,\"number\":2}"),
-        ("calculate", "\"encoded\""),
-        ("calculate", "{\"number\":"),
+    for (name, args, diagnostic) in [
+        ("unregistered", "{}", "tool_name_not_loaded"),
+        (
+            "calculate",
+            "{\"number\":1,\"number\":2}",
+            "tool_arguments_invalid_json",
+        ),
+        ("calculate", "\"encoded\"", "tool_arguments_not_object"),
+        ("calculate", "{\"number\":", "tool_arguments_invalid_json"),
     ] {
         let result = json!({"choices":[{"message":{"role":"assistant","tool_calls":[{"id":"call-c","type":"function","function":{"name":name,"arguments":args}}]},"finish_reason":"tool_calls"}]});
         *fixture.server.state.reply.lock().unwrap() = Reply::json(result);
-        assert_eq!(
-            fixture
-                .runtime
-                .complete("llm", req.clone(), CancellationToken::new())
-                .await
-                .unwrap_err()
-                .kind,
-            ErrorKind::InvalidResponse
-        );
+        let error = fixture
+            .runtime
+            .complete("llm", req.clone(), CancellationToken::new())
+            .await
+            .unwrap_err();
+        assert_eq!(error.kind, ErrorKind::InvalidResponse);
+        assert_eq!(error.response_diagnostic, Some(diagnostic));
+        assert!(error.binding.unwrap()["provider"].is_string());
     }
     assert_eq!(fixture.server.count(), 7);
 }

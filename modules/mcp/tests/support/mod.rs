@@ -45,7 +45,10 @@ pub struct StateData {
     pub durable_workflow: bool,
     pub workflow_missing_preserve: bool,
     pub declared_audio: bool,
+    pub internal_audio: bool,
+    pub output_origin: Option<String>,
     pub extra_tools: usize,
+    pub echo_input_schema: Option<Value>,
     pub file_headers: Mutex<Vec<HeaderMap>>,
 }
 pub struct Server {
@@ -132,7 +135,8 @@ async fn rpc(
                 tools.extend((0..state.extra_tools).map(|index| json!({"name":format!("unused_{index}"),"description":"Unrelated optional operation","inputSchema":{"type":"object","properties":{"unused_payload":{"type":"string","description":"UNRELATED_FULL_SCHEMA"}}}})));
                 json!({"tools":tools})
             } else {
-                json!({"tools":[{"name":"echo","description":"Fixture echo","inputSchema":{"type":"object","properties":{"text":{"type":"string"}},"required":["text"]}}],"nextCursor":"page2"})
+                let schema = state.echo_input_schema.clone().unwrap_or_else(|| json!({"type":"object","properties":{"text":{"type":"string"}},"required":["text"]}));
+                json!({"tools":[{"name":"echo","description":"Fixture echo","inputSchema":schema}],"nextCursor":"page2"})
             }
         }
         "tools/call" => {
@@ -159,7 +163,10 @@ async fn rpc(
                     .to_str()
                     .unwrap()
                     .to_owned();
-                return Json(json!({"jsonrpc":"2.0","id":id,"result":{"content":[{"type":"resource_link","uri":format!("http://{host}/files/song.mp3?key=file-only"),"name":"song.mp3","mimeType":"audio/mpeg"}],"isError":false}})).into_response();
+                let origin = state.output_origin.clone().unwrap_or_else(|| format!("http://{host}"));
+                let mut result = json!({"content":[{"type":"resource_link","uri":format!("{origin}/files/song.mp3?key=file-only"),"name":"song.mp3","mimeType":"audio/mpeg"}],"isError":false});
+                if state.internal_audio {result["_meta"]=json!({"exoharness":{"artifact_visibility":"internal"}});}
+                return Json(json!({"jsonrpc":"2.0","id":id,"result":result})).into_response();
             }
             if state.durable_workflow {
                 let prepared = request["params"]["name"] == "echo";

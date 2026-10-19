@@ -55,6 +55,43 @@ fn read(tx: &mut Transaction<'_>, run: &str, id: &str) -> Result<InvocationRecor
 }
 
 impl PostgresStore {
+    /// A bounded continuation view of a program that actually delivered files.
+    /// Original source and large tool receipts stay in the invocation journal.
+    pub fn workspace_execution_recipe(
+        &self,
+        owner: &str,
+        session: &str,
+        workspace: &str,
+    ) -> Result<Option<Value>> {
+        let mut conn = self.connection()?;
+        let mut tx = conn.transaction()?;
+        lock_session(&mut tx, owner, session)?;
+        let row = tx.query_opt(
+            "WITH recent AS (SELECT id FROM execution_runs WHERE session_id=$1 ORDER BY created_at DESC,id DESC LIMIT 8)
+             SELECT i.id,jsonb_build_object('runtime',i.arguments_json::jsonb->'runtime','entrypoint',i.arguments_json::jsonb->'entrypoint',
+                'arguments',COALESCE(i.arguments_json::jsonb->'arguments','[]'::jsonb),'output_files',i.arguments_json::jsonb->'output_files')::text,
+                i.result_json::jsonb->>'skill_id',i.result_json::jsonb->>'skill_revision',
+                (SELECT f->>'sha256' FROM jsonb_array_elements(COALESCE(i.result_json::jsonb->'files','[]'::jsonb)) f
+                    WHERE f->>'path'=i.arguments_json::jsonb->>'entrypoint' LIMIT 1)
+             FROM execution_invocations i JOIN recent r ON r.id=i.latest_run_id
+             WHERE i.capability_id='tool:native:sandbox' AND i.tool_name='sandbox_run' AND i.outcome_status='success'
+               AND COALESCE(i.arguments_json::jsonb->>'workspace_id',i.result_json::jsonb->>'workspace_id')=$2
+               AND i.result_json::jsonb->>'_host_execution'='true'
+               AND i.result_json::jsonb#>>'{execution,status}'='completed'
+               AND i.result_json::jsonb#>>'{execution,exit_code}'='0'
+               AND i.result_json::jsonb#>>'{execution,cleanup_confirmed}'='true'
+               AND jsonb_array_length(COALESCE(i.result_json::jsonb->'artifacts','[]'::jsonb))>0
+             ORDER BY i.completed_at DESC,i.id DESC LIMIT 1", &[&session,&workspace])?;
+        let result = row.map(|row| -> Result<Value> {
+            Ok(serde_json::json!({"tool":"sandbox_run","source_invocation":row.get::<_,String>(0),
+                "arguments":parsed::<Value>(&row.get::<_,String>(1))?,"skill_id":row.get::<_,Option<String>>(2),
+                "skill_revision":row.get::<_,Option<String>>(3).and_then(|s|s.parse::<i64>().ok()),
+                "entrypoint_sha256":row.get::<_,Option<String>>(4)}))
+        }).transpose()?;
+        tx.commit()?;
+        Ok(result)
+    }
+
     pub fn invocation(
         &self,
         owner: &str,

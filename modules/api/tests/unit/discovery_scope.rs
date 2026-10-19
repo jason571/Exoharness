@@ -82,6 +82,18 @@ async fn discovery_scope_matrix_corrects_before_real_oci_html_delivery() {
                 system.contains("Persona facts describe the assistant's own organization only.")
             );
             assert!(system.contains("ask one concise clarification before authoring"));
+            assert!(
+                system.contains("If material subject facts are missing and cannot be verified")
+            );
+            assert!(system.contains("Do not exhaustively map or fetch a source repository"));
+            assert!(system.contains("Read the primary source document once"));
+            assert!(system.contains("Prefer focused extraction or concise relevant excerpts"));
+            assert!(system.contains("do not fetch equivalent language versions, raw/blob URL variants"));
+            assert!(!system.contains("prefer that over many differently worded queries"));
+            assert!(system.contains("Batch independent known sources in one call"));
+            assert!(system.contains("Normally start with two or three focused queries"));
+            assert!(system.contains("use the latest confirmed period and label its date"));
+            assert!(system.contains("Current UTC date supplied by the host for this Run:"));
         }
         f.tasks.close().await;
         f.sandbox.stop().await.unwrap();

@@ -1,6 +1,79 @@
 use super::*;
 
 #[tokio::test]
+async fn external_task_id_import_is_rejected_without_execution_or_false_permission_failure() {
+    let f = fixture(vec![
+        tool("activate_tools", json!({"names":["workspace_create","workspace_import","workspace_edit","sandbox_run"]})),
+        tool("workspace_create", json!({})),
+        json!({"fixture_workspace_next":"workspace_import","fixture_project_arguments":{"inputs":[{"path":"source.mp4","artifact_id":"external-task-not-a-saved-artifact"}]}}),
+        json!({"fixture_workspace_next":"workspace_edit","fixture_workspace_files":{"main.py":"from pathlib import Path\nPath('final.txt').write_text('saved without importing unavailable source')\n"}}),
+        json!({"fixture_workspace_next":"sandbox_run","fixture_project_arguments":{"runtime":"python","entrypoint":"main.py","output_files":["final.txt"]}}),
+        answer(),
+    ], true).await;
+    let (session, run) = start(&f).await;
+    assert_eq!(terminal(&f, &run).await, RunState::Succeeded);
+    let rejected = invocation(&f, &session, &run, 3).await;
+    assert_eq!(rejected.state, exoharness_contracts::invocation::InvocationState::RejectedBeforeExecution);
+    let result = rejected.result.unwrap();
+    assert_eq!(result["code_executed"], false);
+    assert_eq!(result["_host_input_rejection"], 1);
+    assert!(result["diagnostics"]["message"].as_str().unwrap().contains("external task ID is not an artifact ID"));
+    assert_eq!(invocation(&f, &session, &run, 5).await.result.unwrap()["execution"]["exit_code"], 0);
+    assert_eq!(f.upstream.requests.lock().unwrap().len(), 6);
+    f.tasks.close().await;
+    f.sandbox.stop().await.unwrap();
+    f.server.abort();
+}
+
+#[tokio::test]
+async fn ambiguous_atomic_edit_reads_current_source_then_corrects_without_reexecuting_work() {
+    use sha2::{Digest, Sha256};
+    let source = "from pathlib import Path\nPath('/work/final.txt').write_text('original')\n";
+    let hash = format!("{:x}", Sha256::digest(source.as_bytes()));
+    let f=fixture(vec![
+        tool("activate_tools",json!({"names":["workspace_create","workspace_edit","workspace_read","sandbox_run"]})),
+        tool("workspace_create",json!({})),
+        json!({"fixture_workspace_next":"workspace_edit","fixture_workspace_files":{"main.py":source}}),
+        json!({"fixture_workspace_next":"workspace_edit","fixture_project_arguments":{"patches":[{"path":"main.py","sha256":hash,"before":"not in current file","after":"fixed"}]}}),
+        json!({"fixture_workspace_next":"workspace_read","fixture_project_arguments":{"path":"main.py"}}),
+        json!({"fixture_workspace_next":"workspace_edit","fixture_project_arguments":{"patches":[{"path":"main.py","sha256":hash,"before":"original","after":"fixed"}]}}),
+        json!({"fixture_workspace_next":"sandbox_run","fixture_project_arguments":{"runtime":"python","entrypoint":"main.py","output_files":["final.txt"]}}),answer()
+    ],true).await;
+    let (session, run) = start(&f).await;
+    assert_eq!(terminal(&f, &run).await, RunState::Succeeded);
+    let rejected = invocation(&f, &session, &run, 4).await;
+    assert_eq!(
+        rejected.state,
+        exoharness_contracts::invocation::InvocationState::RejectedBeforeExecution
+    );
+    assert_eq!(
+        rejected.result.as_ref().unwrap()["_host_input_rejection"],
+        1
+    );
+    assert_eq!(rejected.result.unwrap()["code_executed"], false);
+    let read = invocation(&f, &session, &run, 5).await.result.unwrap();
+    assert_eq!(read["content"], source);
+    assert_eq!(read["revision"], 2);
+    let executed = invocation(&f, &session, &run, 7).await.result.unwrap();
+    assert_eq!(executed["execution"]["exit_code"], 0);
+    let artifact = executed["artifacts"][0]["id"].as_str().unwrap().to_owned();
+    let artifacts = f.tools.artifacts.clone();
+    let content = tokio::task::spawn_blocking(move || {
+        let (_, mut file) = artifacts.open_owned("user", &artifact).unwrap();
+        let mut content = String::new();
+        std::io::Read::read_to_string(&mut file, &mut content).unwrap();
+        content
+    })
+    .await
+    .unwrap();
+    assert_eq!(content, "fixed");
+    assert_eq!(f.upstream.requests.lock().unwrap().len(), 8);
+    f.tasks.close().await;
+    f.sandbox.stop().await.unwrap();
+    f.server.abort();
+}
+
+#[tokio::test]
 async fn word_skill_cjs_runtime_and_workspace_mode_are_corrected_before_one_docx_execution() {
     let args = json!({"runtime":"javascript","entrypoint":"skill/scripts/create_document.cjs","arguments":["document.json","intro.docx"],"output_files":["intro.docx"]});
     let mut wrong_runtime = args.clone();

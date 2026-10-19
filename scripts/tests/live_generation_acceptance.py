@@ -22,7 +22,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 
 CASES = {
-    "video": "为开源的ExoHarness生成15秒宣传视频，项目是Rust实现的通用Agent执行框架，提供模型接入、能力管理、沙盒执行和文件交付。科技感、AI元素，视频最后必须清楚显示 https://github.com/jason571/Exoharness 。请直接制作并交付可播放的视频文件。",
+    "video": "为开源的ExoHarness生成15S宣传视频，开源地址，https://github.com/jason571/Exoharness\n视频最后必须出现地址链接",
     "mv": "请使用本次上传的现成音频生成仙侠风格MV：雾中群山、白衣人物、飘动衣袖、古风意境。时长跟随上传音频，保持原音轨，不生成歌曲、配乐或歌词。请实际生成画面并合成，交付可播放下载的MP4文件。",
     "ppt": "生成一份可编辑的3页PPT，给一年级小朋友解释什么是人工智能。第一页是什么，第二页日常例子，第三页安全使用建议。字大、句短，带简单示意图。请直接交付实际PPTX文件。",
     "web": "为ExoHarness生成宣传网站页面。ExoHarness是Rust实现的通用Agent执行框架，提供模型接入、能力管理、隔离执行、持久化会话和文件交付，开源地址 https://github.com/jason571/Exoharness 。需要手机布局、功能介绍、可点击的中文/英文切换和GitHub入口。请直接交付能打开的网页及项目ZIP。",

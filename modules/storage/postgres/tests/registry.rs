@@ -44,6 +44,66 @@ fn input(name: &str, scope: CapabilityScope, permissions: &[&str]) -> ValidatedC
 const ADMIN: RegistryAccess = RegistryAccess::Administrator;
 
 #[test]
+fn restored_current_pointer_can_toggle_without_overwriting_later_immutable_history() {
+    let (store, url, schema) = database();
+    let original = store
+        .register_capability(
+            &ADMIN,
+            input("toggle-restored", CapabilityScope::Global, &["read"]),
+            "admin",
+            true,
+        )
+        .unwrap();
+    store
+        .decide_capability_permission(
+            &ADMIN,
+            &original.id,
+            original.revision,
+            "read",
+            PermissionDecision::Allow,
+            "admin",
+        )
+        .unwrap();
+    let mut conn = url
+        .parse::<postgres::Config>()
+        .unwrap()
+        .connect(postgres::NoTls)
+        .unwrap();
+    conn.batch_execute(&format!("SET search_path={schema}"))
+        .unwrap();
+    conn.execute("INSERT INTO capability_versions(capability_id,revision,version,manifest_json,manifest_digest,source_digest,created_at) SELECT capability_id,7,version,manifest_json,manifest_digest,source_digest,created_at FROM capability_versions WHERE capability_id=$1 AND revision=1",&[&original.id]).unwrap();
+    let historical = store.capability_versions(&ADMIN, &original.id).unwrap();
+    let permissions = store.capability_permissions(&ADMIN, &original.id).unwrap();
+    let disabled = store
+        .set_capability_enabled(&ADMIN, &original.id, 1, false, "admin")
+        .unwrap();
+    assert_eq!(disabled.revision, 8);
+    assert!(!disabled.enabled);
+    assert!(matches!(
+        store.set_capability_enabled(&ADMIN, &original.id, 1, true, "stale"),
+        Err(StoreError::Conflict)
+    ));
+    let enabled = store
+        .set_capability_enabled(&ADMIN, &original.id, 8, true, "admin")
+        .unwrap();
+    assert_eq!(enabled.revision, 9);
+    assert!(enabled.enabled);
+    assert_eq!(
+        store.capability_permissions(&ADMIN, &original.id).unwrap(),
+        permissions
+    );
+    let revisions = store.capability_versions(&ADMIN, &original.id).unwrap();
+    assert_eq!(revisions.len(), 4);
+    for old in historical {
+        assert!(
+            revisions
+                .iter()
+                .any(|v| v.revision == old.revision && v.manifest_digest == old.manifest_digest)
+        );
+    }
+}
+
+#[test]
 fn restored_current_revision_updates_after_history_without_reusing_or_deleting_versions() {
     let (store, url, schema) = database();
     let record = store

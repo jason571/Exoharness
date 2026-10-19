@@ -59,6 +59,8 @@ mod mcp_admission;
 mod mcp_background;
 #[path = "unit/mcp_delivery.rs"]
 mod mcp_delivery;
+#[path = "unit/model_response_correction.rs"]
+mod model_response_correction;
 #[path = "unit/model_tools.rs"]
 mod model_tools;
 #[path = "unit/publication_recovery.rs"]
@@ -69,6 +71,10 @@ mod read_loop;
 mod run_admission;
 #[path = "unit/sandbox_failure_recovery.rs"]
 mod sandbox_failure_recovery;
+#[path = "unit/skill_tool_loading.rs"]
+mod skill_tool_loading;
+#[path = "unit/skill_resources.rs"]
+mod skill_resources;
 #[path = "../../model-runtime/tests/support/speech.rs"]
 #[allow(dead_code)]
 mod speech_fixture;
@@ -128,6 +134,7 @@ async fn reply(State(state): State<Upstream>, body: Bytes) -> axum::Json<Value> 
                     let value: Value = serde_json::from_str(message["content"].as_str()?).ok()?;
                     value
                         .pointer("/_host_delivered_artifacts/0/id")
+                        .or_else(|| value.pointer("/_host_saved_artifacts/0/artifact_id"))
                         .and_then(Value::as_str)
                         .map(str::to_owned)
                 })
@@ -463,11 +470,14 @@ async fn unauthorized_execution_is_not_loaded_and_stops_without_a_container_job(
 }
 
 async fn register_mcp(f: &Fixture, url: &str) {
+    register_mcp_with_origins(f, url, vec![]).await;
+}
+async fn register_mcp_with_origins(f: &Fixture, url: &str, origins: Vec<String>) {
     use exoharness_contracts::capability::PermissionDecision;
     let tools = f.tools.clone();
     let url = url.to_owned();
     let id=tokio::task::spawn_blocking(move||{
-    let record=tools.mcp.import(&RegistryAccess::Administrator,&serde_json::from_value(json!({"content":json!({"mcpServers":{"fixture":{"type":"streamableHttp","url":url}}}).to_string()})).unwrap(),"admin").unwrap().remove(0);
+    let record=tools.mcp.import(&RegistryAccess::Administrator,&serde_json::from_value(json!({"content":json!({"mcpServers":{"fixture":{"type":"streamableHttp","url":url,"artifact_origins":origins}}}).to_string()})).unwrap(),"admin").unwrap().remove(0);
     for permission in &record.manifest.permissions {
         tools
             .registry

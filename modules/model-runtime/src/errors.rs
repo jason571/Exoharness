@@ -27,6 +27,9 @@ pub struct ModelError {
     pub status: Option<u16>,
     pub retry_after_seconds: Option<u64>,
     pub usage: Option<Usage>,
+    /// Fixed diagnostic codes only; no response bodies or provider secrets.
+    pub response_diagnostic: Option<&'static str>,
+    pub binding: Option<Box<serde_json::Value>>,
 }
 impl ModelError {
     pub(crate) fn new(kind: ErrorKind) -> Self {
@@ -35,10 +38,16 @@ impl ModelError {
             status: None,
             retry_after_seconds: None,
             usage: None,
+            response_diagnostic: None,
+            binding: None,
         }
     }
     pub(crate) fn with_usage(mut self, usage: Usage) -> Self {
         self.usage = Some(usage);
+        self
+    }
+    pub(crate) fn with_response_diagnostic(mut self, code: &'static str) -> Self {
+        self.response_diagnostic = Some(code);
         self
     }
 }

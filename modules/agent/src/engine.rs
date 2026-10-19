@@ -79,6 +79,8 @@ pub async fn run(
                         state.read_loop_reviews.push(review.clone());
                     }
                     state.recovery_active = true;
+                    state.input_recovery_started = false;
+                    state.sandbox_recovery_started = false;
                     state.repeat_finalization |= finalize;
                     state.pending.clear();
                     if !persist(driver, state).await {
@@ -102,6 +104,8 @@ pub async fn run(
                     }
                     state.repeat_finalization = true;
                     state.recovery_active = true;
+                    state.input_recovery_started = false;
+                    state.sandbox_recovery_started = false;
                     state.entries.push(JournalEntry::ToolExchange {
                         invocation_id: format!("{}:repeat-rejected", pending.key),
                         tool: pending.call.name,
@@ -139,7 +143,27 @@ pub async fn run(
             let correctable = crate::input_correction::admit(state, &receipt);
             let recoverable = crate::service_recovery::admit(state, &receipt);
             let sandbox_correctable = crate::sandbox_recovery::admit(state, &receipt);
+            if correctable {
+                crate::input_correction::rejected(state, &pending.call.name);
+            }
+            if sandbox_correctable {
+                // A terminated, admitted process proves that its input passed
+                // validation. Settle that episode before opening code repair;
+                // otherwise a valid correction inherits an unrelated owner.
+                crate::input_correction::completed(state, &pending.call.name, true);
+                crate::sandbox_recovery::rejected(state, &pending.call, &receipt);
+            }
+            if recoverable {
+                state.sandbox_recovery_started = false;
+            }
+            if recoverable || sandbox_correctable {
+                state.input_recovery_started = false;
+            }
             state.recovery_active |= correctable || recoverable || sandbox_correctable;
+            if receipt.state == ReceiptState::Completed {
+                crate::input_correction::completed(state, &pending.call.name, receipt.performed_execution);
+                crate::sandbox_recovery::completed(state, &pending.call, &receipt);
+            }
             state.entries.push(JournalEntry::ToolExchange {
                 invocation_id: receipt.invocation_id.clone(),
                 tool: pending.call.name,
@@ -193,6 +217,13 @@ pub async fn run(
         } else {
             driver.request_tools(&state.entries, tools)
         };
+        let discovery_system;
+        let system = if let Some(discovery) = driver.initial_discovery() {
+            discovery_system = discovery.system(system, &state.entries, &active_tools);
+            discovery_system.as_str()
+        } else {
+            system
+        };
         let reminded_system;
         let request_system = if state.repeated.at_limit() && !state.repeat_finalization {
             reminded_system = format!(
@@ -226,6 +257,14 @@ pub async fn run(
             Ok(request) => request,
             Err(_) => return stop(driver, state, StopReason::InvalidProposal).await,
         };
+        if let Some(correction) = state.model_correction {
+            request.messages.push(exoharness_contracts::model::Message::RuntimeData {
+                text: format!("Host model-response diagnostic: {} Analyze this cause before proceeding. This permits one bounded correction and grants no execution permissions.", correction.guidance()),
+            });
+        }
+        if let Some(guidance) = crate::run_budget::guidance(state, policy) {
+            request.messages.push(guidance);
+        }
         if !state.read_loop_reviews.is_empty() {
             request.messages.push(exoharness_contracts::model::Message::RuntimeData {
                 text: serde_json::json!({
@@ -254,13 +293,52 @@ pub async fn run(
         }
         let completion = match driver.model(&key, request).await {
             Ok(completion) => completion,
-            Err(reason) => return stop(driver, state, reason).await,
+            Err(reason) => {
+                if let Some(failure) = driver.take_model_failure() {
+                    state.in_flight_model = None;
+                    crate::recovery_budget::settle(state, recovery_reserved, &failure.usage);
+                    let measured = failure.usage.input_tokens.is_some()
+                        && failure.usage.output_tokens.is_some();
+                    state.add_usage(&failure.usage);
+                    if reason == StopReason::ModelIncomplete
+                        && measured
+                        && state.model_corrections == 0
+                        && policy.recovery_output_cap_available
+                        && let Some(correction) = failure.correction
+                    {
+                        state.model_corrections += 1;
+                        state.model_correction = Some(correction);
+                        state.model_correction_started_recovery = !state.recovery_active;
+                        state.recovery_active = true;
+                        if driver.record_notice(serde_json::json!({"type":"model_response_correction","diagnostic":correction,
+                            "submitted":false,"attempt":state.model_corrections,"usage":failure.usage})).await.is_err() {
+                            return stop(driver, state, StopReason::PersistenceFailed).await;
+                        }
+                        if !persist(driver, state).await {
+                            return RunOutcome::Stopped(StopReason::PersistenceFailed);
+                        }
+                        continue;
+                    }
+                }
+                return stop(driver, state, reason).await;
+            }
         };
         state.in_flight_model = None;
+        let corrected_model_proposal = state.model_correction.take().is_some();
         crate::recovery_budget::settle(state, recovery_reserved, &completion.usage);
         state.add_usage(&completion.usage);
         if state.recovery_active && state.recovery_tokens > state.recovery_token_limit {
             return stop(driver, state, StopReason::RecoveryTokenBudget).await;
+        }
+        if corrected_model_proposal
+            && std::mem::take(&mut state.model_correction_started_recovery)
+            && completion.usage.input_tokens.is_some()
+            && completion.usage.output_tokens.is_some()
+        {
+            // A valid replacement completes this one-response correction.
+            // Do not charge the rest of an otherwise healthy task as retries.
+            // Never close recovery that was already active before this error.
+            state.recovery_active = false;
         }
         if completion.calls.is_empty() {
             if completion.finish != Finish::Stop || completion.text.trim().is_empty() {

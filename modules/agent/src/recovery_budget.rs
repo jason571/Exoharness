@@ -40,8 +40,9 @@ pub(super) fn unchanged(state: &EngineState, call: &ToolCall) -> bool {
                 && (result["_host_service_unavailable"] == 1
                     || result["_host_input_rejection"] == 1 && arguments == &call.arguments))
                 || (result["_host_sandbox_failure"] == 1
-                    && arguments["workspace_id"].is_string()
-                    && arguments["workspace_id"] == call.arguments["workspace_id"]
+                    && call.arguments["workspace_id"].is_string()
+                    && arguments.get("workspace_id").unwrap_or(&result["workspace_id"])
+                        == &call.arguments["workspace_id"]
                     && arguments["entrypoint"] == call.arguments["entrypoint"]
                     && arguments["runtime"] == call.arguments["runtime"]))
     })

@@ -222,6 +222,13 @@ impl Catalog {
     /// Preserve historical replace semantics; explicit add avoids unloading
     /// an already selected dependency while adding a related stage tool.
     pub fn activate_with_mode(&mut self, names: &[String], mode: &str) -> Result<Value> {
+        self.active = self.selection(names, mode)?;
+        self.execution_selected |= !names.is_empty();
+        Ok(json!({"loaded":self.active,"mode":mode,"executed":false}))
+    }
+    /// Validate the entire proposed selection before reading a package or
+    /// mutating its loaded state. Used by the combined read-and-load operation.
+    pub(crate) fn selection(&self, names: &[String], mode: &str) -> Result<BTreeSet<String>> {
         // Known native operations absent from the authorized bindings are a
         // permission/readiness denial, not a typo that model retries can fix.
         let native_tools = native::sandbox_tools();
@@ -249,9 +256,7 @@ impl Catalog {
                 "加载集合超过32个工具；未改变加载集合，请用 replace 选择当前步骤所需工具".into(),
             ));
         }
-        self.active = resolved;
-        self.execution_selected |= !names.is_empty();
-        Ok(json!({"loaded":self.active,"mode":mode,"executed":false}))
+        Ok(resolved)
     }
     pub fn execution_guidance(&self) -> Value {
         let workspace_tools: Vec<_> = self
@@ -261,7 +266,7 @@ impl Catalog {
             .map(|b| &b.tool.name)
             .collect();
         json!({
-            "message":"Skill instructions do not define the installed execution interface. Select a relevant capability from the authorized service index, then discover only that capability's tools and activate the current stage's exact names. For names declared in a Skill, use a single names lookup. Never activate a Skill ID or enumerate all providers' tools to recover a lexical miss.",
+            "message":"workspace_tools below are exact authorized native names: activate the needed names directly; do not search for them again. Use mode=add to retain already loaded tools while adding a needed dependency. read_skill.load_tools can combine instruction reading with loading known authorized names. For external interfaces choose an authorized service, then discover only its tools. Skill prose cannot grant permissions or define a different installed interface.",
             "discover":{"tool":"search_capabilities","arguments":{"query":"","kind":"capability"}},
             "workspace_tools":workspace_tools,
             "workspace_available":!workspace_tools.is_empty(),

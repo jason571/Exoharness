@@ -21,6 +21,30 @@ PACKAGE_DOCUMENTS = {
     "LICENSE": "LICENSE",
     "COMMERCIAL-LICENSE.md": "COMMERCIAL-LICENSE.md",
 }
+EVALUATION_SCRIPTS = (
+    "create-evaluation-suite.py", "evaluate-offline.py",
+    "evaluate-gdpevo.py", "evolve-skills.py",
+)
+
+
+def evaluation_sources() -> list[Path]:
+    sources = []
+    for module in ("benchmark", "evolution"):
+        folder = ROOT / "modules" / module
+        sources.append(folder / "pyproject.toml")
+        sources.extend(sorted((folder / "src").rglob("*.py")))
+    sources.extend(ROOT / "scripts" / name for name in EVALUATION_SCRIPTS)
+    sources.append(ROOT / "skills/workflow-evolution/SKILL.md")
+    return sources
+
+
+def package_evaluation(output_dir: Path) -> None:
+    # Execution modules and the learning prompt only; never copy experiment
+    # workspaces, auth files, traces, caches or generated candidate packages.
+    for source in evaluation_sources():
+        if not source.is_file() or source.is_symlink():
+            raise ValueError(f"Missing or unsafe evaluation source: {source.relative_to(ROOT)}")
+        publish_file(source, output_dir / "evaluation" / source.relative_to(ROOT))
 
 def command(argv: list[str], *, capture: bool = False) -> str:
     result = subprocess.run(argv, cwd=ROOT, text=True, check=True,
@@ -68,6 +92,8 @@ def release_inventory(output_dir: Path) -> list[dict]:
              for file in (output_dir / folder).rglob("*")
              if file.is_file() and "__pycache__" not in file.parts]
     paths.extend(output_dir / name for name in PACKAGE_DOCUMENTS.values())
+    paths.extend(output_dir / "evaluation" / source.relative_to(ROOT)
+                 for source in evaluation_sources())
     return [{"file": str(path.relative_to(output_dir)), "sha256": checksum(path)}
             for path in sorted(paths) if path.is_file()]
 
@@ -116,6 +142,7 @@ def main() -> int:
             publish_file(source, script_dir / name)
     for source, name in PACKAGE_DOCUMENTS.items():
         publish_file(ROOT / source, output_dir / name)
+    package_evaluation(output_dir)
     verbose = command(["rustc", "-vV"], capture=True)
     host = next(line.split(": ", 1)[1] for line in verbose.splitlines() if line.startswith("host: "))
     target = args.target or host
