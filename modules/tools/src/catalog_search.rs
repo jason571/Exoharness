@@ -23,7 +23,7 @@ fn normalized(value: &str) -> String {
         .collect::<Vec<_>>()
         .join(" ")
 }
-fn score(query: &str, name: &str, description: &str) -> usize {
+pub(crate) fn score(query: &str, name: &str, description: &str) -> usize {
     let words = crate::discovery::terms(query);
     if words.is_empty() {
         return 1;

@@ -201,19 +201,41 @@ impl Catalog {
         if task.trim().is_empty() {
             return vec![];
         }
-        self.search_kind(task, 0, Some("skill"))["items"]
-            .as_array()
-            .into_iter()
-            .flatten()
-            .take(3)
-            .map(|v| {
-                let mut v = v.clone();
-                if let Some(description) = v["description"].as_str() {
-                    v["description"] = json!(description.chars().take(480).collect::<String>());
-                }
-                v
-            })
-            .collect()
+        let result = self.search_kind(task, 0, Some("skill"));
+        let Some(items) = result["items"].as_array() else {
+            return vec![];
+        };
+        let relevance = |item: &Value| {
+            item["id"]
+                .as_str()
+                .and_then(|id| self.records.get(id))
+                .map_or(0, |record| {
+                    crate::catalog_search::score(
+                        task,
+                        &record.manifest.name,
+                        &record.manifest.description,
+                    )
+                })
+        };
+        let cutoff = items.get(2).map(&relevance).unwrap_or(0);
+        let mut candidates = Vec::new();
+        let mut characters = 0;
+        for item in items.iter().take(12) {
+            // Lexical relevance is a recognition hint, not semantic routing.
+            // Do not discard equally ranked workflows at an arbitrary third
+            // item (e.g. because a negated description also contains a term).
+            // Keep one bounded page, with exact authorized identities only.
+            if candidates.len() >= 3 && relevance(item) < cutoff {
+                break;
+            }
+            let size = item.to_string().chars().count();
+            if characters + size > 8192 {
+                break;
+            }
+            characters += size;
+            candidates.push(item.clone());
+        }
+        candidates
     }
     pub fn activate(&mut self, names: &[String]) -> Result<Value> {
         self.activate_with_mode(names, "replace")

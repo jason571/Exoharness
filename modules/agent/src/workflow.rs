@@ -45,6 +45,10 @@ pub fn workflow_view(entries: &[JournalEntry]) -> Option<WorkflowView> {
     view(entries, true)
 }
 
+pub(crate) fn context_view(entries: &[JournalEntry]) -> Option<WorkflowView> {
+    view(entries, false)
+}
+
 // Loading schemas changes the dispatch view, not the durability of an already
 // committed checkpoint. Context and schema selection are separate concerns.
 fn view(entries: &[JournalEntry], reset_on_activation: bool) -> Option<WorkflowView> {
@@ -151,7 +155,7 @@ fn view(entries: &[JournalEntry], reset_on_activation: bool) -> Option<WorkflowV
 }
 
 pub(crate) fn compact(items: &mut Vec<ContextItem>, entries: &[JournalEntry]) {
-    let Some(view) = view(entries, false) else {
+    let Some(view) = context_view(entries) else {
         return;
     };
     let Some(boundary) = items.iter().position(|item| matches!(item, ContextItem::Checkpoint{invocation_id,..} if invocation_id == &view.invocation)) else { return; };

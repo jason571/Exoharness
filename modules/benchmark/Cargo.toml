@@ -1,0 +1,31 @@
+[package]
+name = "exoharness-benchmark"
+authors.workspace = true
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+# Evidence digests must survive decimal metrics being serialized and reloaded.
+serde_json = { workspace = true, features = ["float_roundtrip"] }
+sha2.workspace = true
+thiserror.workspace = true
+async-trait.workspace = true
+tokio = { workspace = true, features = ["process", "io-util"] }
+axum.workspace = true
+reqwest = { version = "0.13.4", default-features = false, features = ["rustls", "json", "stream"] }
+base64 = "0.22"
+fs2 = "0.4"
+regex = "1"
+url = "2"
+percent-encoding = "2"
+tempfile = "3"
+zip = { version = "3", default-features = false, features = ["deflate"] }
+quick-xml = "0.38"
+walkdir = "2"
+
+[dev-dependencies]
+tower.workspace = true
+http-body-util.workspace = true

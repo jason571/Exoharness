@@ -10,16 +10,16 @@ SPEC.loader.exec_module(MODULE)
 
 class EvaluationReleaseTests(unittest.TestCase):
     def test_execution_modules_and_runtime_skill_are_allowed(self):
-        for name in ('evaluation/modules/benchmark/pyproject.toml',
-                     'evaluation/modules/evolution/src/exoharness_evolution/skill.py',
-                     'evaluation/scripts/evaluate-offline.py',
-                     'evaluation/scripts/evolve-skills.py',
-                     'evaluation/skills/workflow-evolution/SKILL.md'):
+        for name in ('evaluation/skills/workflow-evolution/SKILL.md',):
             with self.subTest(name=name):
                 self.assertTrue(MODULE.evaluation_asset(PurePosixPath(name)))
 
     def test_configuration_traces_notes_and_unrelated_scripts_are_denied(self):
         for name in ('evaluation/auth.json', 'evaluation/modules/benchmark/auth.json',
+                     'evaluation/modules/benchmark/pyproject.toml',
+                     'evaluation/modules/evolution/src/exoharness_evolution/skill.py',
+                     'evaluation/scripts/evaluate-offline.py',
+                     'evaluation/scripts/evolve-skills.py',
                      'evaluation/modules/evolution/trace.json',
                      'evaluation/modules/evolution/src/credentials.json',
                      'evaluation/scripts/private.py',

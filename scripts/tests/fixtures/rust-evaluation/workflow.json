@@ -1,0 +1,130 @@
+{
+  "suite": {
+    "id": "evolution_fixture",
+    "tasks": [
+      {
+        "checks": [
+          {
+            "fields": {
+              "amount": 42
+            },
+            "kind": "json_equals"
+          }
+        ],
+        "group": "pricing",
+        "id": "train_task",
+        "split": "train",
+        "turns": [
+          "Compute a different business case: train"
+        ]
+      },
+      {
+        "checks": [
+          {
+            "fields": {
+              "amount": 42
+            },
+            "kind": "json_equals"
+          }
+        ],
+        "group": "pricing",
+        "id": "validation_task",
+        "split": "validation",
+        "turns": [
+          "Compute a different business case: validation"
+        ]
+      },
+      {
+        "checks": [
+          {
+            "fields": {
+              "amount": 42
+            },
+            "kind": "json_equals"
+          }
+        ],
+        "group": "pricing",
+        "id": "test_task",
+        "split": "test",
+        "turns": [
+          "Compute a different business case: test"
+        ]
+      }
+    ],
+    "version": 1
+  },
+  "policy": {
+    "auto_suspend": false,
+    "baseline_binary_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "description": "Internal business pricing procedures",
+    "group": "pricing",
+    "id": "pricing_v1",
+    "interval_seconds": 3600,
+    "max_rounds": 3,
+    "max_rule_characters": 2400,
+    "max_tokens": 10000,
+    "max_tokens_per_delivery": 100000,
+    "max_training_characters": 32000,
+    "method": "workflow",
+    "min_savings": 0.05,
+    "monitor_failure_rate": 0.2,
+    "monitor_max_tokens": 100000,
+    "monitor_min_samples": 5,
+    "monitor_user_ids": [],
+    "publish": false,
+    "repeats": 3,
+    "run_reservation": 100,
+    "scope": {
+      "kind": "global"
+    },
+    "skill_name": "experience-pricing",
+    "suite_sha256": "2f035899535a76b486fd4c7b1327c158628aaa8edde6439b95ded05c33fd8363",
+    "supervision": "fewshot",
+    "version": 1
+  },
+  "candidate": {
+    "version": 2,
+    "suite_sha256": "2f035899535a76b486fd4c7b1327c158628aaa8edde6439b95ded05c33fd8363",
+    "rules": [],
+    "workflows": [
+      {
+        "id": "price-report",
+        "group": "pricing",
+        "sources": [
+          "train_task"
+        ],
+        "when": "A pricing report is requested.",
+        "unless": "Inputs are missing.",
+        "terms": [
+          "pricing",
+          "报价"
+        ],
+        "steps": [
+          {
+            "tool": "sandbox_run",
+            "action": "Compute the confirmed amount.",
+            "expect": "A successful computation receipt."
+          }
+        ]
+      }
+    ]
+  },
+  "expected_policy_sha256": "e47278d2b1a5aed4e037559c2136da308b5ac523741dd345e68da5828ac57831",
+  "expected_trajectory_identity": "997ac68caf1f0651d9bc5a9729c2efc3349773e6aaf1284573c66c31ed6991af",
+  "expected_trajectory_rows": [
+    {
+      "train_id": "train_task",
+      "verified_delivery": true,
+      "state": "succeeded",
+      "tokens": 25,
+      "steps": [
+        {
+          "tool": "sandbox_run",
+          "outcome": "success"
+        }
+      ],
+      "failure_classes": [],
+      "evidence_sha256": "a69358e0e5d7718ec0d8174701ad4902e0693fd922959e52ddb7e549f2aa0c57"
+    }
+  ]
+}

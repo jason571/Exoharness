@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "suite_sha256": "2f035899535a76b486fd4c7b1327c158628aaa8edde6439b95ded05c33fd8363",
+  "samples": [
+    {
+      "task_id": "train_task",
+      "directory": "sample",
+      "reviewer": "qa",
+      "owner_user_id": "owner",
+      "delivery_passed": true,
+      "outcome_sha256": "d9744cc46e141a5a3b4947b306843527b5d5cce859917e50f7502d06a5784466",
+      "trace_sha256": [
+        "7a508cb2b5d0455d3b8106d92cc31918b75e55a8f9f86f483a8c7fcbd6979803"
+      ],
+      "session_sha256": "d063b58344f9775cba1032740e3f411c998aa896399f6810f5702d2438c541de"
+    }
+  ]
+}

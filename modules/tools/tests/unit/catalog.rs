@@ -22,6 +22,71 @@ fn fixture() -> Catalog {
     }
 }
 
+fn add_skill(catalog: &mut Catalog, name: &str, description: &str) {
+    let id = format!("skill:global:_:{name}");
+    let record = serde_json::from_value(json!({
+        "id":id,"revision":1,"enabled":true,"created_at":1,"updated_at":1,
+        "manifest_digest":"fixture","source_digest":"fixture",
+        "manifest":{"schema_version":1,"name":name,"description":description,
+            "version":"0.1.0","scope":{"kind":"global"},
+            "source":{"kind":"uploaded","file_name":"fixture"},
+            "spec":{"kind":"skill","config":{}}}
+    }))
+    .unwrap();
+    catalog.records.insert(id, record);
+}
+
+#[test]
+fn initial_skill_hints_preserve_equal_relevance_for_short_followups() {
+    let mut catalog = fixture();
+    // Observed short follow-up. The scorer is deliberately lexical: the
+    // Agent needs the tied candidate descriptions to distinguish applicability.
+    for (name, description) in [
+        ("a-promo", "生成宣传片; not an uploaded-song MV."),
+        ("b-lesson", "生成教学视频"),
+        ("c-director", "生成视频"),
+        (
+            "d-audio-workflow",
+            "Create a complete MV from existing audio.",
+        ),
+    ] {
+        add_skill(&mut catalog, name, description);
+    }
+    let hints = catalog.skill_candidates("生成MV");
+    assert_eq!(hints.len(), 4);
+    assert!(hints.iter().any(|s| s["name"] == "d-audio-workflow"));
+    assert!(catalog.active.is_empty());
+    // Same cutoff behavior for an unrelated document family: no task names
+    // or provider rules are used by the implementation.
+    for index in 0..5 {
+        add_skill(
+            &mut catalog,
+            &format!("report-{index}"),
+            "Create a financial report.",
+        );
+    }
+    assert_eq!(catalog.skill_candidates("report").len(), 5);
+    assert!(catalog.skill_candidates("unmatched-identifier").is_empty());
+    assert!(catalog.skill_candidates("").is_empty());
+}
+
+#[test]
+fn initial_hints_exclude_lower_relevance_and_stay_within_one_bounded_page() {
+    let mut catalog = fixture();
+    for index in 0..3 {
+        add_skill(&mut catalog, &format!("high-{index}"), "alpha beta");
+    }
+    add_skill(&mut catalog, "low", "alpha only");
+    assert_eq!(catalog.skill_candidates("alpha beta").len(), 3);
+    for index in 0..40 {
+        add_skill(&mut catalog, &format!("same-{index}"), "alpha beta");
+    }
+    let hints = catalog.skill_candidates("alpha beta");
+    assert_eq!(hints.len(), 12);
+    assert!(serde_json::to_string(&hints).unwrap().chars().count() < 8192);
+    assert!(catalog.active.is_empty());
+}
+
 #[test]
 fn immutable_skill_stage_declarations_are_exact_and_fail_closed() {
     let mut catalog = fixture();
@@ -700,4 +765,42 @@ fn unauthorized_native_name_is_not_a_correctable_alias_and_keeps_loaded_set() {
         Err(crate::ToolError::Authorization)
     ));
     assert_eq!(catalog.active, loaded);
+}
+
+#[test]
+fn skill_stage_resources_require_exact_existing_text_files_and_keep_legacy_contracts() {
+    use sha2::{Digest, Sha256};
+    let catalog = fixture();
+    let root = "# Skill\nKeep global rules.\n";
+    let spec = json!({"version":1,"entry_tools":["sandbox_run"],"stages":[{"tools":["sandbox_run"],"omit_sections":[],"omit_resources":["reference.md"]}]});
+    let files = std::collections::BTreeMap::from([
+        (
+            "context-stages.json".into(),
+            serde_json::to_vec(&spec).unwrap(),
+        ),
+        ("reference.md".into(), b"exact reference".to_vec()),
+        ("SKILL.md".into(), root.as_bytes().to_vec()),
+    ]);
+    let compiled = crate::skill_context::compile(&catalog, "skill", 3, root, &files).unwrap();
+    assert_eq!(
+        compiled["stages"][0]["omit_resources"][0]["content_sha256"],
+        format!("{:x}", Sha256::digest(b"exact reference"))
+    );
+    for invalid in [
+        json!(["missing.md"]),
+        json!(["SKILL.md"]),
+        json!(["reference.md", "reference.md"]),
+    ] {
+        let mut changed = spec.clone();
+        changed["stages"][0]["omit_resources"] = invalid;
+        let mut files = files.clone();
+        files.insert(
+            "context-stages.json".into(),
+            serde_json::to_vec(&changed).unwrap(),
+        );
+        assert!(crate::skill_context::compile(&catalog, "skill", 3, root, &files).is_none());
+    }
+    let mut binary = files.clone();
+    binary.insert("reference.md".into(), vec![255, 254]);
+    assert!(crate::skill_context::compile(&catalog, "skill", 3, root, &binary).is_none());
 }

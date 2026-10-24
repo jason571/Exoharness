@@ -1,0 +1,30 @@
+{
+  "run": {
+    "id": "fixture-run",
+    "session_id": "owned-session",
+    "status": "succeeded"
+  },
+  "prompt": "Compute a different business case: train",
+  "model_calls": [
+    {
+      "usage_reported": true,
+      "usage": {
+        "input_tokens": 20,
+        "output_tokens": 5
+      }
+    }
+  ],
+  "invocations": [
+    {
+      "tool_name": "sandbox_run",
+      "outcome_status": "success",
+      "arguments": {
+        "source": "PRIVATE SOURCE password=PRIVATE"
+      },
+      "result": {
+        "_host_execution": true,
+        "text": "PRIVATE SOURCE"
+      }
+    }
+  ]
+}

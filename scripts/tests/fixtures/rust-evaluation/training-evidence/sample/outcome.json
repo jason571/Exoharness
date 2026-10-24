@@ -1,0 +1,13 @@
+{
+  "run_ids": [
+    "fixture-run"
+  ],
+  "tokens": 25,
+  "state": "succeeded",
+  "turn_states": [
+    "succeeded"
+  ],
+  "runtime_drift": false,
+  "text": "{\"amount\":42}",
+  "artifacts": []
+}

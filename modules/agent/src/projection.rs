@@ -39,11 +39,8 @@ pub fn project_request(
     let current_sources = crate::repair_context::project(&mut items, entries);
     checkpoint_reads::compact_previous_reads(&mut items);
     crate::workflow::compact(&mut items, entries);
-    crate::skill_context::project(
-        &mut items,
-        entries,
-        &tools.iter().map(|t| t.name.clone()).collect::<Vec<_>>(),
-    );
+    let names = tools.iter().map(|t| t.name.clone()).collect::<Vec<_>>();
+    crate::skill_context::project(&mut items, entries, &names);
     for (sequence, item) in items.into_iter().enumerate() {
         let message=match item {
             ContextItem::User(text)=>Message::User{text},

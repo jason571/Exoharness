@@ -21,26 +21,15 @@ PACKAGE_DOCUMENTS = {
     "LICENSE": "LICENSE",
     "COMMERCIAL-LICENSE.md": "COMMERCIAL-LICENSE.md",
 }
-EVALUATION_SCRIPTS = (
-    "create-evaluation-suite.py", "evaluate-offline.py",
-    "evaluate-gdpevo.py", "evolve-skills.py",
-)
-
-
 def evaluation_sources() -> list[Path]:
-    sources = []
-    for module in ("benchmark", "evolution"):
-        folder = ROOT / "modules" / module
-        sources.append(folder / "pyproject.toml")
-        sources.extend(sorted((folder / "src").rglob("*.py")))
-    sources.extend(ROOT / "scripts" / name for name in EVALUATION_SCRIPTS)
-    sources.append(ROOT / "skills/workflow-evolution/SKILL.md")
-    return sources
+    # Functional evaluation modules are native Cargo binaries in release/bin.
+    # Keep only the independently importable instruction resource here.
+    return [ROOT / "skills/workflow-evolution/SKILL.md"]
 
 
 def package_evaluation(output_dir: Path) -> None:
-    # Execution modules and the learning prompt only; never copy experiment
-    # workspaces, auth files, traces, caches or generated candidate packages.
+    # Instruction resource only; native modules are published with Cargo binaries.
+    # Never copy auth files, traces, caches or generated candidate packages.
     for source in evaluation_sources():
         if not source.is_file() or source.is_symlink():
             raise ValueError(f"Missing or unsafe evaluation source: {source.relative_to(ROOT)}")

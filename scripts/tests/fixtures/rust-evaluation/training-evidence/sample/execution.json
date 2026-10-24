@@ -1,0 +1,9 @@
+{
+  "session_id": "owned-session",
+  "turns": [
+    {
+      "run_id": "fixture-run",
+      "prompt_sha256": "3eb22ae67373c8dfbd4cf5102af4ee913e70f57b902c6c930baccce8444673b9"
+    }
+  ]
+}

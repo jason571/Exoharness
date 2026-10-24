@@ -1,0 +1,76 @@
+{
+  "id": "math_composition_smoke_v1",
+  "purpose": "Protocol and retention smoke only; not a generalization or media-quality claim",
+  "tasks": [
+    {
+      "checks": [
+        {
+          "fields": {
+            "product": 490
+          },
+          "kind": "json_equals"
+        }
+      ],
+      "group": "math",
+      "id": "train_math_0",
+      "split": "train",
+      "turns": [
+        "两位数乘35，把个位5看成8，积多42。只返回JSON，字段product为正确的积，不创建文件、不调用工具。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "fields": {
+            "product": 714
+          },
+          "kind": "json_equals"
+        }
+      ],
+      "group": "math",
+      "id": "train_math_1",
+      "split": "train",
+      "turns": [
+        "两位数乘42，把个位2看成6，积多68。只返回JSON，字段product为正确的积，不创建文件、不调用工具。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "fields": {
+            "product": 848
+          },
+          "kind": "json_equals"
+        }
+      ],
+      "group": "math",
+      "id": "train_math_2",
+      "split": "train",
+      "turns": [
+        "两位数乘53，把个位3看成7，积多64。只返回JSON，字段product为正确的积，不创建文件、不调用工具。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "fields": {
+            "product": 312
+          },
+          "kind": "json_equals"
+        },
+        {
+          "kind": "tool_count",
+          "max": 0,
+          "name_contains": "generate"
+        }
+      ],
+      "group": "math",
+      "id": "test_math_composition",
+      "split": "test",
+      "turns": [
+        "琪琪计算一个两位数乘24，把个位4看成7，结果比正确的积多39。求正确的积。只返回JSON，product为整数；不要创建文件或调用工具。"
+      ]
+    }
+  ],
+  "version": 1
+}

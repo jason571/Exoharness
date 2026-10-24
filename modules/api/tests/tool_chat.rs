@@ -43,6 +43,8 @@ const SKILL: &str = "skill:global:_:document-fixture";
 mod chat_attachments;
 #[path = "unit/coding.rs"]
 mod coding;
+#[path = "unit/conditional_input.rs"]
+mod conditional_input;
 #[path = "unit/discovery_scope.rs"]
 mod discovery_scope;
 #[path = "unit/durable_workflow.rs"]

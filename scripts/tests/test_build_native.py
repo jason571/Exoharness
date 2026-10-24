@@ -13,15 +13,6 @@ SPEC.loader.exec_module(MODULE)
 
 class NativeBuildTests(unittest.TestCase):
     def evaluation_fixture(self, root):
-        for module in ('benchmark', 'evolution'):
-            folder = root / 'modules' / module
-            (folder / 'src' / module).mkdir(parents=True)
-            (folder / 'pyproject.toml').write_text('[project]\nname="fixture"\nversion="0.1.2"\n')
-            (folder / 'src' / module / '__init__.py').write_text('# public code\n')
-        for name in MODULE.EVALUATION_SCRIPTS:
-            source = root / 'scripts' / name
-            source.parent.mkdir(parents=True, exist_ok=True)
-            source.write_text('# public entrypoint\n')
         skill = root / 'skills/workflow-evolution/SKILL.md'
         skill.parent.mkdir(parents=True)
         skill.write_text('Executable learning instructions\n')
@@ -70,7 +61,7 @@ class NativeBuildTests(unittest.TestCase):
                 expected = sorted('evaluation/' + str(p.relative_to(root)) for p in sources)
                 actual = sorted(p['file'] for p in MODULE.release_inventory(output))
             self.assertEqual(actual, expected)
-            self.assertEqual(len(actual), 9)
+            self.assertEqual(len(actual), 1)
             self.assertTrue((output/'evaluation/skills/workflow-evolution/SKILL.md').is_file())
             self.assertFalse(any('credentials' in name or '__pycache__' in name or 'private' in name for name in actual))
 

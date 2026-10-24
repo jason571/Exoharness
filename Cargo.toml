@@ -1,15 +1,17 @@
 [workspace]
-members = ["modules/artifacts", "modules/contracts", "modules/core", "modules/storage/postgres", "modules/storage/sql-compat", "modules/identity", "modules/coding", "modules/configuration", "modules/model-runtime", "modules/registry", "modules/skills", "modules/skill-runtime", "modules/secrets", "modules/mcp", "modules/sandbox", "modules/api", "modules/app"]
+members = ["modules/artifacts", "modules/contracts", "modules/core", "modules/storage/postgres", "modules/storage/sql-compat", "modules/identity", "modules/coding", "modules/configuration", "modules/model-runtime", "modules/registry", "modules/skills", "modules/skill-runtime", "modules/secrets", "modules/mcp", "modules/sandbox", "modules/api", "modules/app", "modules/benchmark", "modules/evolution"]
 resolver = "2"
 
 [workspace.package]
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 rust-version = "1.88"
 authors = ["Jason Yang <flyangqn@gmail.com>"]
 license = "AGPL-3.0-only"
 
 [workspace.dependencies]
+exoharness-benchmark = { path = "modules/benchmark" }
+exoharness-evolution = { path = "modules/evolution" }
 exoharness-coding = { path = "modules/coding" }
 exoharness-tools = { path = "modules/tools" }
 exoharness-agent = { path = "modules/agent" }

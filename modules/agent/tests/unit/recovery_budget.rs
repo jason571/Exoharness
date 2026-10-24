@@ -327,7 +327,7 @@ async fn input_repair_target_survives_resume_and_unrelated_success_does_not_clos
 #[tokio::test]
 async fn successful_authorized_fallback_closes_input_episode_but_not_prior_recovery() {
     for prior in [false,true] {
-        let mut current=state();current.recovery_active=true;current.input_recovery_started=!prior;
+        let mut current=state();current.recovery_active=true;current.input_recovery_started= !prior;
         current.input_recovery_targets.insert("invalid-original-tool".into());current.input_corrections=1;current.recovery_tokens=31;
         let mut driver=Fixture::new(vec![completion(vec![proposal("fallback")]),completion(vec![])],vec![receipt("fallback",ReceiptState::Completed)]);
         assert!(matches!(run(&mut driver,&mut current,&policy(),"system",&BTreeSet::new(),&tools()).await,RunOutcome::Finished(_)));

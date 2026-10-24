@@ -1,0 +1,1488 @@
+{
+  "id": "workflow_combinations_v1",
+  "review_scope": "Structural checks only. Content, real links, original audio, visual quality and non-regression need independent review before retention.",
+  "rules": {
+    "lesson": [
+      "equation",
+      "verify",
+      "voice",
+      "large_text"
+    ],
+    "music": [
+      "female_voice",
+      "slow",
+      "guzheng",
+      "flute"
+    ],
+    "mv": [
+      "portrait",
+      "mountains",
+      "white_robes",
+      "end_title"
+    ],
+    "ppt": [
+      "examples",
+      "safety",
+      "simple_shapes",
+      "notes"
+    ],
+    "video": [
+      "portrait",
+      "static_outro",
+      "chinese_title",
+      "silent"
+    ],
+    "web": [
+      "offline",
+      "keyboard",
+      "faq",
+      "mobile_menu"
+    ]
+  },
+  "tasks": [
+    {
+      "checks": [
+        {
+          "extension": ".mp4",
+          "kind": "artifact",
+          "max_duration": 16.5,
+          "min_duration": 13.5
+        }
+      ],
+      "group": "video",
+      "id": "train_video_0",
+      "review_required": true,
+      "rule_ids": [
+        "portrait"
+      ],
+      "split": "train",
+      "turns": [
+        "生成15秒ExoHarness科技风宣传视频，最后清楚显示开源地址https://github.com/jason571/Exoharness，交付MP4。画幅为竖屏9:16。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "extension": ".mp4",
+          "kind": "artifact",
+          "max_duration": 16.5,
+          "min_duration": 13.5
+        }
+      ],
+      "group": "video",
+      "id": "train_video_1",
+      "review_required": true,
+      "rule_ids": [
+        "static_outro"
+      ],
+      "split": "train",
+      "turns": [
+        "生成15秒ExoHarness科技风宣传视频，最后清楚显示开源地址https://github.com/jason571/Exoharness，交付MP4。片尾使用静态图片承载地址文字。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "extension": ".mp4",
+          "kind": "artifact",
+          "max_duration": 16.5,
+          "min_duration": 13.5
+        }
+      ],
+      "group": "video",
+      "id": "train_video_2",
+      "review_required": true,
+      "rule_ids": [
+        "chinese_title"
+      ],
+      "split": "train",
+      "turns": [
+        "生成15秒ExoHarness科技风宣传视频，最后清楚显示开源地址https://github.com/jason571/Exoharness，交付MP4。开头显示中文标题“让智能体真正交付”。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "extension": ".mp4",
+          "kind": "artifact",
+          "max_duration": 16.5,
+          "min_duration": 13.5
+        }
+      ],
+      "group": "video",
+      "id": "train_video_3",
+      "review_required": true,
+      "rule_ids": [
+        "silent"
+      ],
+      "split": "train",
+      "turns": [
+        "生成15秒ExoHarness科技风宣传视频，最后清楚显示开源地址https://github.com/jason571/Exoharness，交付MP4。全片不包含声音。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "extension": ".mp4",
+          "kind": "artifact",
+          "max_duration": 16.5,
+          "min_duration": 13.5
+        }
+      ],
+      "group": "video",
+      "id": "train_video_4",
+      "review_required": true,
+      "rule_ids": [
+        "portrait",
+        "static_outro"
+      ],
+      "split": "train",
+      "turns": [
+        "生成15秒ExoHarness科技风宣传视频，最后清楚显示开源地址https://github.com/jason571/Exoharness，交付MP4。画幅为竖屏9:16。片尾使用静态图片承载地址文字。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "extension": ".mp4",
+          "kind": "artifact",
+          "max_duration": 16.5,
+          "min_duration": 13.5
+        }
+      ],
+      "group": "video",
+      "id": "test_video_0",
+      "review_required": true,
+      "rule_ids": [
+        "portrait",
+        "chinese_title"
+      ],
+      "split": "test",
+      "turns": [
+        "生成15秒ExoHarness科技风宣传视频，最后清楚显示开源地址https://github.com/jason571/Exoharness，交付MP4。画幅为竖屏9:16。开头显示中文标题“让智能体真正交付”。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "extension": ".mp4",
+          "kind": "artifact",
+          "max_duration": 16.5,
+          "min_duration": 13.5
+        }
+      ],
+      "group": "video",
+      "id": "test_video_1",
+      "review_required": true,
+      "rule_ids": [
+        "static_outro",
+        "silent"
+      ],
+      "split": "test",
+      "turns": [
+        "生成15秒ExoHarness科技风宣传视频，最后清楚显示开源地址https://github.com/jason571/Exoharness，交付MP4。片尾使用静态图片承载地址文字。全片不包含声音。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "extension": ".mp4",
+          "kind": "artifact",
+          "max_duration": 16.5,
+          "min_duration": 13.5
+        }
+      ],
+      "group": "video",
+      "id": "test_video_2",
+      "review_required": true,
+      "rule_ids": [
+        "portrait",
+        "silent"
+      ],
+      "split": "test",
+      "turns": [
+        "生成15秒ExoHarness科技风宣传视频，最后清楚显示开源地址https://github.com/jason571/Exoharness，交付MP4。画幅为竖屏9:16。全片不包含声音。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "extension": ".mp4",
+          "kind": "artifact",
+          "max_duration": 16.5,
+          "min_duration": 13.5
+        }
+      ],
+      "group": "video",
+      "id": "test_video_3",
+      "review_required": true,
+      "rule_ids": [
+        "static_outro",
+        "chinese_title"
+      ],
+      "split": "test",
+      "turns": [
+        "生成15秒ExoHarness科技风宣传视频，最后清楚显示开源地址https://github.com/jason571/Exoharness，交付MP4。片尾使用静态图片承载地址文字。开头显示中文标题“让智能体真正交付”。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "extension": ".mp4",
+          "kind": "artifact",
+          "max_duration": 16.5,
+          "min_duration": 13.5
+        }
+      ],
+      "group": "video",
+      "id": "test_video_4",
+      "review_required": true,
+      "rule_ids": [
+        "portrait",
+        "static_outro",
+        "chinese_title",
+        "silent"
+      ],
+      "split": "test",
+      "turns": [
+        "生成15秒ExoHarness科技风宣传视频，最后清楚显示开源地址https://github.com/jason571/Exoharness，交付MP4。画幅为竖屏9:16。片尾使用静态图片承载地址文字。开头显示中文标题“让智能体真正交付”。全片不包含声音。"
+      ]
+    },
+    {
+      "attachments": [
+        {
+          "path": "inputs/existing.wav",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "type": "audio"
+        }
+      ],
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        },
+        {
+          "kind": "tool_count",
+          "max": 0,
+          "name_contains": "generate_music"
+        }
+      ],
+      "group": "mv",
+      "id": "train_mv_0",
+      "review_required": true,
+      "rule_ids": [
+        "portrait"
+      ],
+      "split": "train",
+      "turns": [
+        "使用上传的现成音频生成仙侠MV，保持原音轨，不生成音乐或歌词，交付MP4。画幅为竖屏9:16。"
+      ]
+    },
+    {
+      "attachments": [
+        {
+          "path": "inputs/existing.wav",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "type": "audio"
+        }
+      ],
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        },
+        {
+          "kind": "tool_count",
+          "max": 0,
+          "name_contains": "generate_music"
+        }
+      ],
+      "group": "mv",
+      "id": "train_mv_1",
+      "review_required": true,
+      "rule_ids": [
+        "mountains"
+      ],
+      "split": "train",
+      "turns": [
+        "使用上传的现成音频生成仙侠MV，保持原音轨，不生成音乐或歌词，交付MP4。包含雾中群山场景。"
+      ]
+    },
+    {
+      "attachments": [
+        {
+          "path": "inputs/existing.wav",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "type": "audio"
+        }
+      ],
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        },
+        {
+          "kind": "tool_count",
+          "max": 0,
+          "name_contains": "generate_music"
+        }
+      ],
+      "group": "mv",
+      "id": "train_mv_2",
+      "review_required": true,
+      "rule_ids": [
+        "white_robes"
+      ],
+      "split": "train",
+      "turns": [
+        "使用上传的现成音频生成仙侠MV，保持原音轨，不生成音乐或歌词，交付MP4。主角穿白衣，衣袖随风。"
+      ]
+    },
+    {
+      "attachments": [
+        {
+          "path": "inputs/existing.wav",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "type": "audio"
+        }
+      ],
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        },
+        {
+          "kind": "tool_count",
+          "max": 0,
+          "name_contains": "generate_music"
+        }
+      ],
+      "group": "mv",
+      "id": "train_mv_3",
+      "review_required": true,
+      "rule_ids": [
+        "end_title"
+      ],
+      "split": "train",
+      "turns": [
+        "使用上传的现成音频生成仙侠MV，保持原音轨，不生成音乐或歌词，交付MP4。最后出现中文标题“云外月如歌”。"
+      ]
+    },
+    {
+      "attachments": [
+        {
+          "path": "inputs/existing.wav",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "type": "audio"
+        }
+      ],
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        },
+        {
+          "kind": "tool_count",
+          "max": 0,
+          "name_contains": "generate_music"
+        }
+      ],
+      "group": "mv",
+      "id": "train_mv_4",
+      "review_required": true,
+      "rule_ids": [
+        "portrait",
+        "mountains"
+      ],
+      "split": "train",
+      "turns": [
+        "使用上传的现成音频生成仙侠MV，保持原音轨，不生成音乐或歌词，交付MP4。画幅为竖屏9:16。包含雾中群山场景。"
+      ]
+    },
+    {
+      "attachments": [
+        {
+          "path": "inputs/existing.wav",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "type": "audio"
+        }
+      ],
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        },
+        {
+          "kind": "tool_count",
+          "max": 0,
+          "name_contains": "generate_music"
+        }
+      ],
+      "group": "mv",
+      "id": "test_mv_0",
+      "review_required": true,
+      "rule_ids": [
+        "portrait",
+        "white_robes"
+      ],
+      "split": "test",
+      "turns": [
+        "使用上传的现成音频生成仙侠MV，保持原音轨，不生成音乐或歌词，交付MP4。画幅为竖屏9:16。主角穿白衣，衣袖随风。"
+      ]
+    },
+    {
+      "attachments": [
+        {
+          "path": "inputs/existing.wav",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "type": "audio"
+        }
+      ],
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        },
+        {
+          "kind": "tool_count",
+          "max": 0,
+          "name_contains": "generate_music"
+        }
+      ],
+      "group": "mv",
+      "id": "test_mv_1",
+      "review_required": true,
+      "rule_ids": [
+        "mountains",
+        "end_title"
+      ],
+      "split": "test",
+      "turns": [
+        "使用上传的现成音频生成仙侠MV，保持原音轨，不生成音乐或歌词，交付MP4。包含雾中群山场景。最后出现中文标题“云外月如歌”。"
+      ]
+    },
+    {
+      "attachments": [
+        {
+          "path": "inputs/existing.wav",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "type": "audio"
+        }
+      ],
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        },
+        {
+          "kind": "tool_count",
+          "max": 0,
+          "name_contains": "generate_music"
+        }
+      ],
+      "group": "mv",
+      "id": "test_mv_2",
+      "review_required": true,
+      "rule_ids": [
+        "portrait",
+        "end_title"
+      ],
+      "split": "test",
+      "turns": [
+        "使用上传的现成音频生成仙侠MV，保持原音轨，不生成音乐或歌词，交付MP4。画幅为竖屏9:16。最后出现中文标题“云外月如歌”。"
+      ]
+    },
+    {
+      "attachments": [
+        {
+          "path": "inputs/existing.wav",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "type": "audio"
+        }
+      ],
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        },
+        {
+          "kind": "tool_count",
+          "max": 0,
+          "name_contains": "generate_music"
+        }
+      ],
+      "group": "mv",
+      "id": "test_mv_3",
+      "review_required": true,
+      "rule_ids": [
+        "mountains",
+        "white_robes"
+      ],
+      "split": "test",
+      "turns": [
+        "使用上传的现成音频生成仙侠MV，保持原音轨，不生成音乐或歌词，交付MP4。包含雾中群山场景。主角穿白衣，衣袖随风。"
+      ]
+    },
+    {
+      "attachments": [
+        {
+          "path": "inputs/existing.wav",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "type": "audio"
+        }
+      ],
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        },
+        {
+          "kind": "tool_count",
+          "max": 0,
+          "name_contains": "generate_music"
+        }
+      ],
+      "group": "mv",
+      "id": "test_mv_4",
+      "review_required": true,
+      "rule_ids": [
+        "portrait",
+        "mountains",
+        "white_robes",
+        "end_title"
+      ],
+      "split": "test",
+      "turns": [
+        "使用上传的现成音频生成仙侠MV，保持原音轨，不生成音乐或歌词，交付MP4。画幅为竖屏9:16。包含雾中群山场景。主角穿白衣，衣袖随风。最后出现中文标题“云外月如歌”。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "人工智能"
+          ],
+          "extension": ".pptx",
+          "kind": "artifact",
+          "slides": 3
+        }
+      ],
+      "group": "ppt",
+      "id": "train_ppt_0",
+      "review_required": true,
+      "rule_ids": [
+        "examples"
+      ],
+      "split": "train",
+      "turns": [
+        "给一年级小朋友解释人工智能，生成3页可编辑PPT，字大句短，交付PPTX。包含家庭和学校两种日常例子。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "人工智能"
+          ],
+          "extension": ".pptx",
+          "kind": "artifact",
+          "slides": 3
+        }
+      ],
+      "group": "ppt",
+      "id": "train_ppt_1",
+      "review_required": true,
+      "rule_ids": [
+        "safety"
+      ],
+      "split": "train",
+      "turns": [
+        "给一年级小朋友解释人工智能，生成3页可编辑PPT，字大句短，交付PPTX。明确说明不要分享密码。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "人工智能"
+          ],
+          "extension": ".pptx",
+          "kind": "artifact",
+          "slides": 3
+        }
+      ],
+      "group": "ppt",
+      "id": "train_ppt_2",
+      "review_required": true,
+      "rule_ids": [
+        "simple_shapes"
+      ],
+      "split": "train",
+      "turns": [
+        "给一年级小朋友解释人工智能，生成3页可编辑PPT，字大句短，交付PPTX。插图使用简单矢量形状，不生成图片。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "人工智能"
+          ],
+          "extension": ".pptx",
+          "kind": "artifact",
+          "slides": 3
+        }
+      ],
+      "group": "ppt",
+      "id": "train_ppt_3",
+      "review_required": true,
+      "rule_ids": [
+        "notes"
+      ],
+      "split": "train",
+      "turns": [
+        "给一年级小朋友解释人工智能，生成3页可编辑PPT，字大句短，交付PPTX。每页带一段老师讲解用的演讲备注。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "人工智能"
+          ],
+          "extension": ".pptx",
+          "kind": "artifact",
+          "slides": 3
+        }
+      ],
+      "group": "ppt",
+      "id": "train_ppt_4",
+      "review_required": true,
+      "rule_ids": [
+        "examples",
+        "safety"
+      ],
+      "split": "train",
+      "turns": [
+        "给一年级小朋友解释人工智能，生成3页可编辑PPT，字大句短，交付PPTX。包含家庭和学校两种日常例子。明确说明不要分享密码。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "人工智能"
+          ],
+          "extension": ".pptx",
+          "kind": "artifact",
+          "slides": 3
+        }
+      ],
+      "group": "ppt",
+      "id": "test_ppt_0",
+      "review_required": true,
+      "rule_ids": [
+        "examples",
+        "simple_shapes"
+      ],
+      "split": "test",
+      "turns": [
+        "给一年级小朋友解释人工智能，生成3页可编辑PPT，字大句短，交付PPTX。包含家庭和学校两种日常例子。插图使用简单矢量形状，不生成图片。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "人工智能"
+          ],
+          "extension": ".pptx",
+          "kind": "artifact",
+          "slides": 3
+        }
+      ],
+      "group": "ppt",
+      "id": "test_ppt_1",
+      "review_required": true,
+      "rule_ids": [
+        "safety",
+        "notes"
+      ],
+      "split": "test",
+      "turns": [
+        "给一年级小朋友解释人工智能，生成3页可编辑PPT，字大句短，交付PPTX。明确说明不要分享密码。每页带一段老师讲解用的演讲备注。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "人工智能"
+          ],
+          "extension": ".pptx",
+          "kind": "artifact",
+          "slides": 3
+        }
+      ],
+      "group": "ppt",
+      "id": "test_ppt_2",
+      "review_required": true,
+      "rule_ids": [
+        "examples",
+        "notes"
+      ],
+      "split": "test",
+      "turns": [
+        "给一年级小朋友解释人工智能，生成3页可编辑PPT，字大句短，交付PPTX。包含家庭和学校两种日常例子。每页带一段老师讲解用的演讲备注。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "人工智能"
+          ],
+          "extension": ".pptx",
+          "kind": "artifact",
+          "slides": 3
+        }
+      ],
+      "group": "ppt",
+      "id": "test_ppt_3",
+      "review_required": true,
+      "rule_ids": [
+        "safety",
+        "simple_shapes"
+      ],
+      "split": "test",
+      "turns": [
+        "给一年级小朋友解释人工智能，生成3页可编辑PPT，字大句短，交付PPTX。明确说明不要分享密码。插图使用简单矢量形状，不生成图片。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "人工智能"
+          ],
+          "extension": ".pptx",
+          "kind": "artifact",
+          "slides": 3
+        }
+      ],
+      "group": "ppt",
+      "id": "test_ppt_4",
+      "review_required": true,
+      "rule_ids": [
+        "examples",
+        "safety",
+        "simple_shapes",
+        "notes"
+      ],
+      "split": "test",
+      "turns": [
+        "给一年级小朋友解释人工智能，生成3页可编辑PPT，字大句短，交付PPTX。包含家庭和学校两种日常例子。明确说明不要分享密码。插图使用简单矢量形状，不生成图片。每页带一段老师讲解用的演讲备注。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "ExoHarness",
+            "Rust"
+          ],
+          "extension": ".zip",
+          "kind": "artifact"
+        }
+      ],
+      "group": "web",
+      "id": "train_web_0",
+      "review_required": true,
+      "rule_ids": [
+        "offline"
+      ],
+      "split": "train",
+      "turns": [
+        "为Rust通用Agent框架ExoHarness生成宣传网页，含手机布局、中英文切换与GitHub入口https://github.com/jason571/Exoharness。交付项目ZIP与预览链接。所有CSS、JS、SVG内联，离线可用。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "ExoHarness",
+            "Rust"
+          ],
+          "extension": ".zip",
+          "kind": "artifact"
+        }
+      ],
+      "group": "web",
+      "id": "train_web_1",
+      "review_required": true,
+      "rule_ids": [
+        "keyboard"
+      ],
+      "split": "train",
+      "turns": [
+        "为Rust通用Agent框架ExoHarness生成宣传网页，含手机布局、中英文切换与GitHub入口https://github.com/jason571/Exoharness。交付项目ZIP与预览链接。语言切换可用键盘操作，有明确焦点。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "ExoHarness",
+            "Rust"
+          ],
+          "extension": ".zip",
+          "kind": "artifact"
+        }
+      ],
+      "group": "web",
+      "id": "train_web_2",
+      "review_required": true,
+      "rule_ids": [
+        "faq"
+      ],
+      "split": "train",
+      "turns": [
+        "为Rust通用Agent框架ExoHarness生成宣传网页，含手机布局、中英文切换与GitHub入口https://github.com/jason571/Exoharness。交付项目ZIP与预览链接。提供可展开的FAQ区域。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "ExoHarness",
+            "Rust"
+          ],
+          "extension": ".zip",
+          "kind": "artifact"
+        }
+      ],
+      "group": "web",
+      "id": "train_web_3",
+      "review_required": true,
+      "rule_ids": [
+        "mobile_menu"
+      ],
+      "split": "train",
+      "turns": [
+        "为Rust通用Agent框架ExoHarness生成宣传网页，含手机布局、中英文切换与GitHub入口https://github.com/jason571/Exoharness。交付项目ZIP与预览链接。手机端提供可点击的折叠菜单。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "ExoHarness",
+            "Rust"
+          ],
+          "extension": ".zip",
+          "kind": "artifact"
+        }
+      ],
+      "group": "web",
+      "id": "train_web_4",
+      "review_required": true,
+      "rule_ids": [
+        "offline",
+        "keyboard"
+      ],
+      "split": "train",
+      "turns": [
+        "为Rust通用Agent框架ExoHarness生成宣传网页，含手机布局、中英文切换与GitHub入口https://github.com/jason571/Exoharness。交付项目ZIP与预览链接。所有CSS、JS、SVG内联，离线可用。语言切换可用键盘操作，有明确焦点。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "ExoHarness",
+            "Rust"
+          ],
+          "extension": ".zip",
+          "kind": "artifact"
+        }
+      ],
+      "group": "web",
+      "id": "test_web_0",
+      "review_required": true,
+      "rule_ids": [
+        "offline",
+        "faq"
+      ],
+      "split": "test",
+      "turns": [
+        "为Rust通用Agent框架ExoHarness生成宣传网页，含手机布局、中英文切换与GitHub入口https://github.com/jason571/Exoharness。交付项目ZIP与预览链接。所有CSS、JS、SVG内联，离线可用。提供可展开的FAQ区域。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "ExoHarness",
+            "Rust"
+          ],
+          "extension": ".zip",
+          "kind": "artifact"
+        }
+      ],
+      "group": "web",
+      "id": "test_web_1",
+      "review_required": true,
+      "rule_ids": [
+        "keyboard",
+        "mobile_menu"
+      ],
+      "split": "test",
+      "turns": [
+        "为Rust通用Agent框架ExoHarness生成宣传网页，含手机布局、中英文切换与GitHub入口https://github.com/jason571/Exoharness。交付项目ZIP与预览链接。语言切换可用键盘操作，有明确焦点。手机端提供可点击的折叠菜单。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "ExoHarness",
+            "Rust"
+          ],
+          "extension": ".zip",
+          "kind": "artifact"
+        }
+      ],
+      "group": "web",
+      "id": "test_web_2",
+      "review_required": true,
+      "rule_ids": [
+        "offline",
+        "mobile_menu"
+      ],
+      "split": "test",
+      "turns": [
+        "为Rust通用Agent框架ExoHarness生成宣传网页，含手机布局、中英文切换与GitHub入口https://github.com/jason571/Exoharness。交付项目ZIP与预览链接。所有CSS、JS、SVG内联，离线可用。手机端提供可点击的折叠菜单。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "ExoHarness",
+            "Rust"
+          ],
+          "extension": ".zip",
+          "kind": "artifact"
+        }
+      ],
+      "group": "web",
+      "id": "test_web_3",
+      "review_required": true,
+      "rule_ids": [
+        "keyboard",
+        "faq"
+      ],
+      "split": "test",
+      "turns": [
+        "为Rust通用Agent框架ExoHarness生成宣传网页，含手机布局、中英文切换与GitHub入口https://github.com/jason571/Exoharness。交付项目ZIP与预览链接。语言切换可用键盘操作，有明确焦点。提供可展开的FAQ区域。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "ExoHarness",
+            "Rust"
+          ],
+          "extension": ".zip",
+          "kind": "artifact"
+        }
+      ],
+      "group": "web",
+      "id": "test_web_4",
+      "review_required": true,
+      "rule_ids": [
+        "offline",
+        "keyboard",
+        "faq",
+        "mobile_menu"
+      ],
+      "split": "test",
+      "turns": [
+        "为Rust通用Agent框架ExoHarness生成宣传网页，含手机布局、中英文切换与GitHub入口https://github.com/jason571/Exoharness。交付项目ZIP与预览链接。所有CSS、JS、SVG内联，离线可用。语言切换可用键盘操作，有明确焦点。提供可展开的FAQ区域。手机端提供可点击的折叠菜单。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp3",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "music",
+      "id": "train_music_0",
+      "review_required": true,
+      "rule_ids": [
+        "female_voice"
+      ],
+      "split": "train",
+      "turns": [
+        "使用这些明确提供的原创歌词生成古风歌曲，不自动写词，交付可播放音频：[Verse]\n山间清风过，云外月如歌。\n[Chorus]\n一盏星河落，与你看山河。使用女声演唱。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp3",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "music",
+      "id": "train_music_1",
+      "review_required": true,
+      "rule_ids": [
+        "slow"
+      ],
+      "split": "train",
+      "turns": [
+        "使用这些明确提供的原创歌词生成古风歌曲，不自动写词，交付可播放音频：[Verse]\n山间清风过，云外月如歌。\n[Chorus]\n一盏星河落，与你看山河。歌曲节奏舒缓。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp3",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "music",
+      "id": "train_music_2",
+      "review_required": true,
+      "rule_ids": [
+        "guzheng"
+      ],
+      "split": "train",
+      "turns": [
+        "使用这些明确提供的原创歌词生成古风歌曲，不自动写词，交付可播放音频：[Verse]\n山间清风过，云外月如歌。\n[Chorus]\n一盏星河落，与你看山河。突出古筝伴奏。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp3",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "music",
+      "id": "train_music_3",
+      "review_required": true,
+      "rule_ids": [
+        "flute"
+      ],
+      "split": "train",
+      "turns": [
+        "使用这些明确提供的原创歌词生成古风歌曲，不自动写词，交付可播放音频：[Verse]\n山间清风过，云外月如歌。\n[Chorus]\n一盏星河落，与你看山河。突出笛子伴奏。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp3",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "music",
+      "id": "train_music_4",
+      "review_required": true,
+      "rule_ids": [
+        "female_voice",
+        "slow"
+      ],
+      "split": "train",
+      "turns": [
+        "使用这些明确提供的原创歌词生成古风歌曲，不自动写词，交付可播放音频：[Verse]\n山间清风过，云外月如歌。\n[Chorus]\n一盏星河落，与你看山河。使用女声演唱。歌曲节奏舒缓。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp3",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "music",
+      "id": "test_music_0",
+      "review_required": true,
+      "rule_ids": [
+        "female_voice",
+        "guzheng"
+      ],
+      "split": "test",
+      "turns": [
+        "使用这些明确提供的原创歌词生成古风歌曲，不自动写词，交付可播放音频：[Verse]\n山间清风过，云外月如歌。\n[Chorus]\n一盏星河落，与你看山河。使用女声演唱。突出古筝伴奏。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp3",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "music",
+      "id": "test_music_1",
+      "review_required": true,
+      "rule_ids": [
+        "slow",
+        "flute"
+      ],
+      "split": "test",
+      "turns": [
+        "使用这些明确提供的原创歌词生成古风歌曲，不自动写词，交付可播放音频：[Verse]\n山间清风过，云外月如歌。\n[Chorus]\n一盏星河落，与你看山河。歌曲节奏舒缓。突出笛子伴奏。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp3",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "music",
+      "id": "test_music_2",
+      "review_required": true,
+      "rule_ids": [
+        "female_voice",
+        "flute"
+      ],
+      "split": "test",
+      "turns": [
+        "使用这些明确提供的原创歌词生成古风歌曲，不自动写词，交付可播放音频：[Verse]\n山间清风过，云外月如歌。\n[Chorus]\n一盏星河落，与你看山河。使用女声演唱。突出笛子伴奏。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp3",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "music",
+      "id": "test_music_3",
+      "review_required": true,
+      "rule_ids": [
+        "slow",
+        "guzheng"
+      ],
+      "split": "test",
+      "turns": [
+        "使用这些明确提供的原创歌词生成古风歌曲，不自动写词，交付可播放音频：[Verse]\n山间清风过，云外月如歌。\n[Chorus]\n一盏星河落，与你看山河。歌曲节奏舒缓。突出古筝伴奏。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp3",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "music",
+      "id": "test_music_4",
+      "review_required": true,
+      "rule_ids": [
+        "female_voice",
+        "slow",
+        "guzheng",
+        "flute"
+      ],
+      "split": "test",
+      "turns": [
+        "使用这些明确提供的原创歌词生成古风歌曲，不自动写词，交付可播放音频：[Verse]\n山间清风过，云外月如歌。\n[Chorus]\n一盏星河落，与你看山河。使用女声演唱。歌曲节奏舒缓。突出古筝伴奏。突出笛子伴奏。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "lesson",
+      "id": "train_lesson_0",
+      "review_required": true,
+      "rule_ids": [
+        "equation"
+      ],
+      "split": "train",
+      "turns": [
+        "生成四年级数学讲解视频：一个两位数乘24，把个位4看成7，积多39，正确的积为312。请解释原因并交付视频。清楚展示27减24等于3。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "lesson",
+      "id": "train_lesson_1",
+      "review_required": true,
+      "rule_ids": [
+        "verify"
+      ],
+      "split": "train",
+      "turns": [
+        "生成四年级数学讲解视频：一个两位数乘24，把个位4看成7，积多39，正确的积为312。请解释原因并交付视频。最后展示13乘24等于312并验算差额。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "lesson",
+      "id": "train_lesson_2",
+      "review_required": true,
+      "rule_ids": [
+        "voice"
+      ],
+      "split": "train",
+      "turns": [
+        "生成四年级数学讲解视频：一个两位数乘24，把个位4看成7，积多39，正确的积为312。请解释原因并交付视频。使用清晰普通话旁白。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "lesson",
+      "id": "train_lesson_3",
+      "review_required": true,
+      "rule_ids": [
+        "large_text"
+      ],
+      "split": "train",
+      "turns": [
+        "生成四年级数学讲解视频：一个两位数乘24，把个位4看成7，积多39，正确的积为312。请解释原因并交付视频。公式字体大，避免密集文字。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "lesson",
+      "id": "train_lesson_4",
+      "review_required": true,
+      "rule_ids": [
+        "equation",
+        "verify"
+      ],
+      "split": "train",
+      "turns": [
+        "生成四年级数学讲解视频：一个两位数乘24，把个位4看成7，积多39，正确的积为312。请解释原因并交付视频。清楚展示27减24等于3。最后展示13乘24等于312并验算差额。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "lesson",
+      "id": "test_lesson_0",
+      "review_required": true,
+      "rule_ids": [
+        "equation",
+        "voice"
+      ],
+      "split": "test",
+      "turns": [
+        "生成四年级数学讲解视频：一个两位数乘24，把个位4看成7，积多39，正确的积为312。请解释原因并交付视频。清楚展示27减24等于3。使用清晰普通话旁白。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "lesson",
+      "id": "test_lesson_1",
+      "review_required": true,
+      "rule_ids": [
+        "verify",
+        "large_text"
+      ],
+      "split": "test",
+      "turns": [
+        "生成四年级数学讲解视频：一个两位数乘24，把个位4看成7，积多39，正确的积为312。请解释原因并交付视频。最后展示13乘24等于312并验算差额。公式字体大，避免密集文字。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "lesson",
+      "id": "test_lesson_2",
+      "review_required": true,
+      "rule_ids": [
+        "equation",
+        "large_text"
+      ],
+      "split": "test",
+      "turns": [
+        "生成四年级数学讲解视频：一个两位数乘24，把个位4看成7，积多39，正确的积为312。请解释原因并交付视频。清楚展示27减24等于3。公式字体大，避免密集文字。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "lesson",
+      "id": "test_lesson_3",
+      "review_required": true,
+      "rule_ids": [
+        "verify",
+        "voice"
+      ],
+      "split": "test",
+      "turns": [
+        "生成四年级数学讲解视频：一个两位数乘24，把个位4看成7，积多39，正确的积为312。请解释原因并交付视频。最后展示13乘24等于312并验算差额。使用清晰普通话旁白。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "lesson",
+      "id": "test_lesson_4",
+      "review_required": true,
+      "rule_ids": [
+        "equation",
+        "verify",
+        "voice",
+        "large_text"
+      ],
+      "split": "test",
+      "turns": [
+        "生成四年级数学讲解视频：一个两位数乘24，把个位4看成7，积多39，正确的积为312。请解释原因并交付视频。清楚展示27减24等于3。最后展示13乘24等于312并验算差额。使用清晰普通话旁白。公式字体大，避免密集文字。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "audio": true,
+          "extension": ".mp4",
+          "kind": "artifact",
+          "min_duration": 1
+        }
+      ],
+      "group": "lesson",
+      "id": "regression_lesson_continue",
+      "review_required": true,
+      "split": "regression",
+      "turns": [
+        "生成四年级数学讲解视频：一个两位数乘24，把个位4看成7，积多39，正确的积为312。请解释原因并交付视频。",
+        "继续完成当前任务，复用已生成音频。"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "extension": ".mp4",
+          "kind": "artifact",
+          "max_duration": 16.5,
+          "min_duration": 13.5
+        }
+      ],
+      "group": "video",
+      "id": "regression_video_repo_endcard",
+      "review_required": true,
+      "split": "regression",
+      "turns": [
+        "为开源的ExoHarness生成15S宣传视频，开源地址，https://github.com/jason571/Exoharness\n视频最后必须出现地址链接"
+      ]
+    }
+  ],
+  "version": 1
+}

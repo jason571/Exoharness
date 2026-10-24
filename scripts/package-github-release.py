@@ -15,15 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def evaluation_asset(name):
-    parts = name.parts
-    if parts[:2] != ('evaluation', 'modules'):
-        return (str(name) == 'evaluation/skills/workflow-evolution/SKILL.md'
-                or str(name) in {'evaluation/scripts/' + script for script in (
-                    'create-evaluation-suite.py', 'evaluate-offline.py',
-                    'evaluate-gdpevo.py', 'evolve-skills.py')})
-    return (len(parts) >= 4 and parts[2] in ('benchmark', 'evolution')
-            and ((len(parts) == 4 and parts[3] == 'pyproject.toml')
-                 or (len(parts) >= 5 and parts[3] == 'src' and name.suffix == '.py')))
+    return str(name) == 'evaluation/skills/workflow-evolution/SKILL.md'
 
 def digest(path):
     with path.open('rb') as stream:

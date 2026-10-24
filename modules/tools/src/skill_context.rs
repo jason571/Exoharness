@@ -23,6 +23,8 @@ struct Declaration {
 struct Stage {
     tools: Vec<String>,
     omit_sections: Vec<String>,
+    #[serde(default)]
+    omit_resources: Vec<String>,
 }
 
 pub(crate) fn compile(
@@ -90,7 +92,22 @@ pub(crate) fn compile(
                 return None;
             }
         }
-        stages.push(json!({"tools":tools,"omit_ranges":ranges}));
+        if stage.omit_resources.len() > 32 {
+            return None;
+        }
+        let mut paths = BTreeSet::new();
+        let mut resources = Vec::new();
+        for path in stage.omit_resources {
+            if path == "SKILL.md" || !paths.insert(path.clone()) {
+                return None;
+            }
+            let content = files.get(&path)?;
+            std::str::from_utf8(content).ok()?;
+            resources.push(
+                json!({"path":path,"content_sha256":format!("{:x}",Sha256::digest(content))}),
+            );
+        }
+        stages.push(json!({"tools":tools,"omit_ranges":ranges,"omit_resources":resources}));
     }
     if !entry.iter().all(|tool| workflow.contains(tool)) {
         return None;

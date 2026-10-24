@@ -1,0 +1,84 @@
+{
+  "id": "current_reports_v2",
+  "review_scope": "Require real PPTX delivery, dated confirmed sources and Office rendering. No exact slide count. The China prompt is a known production regression, not an unseen test. Inspect source accuracy and actual Token use separately.",
+  "tasks": [
+    {
+      "checks": [
+        {
+          "contains": [
+            "储能"
+          ],
+          "extension": ".pptx",
+          "kind": "artifact"
+        },
+        {
+          "kind": "tool_count",
+          "max": 8,
+          "min": 1,
+          "name_contains": "mcp_tavily_",
+          "successful_only": true
+        }
+      ],
+      "group": "current_report",
+      "id": "train_current_report",
+      "review_required": true,
+      "split": "train",
+      "turns": [
+        "做一份家用储能行业现状的PPT"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "中国",
+            "经济"
+          ],
+          "extension": ".pptx",
+          "kind": "artifact"
+        },
+        {
+          "kind": "tool_count",
+          "max": 8,
+          "min": 1,
+          "name_contains": "mcp_tavily_",
+          "successful_only": true
+        }
+      ],
+      "group": "current_report",
+      "id": "regression_china_economy",
+      "review_required": true,
+      "split": "regression",
+      "turns": [
+        "写一个当前中国经济现状的PPT"
+      ]
+    },
+    {
+      "checks": [
+        {
+          "contains": [
+            "新能源",
+            "汽车"
+          ],
+          "extension": ".pptx",
+          "kind": "artifact"
+        },
+        {
+          "kind": "tool_count",
+          "max": 8,
+          "min": 1,
+          "name_contains": "mcp_tavily_",
+          "successful_only": true
+        }
+      ],
+      "group": "current_report",
+      "id": "test_current_vehicle_market",
+      "review_required": true,
+      "split": "test",
+      "turns": [
+        "做一份新能源汽车市场现状的PPT"
+      ]
+    }
+  ],
+  "version": 1
+}
